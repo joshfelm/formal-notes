@@ -1,0 +1,438 @@
+%%=====================================================================================
+%%
+%%       Filename:  stats.tex
+%%
+%%    Description:  Notes for statistics written up nicely
+%%
+%%        Version:  1.0
+%%        Created:  05/01/19
+%%
+%%         Author:  Josh Felmeden (), nk18044@bristol.ac.uk
+%%
+%%=====================================================================================
+
+% Preamble
+\documentclass[11pt,a4paper,titlepage]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+
+% Set indentation and line skip for paragraph
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+
+% Math
+\usepackage[]{amsmath} 
+
+% Headers setup
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Statistics: Nicely written up}
+\rhead{Josh Felmeden}
+
+% Title
+\author{Josh Felmeden}
+\date{January \\ 2019}
+\title{Statistics: Nicely written up}
+
+% Links
+\usepackage{hyperref} 
+
+% Start document
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Regression}%
+\label{sec:regression}
+When we look at statistics, there are a lot of things that we need to
+consider. One of these things is to consider how well something fits the
+line, or the expected results of the data etc. If we take the example of
+Fitt's law, which is the time required to \textbf{acquire a target} of
+size \textit{w} at a distance of \textit{d}, and we describe this as $T =
+a + b \log(1+ \frac{d}{w})$. Say we were trying to throw a paper ball into
+the bin. It would get harder if the bin were smaller or further away, and
+this fits with the Fitt's law. But, where does the equation come from?
+Well, when we plot it, we get a kinda straight line. 
+
+\textbf{Regression} is a technique for determining the statistical
+relationship between two or more variables where a change in some
+\textit{dependent variable} is associated with, and depends on a change,
+in one or more \textit{independent variables}. This is the most basic
+technique for machine learning.
+
+There are two basic kinds of regression: linear, and \textit{multiple}
+linear regression. There are some non-linear regression methods, but we
+don't need to worry about that bad boy right now. Regression is pretty
+useful because it helps financial and professional investment. It can also
+help to predict sales for a company based on weather, or previous sales
+etcetera.
+
+So, the formula for linear regression is:
+\begin{equation*}
+    Y = a + bX (+ u)
+\end{equation*}
+
+Multiple regression is:
+\begin{equation*}
+    Y = a + b_1 X_1 + b_2 X_2 + b_3 X_3 + \cdots + b_t X_t + u
+\end{equation*}
+
+But we don't really need to worry about the multiple regression.
+
+In this, $Y$ is the variable that we're trying to predict (or the
+\textbf{dependent} variable), while $X$ is the variable that we're using
+to predict $Y$ (or the \textbf{independent} variable). $a$ is the
+intercept, $b$ is the slope and $u$ is the regression residual.
+
+Regression takes a group of random variables that we think will predict
+$Y$, and it attempts to find a mathematical relationship between them.
+This relationship is usually in the form of a straight line (known as
+linear regression) that best approximates all the individual data points.
+
+The residual is also known as the deviation, and we don't really worry
+about it in this module.
+
+But how can you be sure that a line we draw is a good fit for the data?
+You can actually compute the goodness of fit with a number of methods,
+like the \textit{standard error of the estimate} or \textit{R squared}.
+
+\subsection{Standard error of estimate}%
+\label{sub:standard-error}
+The equation for this is:
+\begin{equation*}
+    \sqrt{\frac{\sum {(\vdots)}^2}{(\text{sample size} - 2)}}
+\end{equation*}
+
+The bottom part of the fraction is also known as the \textit{degree of
+freedom}. The result of this gives a standard error in the metric of the
+data. The lower it is, the better it is.
+
+\subsection{R squared}%
+\label{sub:r-squared}
+The equation for this one is:
+\begin{equation*}
+    \frac{\sum{{(\vdots)}^2}}{\sum{{(\vdots)}^2}}
+\end{equation*}
+
+\begin{equation*}
+    \frac{\sum{{(\text{estimated } \hat y - \text{mean }
+    y)}^2}}{\sum{(\text{actual } y - \text{mean } y)}^2}
+\end{equation*}
+You could also find it in a format which is \textit{more generic}. R
+squared gives a \textbf{percentage} result, and 100\% means that it is a
+perfect fit (however, we say that >70\% is acceptable).
+
+Say we have graph that has the following values for the standard error and
+R squared:
+\begin{equation*}
+    T = 2.3 + 1.1 ID \\
+    R^2 = 0.97
+\end{equation*}
+
+How can we be sure that it's a good fit for every human (say that it is a
+test modelling some human performance). Well, we can gain additional
+confidence by \textbf{repeating}. We gain trust in a model if it fits the
+data with \textit{little error} when it:
+\begin{enumerate}
+    \item is verified with \textit{a lot of data}.
+    \item holds across \textit{very different people}.
+    \item is verified in \textit{independent studies}.
+\end{enumerate}
+
+\subsection{What can it be used for?}%
+\label{sub:usage}
+Linear regressions can be used for predicting things, like Ebay's online
+auction prices using functional data analysis, or the number of passersby
+who will pass in front of a public ad and use the data for choosing
+advertisement prices. It's really quite useful, to be fair.
+
+\newpage
+
+\section{Comparing things and hypothesis testing}%
+\label{sec:comparing}
+We're moving onto a \textit{discrete} independent variable, with a
+\textit{continuous} dependent variable. It's normally distributed, which
+means that we have three choices for data comparison:
+\begin{enumerate}
+    \item 2 groups
+    \begin{enumerate}
+        \item[a)] Non paired = T-Test
+        \item[b)] Paired = Paired T-Test
+    \end{enumerate}
+    \item $>2$ groups = ANOVA
+\end{enumerate}
+
+We're gonna start with a kind of weird example Say we have some magic
+shoes, and you run the 10 metres with it a lot. You also (\textit{wierdly})
+have a log of the times you've run with it. One day,
+you come home, and someone has moved your shoes. You think that someone
+may have taken your gorgeous shoes, and replaced it with some
+\textbf{identical looking ones}. GASP! You look at the shoes, and they do
+indeed look the same, but you're still concerned. What do you do?
+
+If you answered ``run the 10 metres with the weird shoes a lot of times",
+you'd be \textbf{correct!}. You do so, and this is what you see that your
+times have changed. You're more consistently getting slower times, so is
+this proof that some thieving bastard has filched your shoes?
+
+Actually, it's kind of impossible to know. It's a common limitation of
+science, no matter how many times something happens, it could
+\textit{always} be chance. The good news is that the more samples you
+take, the more your confidence increases, so you can be
+\textbf{arbitrarily sure}.
+
+Now, you get your shoes returned to you, but a week later, the same thing
+happens again. So, you run the 10-metre race a few times, and the
+distribution matches your log files almost perfectly. Are these your
+shoes? YOU STILL DON'T KNOW. That's right, you don't know, because it
+could be a really good copy of your shoes. The odds of this being a
+different pair of shoes, though, can't be computed. Why not? Because there
+are always two explanations:
+\begin{enumerate}
+    \item same shoes
+    \item different shoes
+\end{enumerate}
+
+What is the point of this stupid module? Well, if we use stats, it turns
+out that we can be kind of sure. \textbf{Statistical significance} is a
+result that is unlikely to have occurred by chance. A \textit{t-test}
+returns a p-value. A p-value is such that if it is lower than the
+significance level, then the results are colloquially known as
+`statistically significant'. The usual level that we go for is 5\% (or a
+value of 0.05).
+
+\subsection{Null Hypothesis}%
+\label{sub:Null Hypothesis}
+The definition of the null hypothesis is \textbf{both sets of data are
+from the same mechanism}. We are running tests to try to \textit{reject}
+the null hypothesis. If, when we compare the two groups, there is no
+statistically significant difference between the two, it doesn't mean that
+there is not difference in reality. It just means that there's not enough
+evidence to reject the null hypothesis. In other words, it \textit{fails
+to reject the null hypothesis.}
+
+Okay, new example time: let's say that we're making a new input device. It
+can't be better than a mouse, but you want to prove that it's \textit{as
+good as the mouse.} How do you go about that?
+
+What if you run a test, and if the stats come out as insignificant, you
+write that `the tests showed that there was \textit{no difference'?} Well,
+you'd be stupid and incorrect because no significant difference means
+absolutely zilch. So how in the Christ do we prove that the two mechanisms
+are the same? (\textit{lotta unanswered questions here boss}.)
+
+You can't (\textit{shock}). The only thing that you can write is `our test
+did not find a significant difference'. Boring, right?
+
+Say you want to test the effect of two soporific drugs on the amount of
+sleep. You take 10 participants and make them sleep to get their normal
+sleep time (this is the control variable). You then give them drug 1
+and note the difference of sleep time. You do the same for drug 2. You end
+up with the following results:
+\begin{center}
+    \begin{tabular}{c|c}
+        \textbf{Sleep extra drug 1} & \textbf{Sleep extra drug 2} \\
+        \hline
+        1. 0.7 & 1. 1.9 \\
+        \hline
+        2. -1.6 & 2. 0.8 \\
+        \hline
+        3. -0.2 & 3. 1.1 \\
+        \hline
+        4. -1.2 & 0.1 \\
+        \hline
+        5. -0.1 & -0.1 \\
+        \hline
+        6. 3.4 & 6. 4.4 \\
+        \hline
+        7. 3.7 &  7. 5.5 \\
+        \hline
+        8. 0.8 & 8. 1.6 \\ \hline
+        9. 0.0 & 9. 4.6 \\ \hline
+        10. 2.0 & 10. 3.4 
+    \end{tabular}
+\end{center}
+
+Because you want to test the effects of the drug, and \textit{all
+participants did both conditions}, then the data is paired. If the
+subjects had not done both drugs (so take new participants for drug 2),
+then the data is unpaired.
+
+In this experiment (the between subject one), if you crunch the numbers,
+you'll find that we can't
+reject the null hypothesis, since the p-value equates to 0.07939. What
+you'd write for this is ``An unpaired student t-test showed no significant
+difference between the two drugs".
+
+In the within subject experiment, you'll find that the p-value ends up
+being 0.002833, so you'd write ``A paired t-test showed significant
+difference between the two drugs (two-tailed t(9) = -4.0621, $p<0.05$)"
+
+Oh, try to design your studies within-subject, because it increases the
+chance you find a smaller p-value. If you don't you're gonna need twice as
+many participants.
+
+\subsection{One tail vs two tail}%
+\label{sub:tail}
+A \textbf{two tailed} t-test is asking whether the effect of one drug is
+greater than or less than the effect of the other, while \textbf{one
+tailed} is only one side of the effect (like is drug 1 better than drug 2
+OR is drug 1 less than drug 2). You'll normally use two-tails, but if you
+can use a one-tail, then go ahead because it will increase the chance to
+reach a smaller p-value.
+
+\subsection{Multiple variables}%
+\label{sub:multiple}
+What do you do if you have more than two variables? Going back to the
+input devices example again, say we're comparing a mouse to a track pad and
+a stylus. How do you work out which one is better? What you could do is to
+t-test each one against the others, but you then have a lot of errors
+adding up and it gets sad. There are two solutions to this:
+
+\subsubsection{Bonferroni correction}%
+\label{ssub:bonferroni}
+When testing $n$ hypotheses, test each one against 0.05/n. In the example
+above, we should use $0.05 \div 3$ as a significant threshold instead of
+0.05.
+
+\subsubsection{ANOVA}%
+\label{ssub:anova}
+This is the analysis of variance to compare multiple variables. There are
+two kinds of anova:
+\begin{enumerate}
+    \item \textbf{one-way anova} -- one variable, multiple levels.
+    \item \textbf{two-way anova} -- two variables, multiple levels.
+\end{enumerate}
+
+We're going to look at anova over the next few sections.
+
+\section{Designing an experiment}%
+\label{sec:designing}
+Say we do an experiment, and we get some results. We put the results into
+a table (excel is pretty good for that), and then save it as a `.csv'
+file (a comma separated virgule). We can then do some cool things with R.
+I'm not going to demonstrate them here, because I don't think we need it
+for the exam, but I'll relay the basics.
+
+There's quite a simple flowchart to follow when we're designing our own
+experiment:
+\begin{enumerate}
+    \item[1)] Develop the research question or hypothesis
+    \item[2)] What are the variables going to be?
+    \item[3 a)] Will it be within or between subjects?
+    \item[3 b)] Do you need any counter balancing?
+    \item[4)] how many repetitions do you need?
+    \item[5)] Look at the raw data
+    \item[6)] Look at the distributions
+    \item[7 a)] Check for normality
+    \item[7 b)] Run some stats
+    \item[8)] Conclude
+\end{enumerate}
+
+When developing the research question, you need to identify a statement
+that identifies some phenomenon that you want to study. An example of this
+is `in our experiment, I believe that rewards will improve memorisation
+skills'. The hypothesis is a provisional answer to a research question, so
+in our experiment, we'd have `group chocolate will have a higher
+memorisation score than the group that doesn't have a reward'.
+
+The dependent variable is the event studied and expected to change
+whenever the independent variable is altered. In this experiment, the
+independent variable is the group type (which one gets chocolate), and the
+dependent variable is the memorisation score. Everything else is a control
+variable.
+
+The \textbf{confounding variable} is the extraneous variables that
+\textit{correlates} with both the dependent variable and the independent
+variable. For example, saying that ice cream consumption leads to murder
+has a confounding variable of the weather. Apparently you're more likely
+to be murdered if it's hot out. Who knew? We're not out to prove
+correlation, we're out to show causality (so some A causes some B).
+
+Do we have any confounding variables? Yeah, because our experiment isn't
+greatly designed. There's gender, age, background, what you ate before,
+etcetera, etcetera. But what can we do about it? Well, we can avoid them
+by controlling as much as you can about the environment. If not, make it
+an independent variable. Some of the things are inherent noise (like basic
+human individuality), so you can use more participants to get statistical
+power.
+
+The goal of a quantitative study is to find a signal in a lot of noise.
+
+In experimental design, you aim to maximise your chances of finding the
+signal and not the noise.
+
+One of the main things that you need to avoid is \textbf{systematic
+biases} such as learning effect or fatigue. These will give you false
+results. The other thing you need to avoid is \textbf{random noise}. It
+makes your results non-significant. Clever experimental design is all
+about keeping noise down.
+
+\subsection{Within vs Between}%
+\label{sub:within-between}
+
+So, what's the deal with within vs between? Well, within means that all
+participants are doing the same thing. Between means that participants do
+only some of the conditions. For example, between would be group 1 vs
+group 2, while within would be all participants do both group 1 and group
+2.
+
+Within subject experiments suffer less user variation and the statistical
+power with less participants, while between means that there are no biases
+from other conditions (like the transfer of learning or some participants
+getting used to the experiment from the other group).
+
+In the experiment with the chocolate, it was between because of the
+rewards. Half of the participants did the control condition while the
+other half had the reward condition.
+
+Imagine a within subject experiment where we test how fast we click an
+icon. The participants do all the conditions: the start with the trackpad
+and finish with the mouse. Is this a good idea? No because they have
+something known as the learning effect, where they learn the thing they
+need to do and so will perform better in the second experiment. This is
+where the next part comes in.
+
+\subsubsection{counterbalancing}%
+\label{ssub:counterbalancing}
+This is a method of avoiding confounding among variables and involves
+presenting the conditions in a different order. One approach is to use a
+Latin square. What is this? Well, it's an $n \times n$ array filled with
+$n$ different Latin letters, each occurring exactly once in each column.
+Basically, you make some people do the first group, followed by the second
+group, and then some others do the second group followed by the first
+group. This gives a much more accurate picture of the results.
+
+\subsection{How many trials?}%
+\label{sub:trials}
+Ideally, you want as many trials as you can, but try to keep the
+experiment to around 30 or 40 minutes. In the experiment with the
+chocolate, we only did one because of time, but you should do more to
+reduce noise. 
+
+\subsection{ANOVA in use}%
+\label{sec:anova-usage}
+
+Let's say that we want to add a third imaginary group to the experiment
+with the chocolate. Let's say that if they had the smallest memorisation
+score, then they get a slap on the wrist (obviously not in real life, only
+in hypothetical terms). 
+
+How can we compare them? Can we use t-tests? Yeah, but we gotta use
+Bonferoni correction. Remember, that it's two tailed and it is unpaired
+data.
+
+Another test that we can do is the ANOVA test. We have 3 different
+conditions (or 1 factor with 3 different levels, so we can do a one-way
+ANOVA. ANOVA can be of two kinds (if you remember from above). If we do
+the tests on some data, we can write: `A one-way ANOVA showed a
+significant effect on time for the variable group (F2.57 = 154.88, $p <
+0.05$)' and then: `Post-hoc comparison t-tests (using Bonferoni correction)
+showed significant difference between the group C and the group A
+($p<0.05$)'. You could even give some mean values if you really wanted to
+flex.
+\end{document}
