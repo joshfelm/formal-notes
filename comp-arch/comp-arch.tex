@@ -14,7 +14,7 @@
 %%=====================================================================================
 
 % Preamble
-\documentclass[11pt,a4paper,titlepage]{scrartcl}
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
 \usepackage[english]{babel}
 \typearea{12}
 
@@ -30,26 +30,54 @@
 \pagestyle{fancy}
 \lhead{Introduction to Computer architecture: The Comprehensive Notes}
 \rhead{Josh Felmeden}
+\usepackage{hyperref} 
+
 
 % Listings
-\usepackage[]{listings}
-\usepackage[]{color} 
-\lstset{frame = tb
-language = VB.net
-aboveskip=3mm,
-  belowskip=3mm,
-  showstringspaces=false,
-  columns=flexible,
-  basicstyle={\small\ttfamily},
-  numbers=none,
-  numberstyle=\tiny\color{gray},
-  keywordstyle=\color{blue},
-  commentstyle=\color{dkgreen},
-  stringstyle=\color{mauve},
-  breaklines=true,
-  breakatwhitespace=true,
-  tabsize=3
-  }
+\usepackage[]{listings,xcolor} 
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+
+\lstdefinestyle{Common}
+{
+    extendedchars=\true,
+    language={[Visual]Basic},
+    frame=single,
+    %===========================================================
+    framesep=3pt,%expand outward.
+    framerule=0.4pt,%expand outward.
+    xleftmargin=3.4pt,%make the frame fits in the text area. 
+    xrightmargin=3.4pt,%make the frame fits in the text area.
+    %=========================================================== 
+    rulecolor=\color{Red}
+}
+
+\lstdefinestyle{A}
+{
+    style=Common,
+    backgroundcolor=\color{Yellow!10},
+    basicstyle=\small\color{Black}\ttfamily,
+    keywordstyle=\color{Orange},
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Red},
+    commentstyle=\color{Green}
+}
+
+\lstdefinestyle{B}
+{
+    style=Common,
+    backgroundcolor=\color{Black},
+    basicstyle=\scriptsize\color{White}\ttfamily,
+    keywordstyle=\color{Orange},
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Red},
+    commentstyle=\color{Green}
+}
 
 \usepackage[]{amsmath} 
 \usepackage[]{booktabs} 
@@ -65,6 +93,9 @@ Notes}
 % Start document
 \begin{document}
 \maketitle
+
+\tableofcontents
+\newpage
 
 \section{Integer representation and arithmetic}%
 \label{sec:reallyboring}
@@ -120,7 +151,7 @@ Now, we're going to create a really simple algorithm (it's going to be called
 ADD), and is going to look like $\text{ADD}(\hat x, \hat y, n, b, ci)$, where b
 is the base, ci is the carry in and n is the length of x and y. We would then
 have the algorithm as follows:
-\begin{lstlisting}
+\begin{lstlisting}[style=B]
 for i = 0 to (n-1)
     r(i) += (x(i) + y(i) + c(i)) mod b
     if(x(i) + y(i) + c(i) < b)
@@ -339,5 +370,253 @@ These components are USELESS in this form, so they're packaged before use, which
 protects against damage, including heat sinks and an interface between the
 component and the outside world using pins bonded to internal inputs and
 outputs.
-% TODO DAN PAGE 3.2 WATCH PLEASE OMG IT WILL BE EPIC
+
+So, while MOSFETs are pretty great, there are down sides. Designing
+complex functionality using transistors alone is really hard because
+transistors are simply \textit{too} low level. We can address this problem
+by repackaging groups of transistors into logic gates, since logic gates
+are ordered logic gates such that we get certain functionality. Pretty
+cool right? It's like nerdy Lego.
+
+\section{Logic Gates}%
+\label{sec:logic-gates}
+If we form a \textbf{pull-up network} of P-MOSFET transistors, connected
+to $V_{dd}$ (which is the high voltage rail), and a \textbf{pull-down
+network} of N-MOSFETs, connected to $V_{ss}$ (the low voltage rail), and
+assume that the power rails are everywhere:
+\begin{align*}
+    V_{ss} &= 0V \approx 0 \\
+    V_{dd} &= 5V \approx 1
+\end{align*}
+
+We can then describe the operation of each logic gate using a truth table.
+
+\subsection{NAND gate}%
+\label{sub:nand}
+% Insert picture of a nand gate I think
+If both x and y are 0 (connected to $V_{ss}$), then:
+\begin{enumerate}
+    \item Both top P-MOSFETs will be connected.
+    \item Both botton N-MOSFETs will be disconnected.
+    \item r (the output) will be connected to $V_{dd}$
+\end{enumerate}
+
+If x is 1 and y is 0, then:
+\begin{enumerate}
+    \item The right most P-MOSFET will be connected.
+    \item The upper-most N-MOSFET will be disconnected.
+    \item r will be connected to $V_{dd}$
+\end{enumerate}
+
+If x is 0 and y is 1, then:
+\begin{enumerate}
+    \item The left most P-MOSFET will be connected.
+    \item The lower-most N-MOSFET will be disconnected.
+    \item r will be connected to $V_{dd}$
+\end{enumerate}
+
+Finally, if both x and y are 1, then:
+\begin{enumerate}
+    \item Both top P-MOSFETs will be disconnected.
+    \item Both bottom N-MOSFETs will be connected.
+    \item r will be connected to $V_{ss}$
+\end{enumerate}
+
+\subsection{NOR gate}%
+\label{sub:nor}
+% Insert picture of a nor gate
+If both x and y are 0, then:
+\begin{enumerate}
+    \item Both top P-MOSFETs will be connected.
+    \item Both bottom N-MOSFETs will be disconnected.
+    \item r will be connected to $V_{dd}$
+\end{enumerate}
+
+If x is 1 and y is 0, then:
+\begin{enumerate}
+    \item The upper-most P-MOSFET will be disconnected
+    \item the left-most N-MOSFET will be connected.
+    \item r will be connected to $V_{ss}$
+\end{enumerate}
+
+If x is 0 and y is 1, then:
+\begin{enumerate}
+    \item The lower-most P-MOSFET will be disconnected.
+    \item The right-most N-MOSFET will be connected.
+    \item r will be connected to $V_{ss}$.
+\end{enumerate}
+
+If both x and y are 1, then:
+\begin{enumerate}
+    \item Both top P-MOSFETs will be disconnected.
+    \item Both botton N-MOSFETs will be connected.
+    \item r will be connected to $V_{ss}$.
+\end{enumerate}
+
+\subsection{Physical limitations}%
+\label{sub:Physical limitations}
+There are, of course, some physical limitations that we haven't discussed
+yet. There are two classes of delay (often described as
+\textbf{propagation delay}), that will dictate the time between change to
+some input and corresponding change in an output. These are:
+\begin{itemize}
+    \item \textbf{Wire delay:} This relates to the time taken for the
+        current to move through the conductive wire from one point to
+        another.
+    \item \textbf{Gate delay:} This relates to the time taken for the
+        transistors in each gate to switch between the connected and
+        disconnected states
+\end{itemize}
+Normally, the gate delay is more than wire delay, and both relate to the
+implementations. Gate delay is the fault of the properties of the
+transistors used, and wire delay to the properties of the wire.
+
+\textbf{Critical path} is the longest sequential delay possible in some
+combinatorial logic. Basically, the worst case scenario in a given logic
+circuit.
+
+Ideally, we'd get a perfect digital on/off graph of the response, while in
+reality, we get a more curved graph. It would also make sense to have 1
+and 0 as a threshold, rather than a definitive voltage. This fuzzy
+representation allows for some inaccuracies that are unavoidable with this
+physical implementation.
+
+Including gate delay gives us a \textit{dynamic} view computation. We're
+gonna kind of ignore wire delay for the moment and arbitrarily choose some
+delays for the gates:
+\begin{enumerate}
+    \item NOT: 10ns
+    \item AND: 20ns
+    \item OR: 20ns
+\end{enumerate}
+
+If we then did some computation, we could see the output changing after we
+switch x from 0 to 1 and keep y as 1. If we're using an XOR gate, then it
+would take 50ns to completely change to 0 (since x and y are both 1, hence
+x XOR y = 0).
+
+It is cool to use \textit{3-stage logic}, using an extra value:
+\begin{itemize}
+    \item 0 is false
+    \item 1 is true
+    \item Z is \textbf{high impedance}
+\end{itemize}
+
+High impedance is the null value, so we can allow a wire to be
+disconnected.
+
+If we have two inputs connected to an output, you can have some weird
+results where the two inputs are in conflict with the other. The way to
+fix this is to have some enable switch on the two inputs to the output, so
+we don't get any inconsistencies.
+
+Here are some more definitions:
+\begin{itemize}
+    \item \textbf{fan-in} is used to describe the number of inputs to a
+        given gate.
+    \item \textbf{fan-out} is used to describe the number of inputs (or
+        \textit{other} gates) the output of a given gate is connected to.
+\end{itemize}
+
+\section{Combinatorial Logic}%
+\label{sec:combinatorial}
+
+The logic gates that we've discussed already are higher level than the
+transistors that we started off with. Armed with these new logic gates, we
+can move onto \textit{actual} high level components. We want components
+that are closer to what we can actually do things with.
+
+Thus far, we've just looked at various ways of writing the same things;
+having moved from the completely abstract pencil and paper, to the
+implementation of logic gates and NAND-boards.
+
+\subsection{Design patterns}%
+\label{sub:patterns}
+There are a number of design patterns that we can take:
+
+\subsubsection{Decomposition}%
+\label{ssub:Decomposition}
+
+Divide and conquer, take some complicated design, and break it down into
+simpler and more manageable parts.
+
+\subsubsection{Sharing}%
+\label{ssub:Sharing}
+
+We can replace two AND gates that exist in some design with a single AND
+gate, using the same gate from the usage points.  It makes sense because
+the output will always be the same.
+
+\subsubsection{Isolated Replication}%
+\label{ssub:isolated}
+
+Say we have a 2 input AND gate, and we want a 2-input \textit{m}-bit AND
+gate, which is simply a replication of 2-input, 1-bit AND gates, then we
+are going to have \textit{m}-bits of the AND gate. We're also saying that
+they are operating in parallel, and that each bit does not affect the
+neighbouring bits.
+
+\subsubsection{Cascaded Replication}%
+\label{ssub:cascaded}
+
+Using the same example as before, instead of using \textit{m} AND gates,
+we want something like this:
+\begin{alignat*}{4}
+    r &= & &x_0 \wedge x_1   &&\ \wedge \ & &x_2 \wedge x_3 \\
+      &= (& &x_0 \wedge x_1) &&\wedge \ (& &x_2 \wedge x_3)
+\end{alignat*}
+
+You can also write that like this:
+\begin{equation*}
+    r = \bigwedge^{n-1}_{i=0} x_i
+\end{equation*}
+
+It's different from isolated replication, because the and gates are
+entirely isolated from one another.
+
+\subsection{Mechanical Derivation}%
+\label{sub:mechanical}
+In every case, the process is the same. We want to be able to process some
+truth table and get something that will work (with a boolean expression).
+So, let's let $T_i$ denote the $j$th input for $0 \le j < n$, and let $O$
+denote the single output.
+
+\begin{enumerate}
+    \item Find a set $T$ such that $i \in T$ iff. $O = 1$ in the $i$th row
+        of the truth table.
+    \item For each $i \in T$, form a term $t_i$ by ANDing together all the
+        variables while following two rules:
+        \begin{enumerate}
+            \item if $T_j = 1$ in the $i$th row, then we use $T_j$ as is,
+                but
+            \item If $T_j = 0$ in the $i$th row, then we use $-T_j$
+        \end{enumerate}
+    \item An expression implementing this function is then formed by ORing
+        all of the terms together:
+        \begin{equation*}
+            e = \bigvee_{i \in T} t_i
+        \end{equation*}
+\end{enumerate}
+
+Let's consider the example of deriving an expression for XOR:
+\begin{equation*}
+    r = f(x,y) = x \oplus y
+\end{equation*}
+
+This is a function described by the following table:
+\begin{center}
+    \begin{tabular}{|c c|c|}
+        \hline
+        $x$ & $y$ & $r$ \\
+        \hline
+        0 & 1 & 1 \\
+        \hline
+        1 & 0 & 1 \\
+        \hline
+        1 & 1 & 0 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+
 \end{document}
