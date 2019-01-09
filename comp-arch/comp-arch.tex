@@ -618,5 +618,214 @@ This is a function described by the following table:
     \end{tabular}
 \end{center}
 
+\subsection{Karnaugh Map}%
+\label{sub:karnaugh}
+
+The simple algorithm for creating a Karnaugh map is as follows:
+\begin{enumerate}
+    \item Draw a rectangular ($p \times 1$) element grid:
+    \begin{enumerate}
+        \item $p = q = 0 (mod 2)$, and
+        \item $p \cdot q = 2^n$
+    \end{enumerate}
+    \item Fill the grid elements with the output that corresponds to
+        inputs for that row and column.
+    \item Cover rectangular groups of
+        adjacent 1 elements which are of total size $2^n$ for some group
+        $m$, groups can `wrap around' if you like, so they can go over
+        edges of the grid and overlap.
+    \item Translate each group into a single term in some SoP form Boolean
+        expression, where
+    \begin{enumerate}
+        \item bigger groups
+        \item less groups
+    \end{enumerate}
+    mean a simpler expression.
+\end{enumerate}
+
+The basic idea is that we don't count up as per normal in binary, but we
+actually count up by changing one binary digit at a time. You then group
+them, and the groups have to be adjacent (but they can't form a kind of L
+shape). After this, it's easy to group them into some format.
+
+\subsection{Building blocks}%
+\label{sub:blocks}
+
+There are two more blocks that we're going to look at now:
+\begin{enumerate}
+    \item \textbf{Multiplexer}
+        \begin{itemize}
+            \item It has $m$ inputs,
+            \item 1 output and
+            \item uses a ($\log_2(m)$)-bit control signal input to choose
+                which input is connected to the output.
+        \end{itemize}
+    \item \textbf{Demultiplexer}
+        \begin{itemize}
+            \item It has 1 input,
+            \item $m$ outputs and
+            \item uses a ($\log_2(m)$)-bit control signal to choose which
+                output is connected to the input
+        \end{itemize}
+\end{enumerate}
+
+Remember that the inputs and outputs are $n$ bits, but they obviously have
+to match up. The connection that is made is continuous, because both
+components are \textit{combinatorial}.
+
+\subsubsection{Multiplexer}%
+\label{ssub:Multiplexer}
+The behaviour of a 2-input, 1-bit multiplexer is as follows:
+\begin{equation*}
+    r = (\neg \ c \wedge x) \vee (c \wedge y)
+\end{equation*}
+
+It can be more clearly represented by this table:
+\begin{center}
+    \begin{tabular}{|c c c|c|}
+        \hline
+        c & x & y & r \\
+        \hline
+        0 & 0 & ? & 0 \\ \hline
+        0 & 1 & ? & 1 \\ \hline
+        1 & ? & 0 & 0 \\ \hline
+        1 & ? & 1 & 1 \\ \hline
+    \end{tabular}
+\end{center}
+
+
+\subsubsection{Demultiplexer}%
+\label{ssub:Demultiplexer}
+
+The behaviour of a 2-output, 1-bit demultiplexer is as follows:
+\begin{align*}
+    r_0 &= \neg \ c \wedge x \\
+    r_1 &- c \wedge x
+\end{align*}
+
+It can be more clearly represented in this table:
+\begin{center}
+    \begin{tabular}{|c c|c c|}
+        \hline
+        $c$ & $x$ & $r_1$ & $r_0$ \\ \hline
+        0 & 0 & ? & 0 \\ \hline
+        0 & 1 & ? & 1 \\ \hline
+        1 & 0 & 0 & ? \\ \hline
+        1 & 1 & 1 & ? \\ \hline
+    \end{tabular}
+\end{center}
+
+Multiplexers can be used to for isolated replication. If we line up 4
+multiplexers, we get a control signal in to choose between two choices,
+and we get one of those out, meaning that we end up with a 4-bit output.
+We can scale this in the same way as before and use the \textit{cascaded}
+pattern, meaning that they interact with one another. We now need a 2-bit
+control signal however, because in the other design, each multiplexer uses
+the same control signal.
+
+Building on this idea, we can look at two more components:
+\begin{enumerate}
+    \item Half adder
+        \begin{itemize}
+            \item Has 2 inputs, $x$ and $y$,
+            \item Computes the 2-bit result $x + y$
+            \item Has 2 outputs: a sum $s$ and a carry out $co$ (which are
+                the least significant bit and the most significant bit of
+                the result)
+        \end{itemize}
+    \item Full adder
+        \begin{itemize}
+            \item Has 3 inputs: $x$, $y$, and a carry-in $ci$
+            \item Computes the 2-bit result $x + y + ci$
+            \item Has 2 outputs: a sum $s$ and a carry out $co$ (which are
+                the least significant bit and the most significant bit of
+                the result)
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Half adder}%
+\label{sub:half}
+The behaviour of the half adder looks like this:
+\begin{center}
+    \begin{tabular}{|c c|c|c|}
+        \hline
+        $x$ & $y$ & $co$ & $s$ \\ \hline
+    \end{tabular}
+\end{center}
+
+And can be displayed by the following equations:
+\begin{align*}
+    co &= x \wedge y \\
+    s &= x \oplus y
+\end{align*}
+
+\subsection{Full adder}%
+\label{sub:full}
+The behaviour of a full adder looks like this:
+\begin{center}
+    \begin{tabular}{|c c c|c|c|}
+        \hline
+        $ci$ & $x$ & y & $co$ & $s$ \\ \hline
+        0 & 0 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 1 & 0 & 1 \\ \hline
+        0 & 1 & 0 & 0 & 1 \\ \hline
+        0 & 1 & 1 & 1 & 0 \\ \hline
+        1 & 0 & 0 & 0 & 1 \\ \hline
+        1 & 0 & 1 & 1 & 0 \\ \hline
+        1 & 1 & 0 & 1 & 0 \\ \hline
+        1 & 1 & 1 & 1 & 1 \\ \hline
+    \end{tabular}
+\end{center}
+
+And can be displayed by the following equations:
+\begin{align*}
+    co &= (x \wedge y) \vee (x \wedge ci) \vee (y \wedge ci) \\
+       &= (x \wedge y) \vee ((x \oplus y) \wedge ci) \\
+    s &= x \oplus y \oplus ci
+\end{align*}
+
+A full adder is kind of like two half adders put together in a nice way.
+
+There is a circuit for the full adder that allows us to implement the
+cascading design choice to replicate the $n$-bit addition; cascading
+because of the carries that we have are \textit{cascaded} into one
+another. It might not be immediately clear that it's cascaded when we
+initially looked at it, but now as we look at it from a higher value, then
+we can clearly see that it is indeed cascaded.
+
+
+Moving onto equality comparators, we have 2 final building blocks:
+\begin{enumerate}
+    \item An equality comparator
+        \begin{itemize}
+            \item Has 2 inputs: $x$ and $y$,
+            \item computes the 1 output as:
+                \begin{equation*}
+                    r = \bigg \{
+                   \begin{matrix}
+                       1 & \text{if } $x = y$ \\
+                       0 & \text{otherwise}
+                   \end{matrix}
+                \end{equation*}
+        \end{itemize}
+    \item A less-than comparator
+        \begin{itemize}
+            \item Has 2 inputs: $x$ and $y$,
+            \item computes the 1 output as:
+                \begin{equation*}
+                    r = \bigg \{
+                        \begin{matrix}
+                            1 & \text{if } x < y \\
+                            0 & \text{otherwise}
+                        \end{matrix}
+                \end{equation*}
+        \end{itemize}
+\end{enumerate}
+
+All of the inputs and outputs are only 1 bit.
+
+Even though we only have these two, we can do a lot of other comparators,
+for example, we can get $x \neq y$ from passing the result of an equality
+gate through a not gate.
 
 \end{document}
