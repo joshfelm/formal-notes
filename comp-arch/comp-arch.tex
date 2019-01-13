@@ -828,4 +828,52 @@ Even though we only have these two, we can do a lot of other comparators,
 for example, we can get $x \neq y$ from passing the result of an equality
 gate through a not gate.
 
+\subsection{Equality comparator}%
+\label{sub:equality}
+The behaviour of the equality comparator is as follows:
+\begin{equation*}
+    r = \neg (x \oplus y)
+\end{equation*}
+
+And can be modelled by this table:
+\begin{center}
+    \begin{tabular}{|c c|c|}
+        \hline
+        $x$ & $y$ & $r$ \\ \hline
+        0 & 0 & 1 \\ \hline
+        0 & 1 & 0 \\ \hilne
+        1 & 0 & 0 \\ \hline
+        1 & 1 & 1 \\ \hline
+    \end{tabular}
+\end{center}
+
+\subsection{Less-than comparator}%
+\label{sub:less-than}
+
+The behaviour of the less-than comparator can be modelled as follows:
+\begin{equation*}
+    r = \neg x \wedge y
+\end{equation*}
+
+And can be shown in this table:
+\begin{center}
+    \begin{tabular}{|c c|c|}
+        \hline
+        $x$ & $y$ & $r$ \\ \hline
+        0 & 0 & 0 \\ \hline
+        0 & 1 & 1 \\ \hline
+        1 & 0 & 0 \\ \hline
+        1 & 1 & 0 \\ \hline
+    \end{tabular}
+\end{center}
+
+In the same way that we had a ripple carry adder, we can have an $n$-bit
+comparison. For a 3-bit number, for them to be equal, every single bit
+must match. Therefore, if we first compare the first bits, and or this
+with the second bits, and or this with the third bits, this will give us
+the result we require.
+
+If we wanted to do a cyclic less-than comparison, we could do something
+like O
+
 \end{document}
