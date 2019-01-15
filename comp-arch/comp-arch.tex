@@ -869,11 +869,107 @@ And can be shown in this table:
 
 In the same way that we had a ripple carry adder, we can have an $n$-bit
 comparison. For a 3-bit number, for them to be equal, every single bit
-must match. Therefore, if we first compare the first bits, and or this
-with the second bits, and or this with the third bits, this will give us
-the result we require.
+must match. Therefore, if we first compare the first bits, and then and
+this with the second bits, and then and it again this with the third bits,
+this will give us the result we require.
 
-If we wanted to do a cyclic less-than comparison, we could do something
-like O
+For a cyclic less-than format, we have to do use a less than and an
+equality block to be able to go through and work out which is bigger.
+Let's say we take two numbers, $x$ and $y$, where $x = 123$ and $y = 223$.
+We can see that $y$ is bigger than $x$, because we started at the left
+most digit and compared these. This is quite an easy example, so let's
+look at another one.
 
+In this example, $x = 121, \ y = 123$. Here, we start at the left most
+digit, which are the same. So, we move inward, which is the same again.
+Doing this one more time, we can see that this digit of $y$ is bigger than
+that of $x$, therefore $y > x$. We have some rules here then:
+\begin{enumerate}
+    \item If $x_i < y_i$, then $x < y$
+    \item If $x_i > y_i$, then $x \not < y$
+    \item if $x_i = y_i$, then $x < y$ IF the $rest(x) < rest(y)$
+\end{enumerate}
+
+In the format of an equation:
+\begin{align*}
+    x<y \text{if } (x_i < y_i) \vee (x_i = y_i \wedge \text{ rest } x <
+    \text{ rest } y)
+\end{align*}
+
+We have this joined up to each bit of the input.
+
+The final set of components are the \textbf{encoder} and the
+\textbf{decoder}. They can also be viewed as translators, or, formally:
+\begin{enumerate}
+    \item an $n$-to$m$ encoder translates an $n$-bit input into some
+        $m$-bit code word, and
+    \item an $m$-to-$n$ decoder translates an $m$-bit code word
+        \textbf{back} into the same $n$-bit output.
+\end{enumerate}
+
+Where if only one output is allowed to be 1 at a time, we call it a
+\textbf{one of many} encoder.
+
+A \textit{general} building block is impossible because it depends on the
+scheme for encoding or decoding. Let's look at an example:
+\begin{enumerate}
+    \item To encode, take $n$ inputs, for example $x_i$ for $0 \le i < n$
+        and produce an unsigned integer $x'$ that determines which $x_i =
+        1$
+    \item To decode, take $x'$ and set the right $x_i = 1$
+\end{enumerate}
+
+Where for all $j \not = i, x_j' = 0$ (so both are \textbf{one-of-many})
+and this means we recover the original $x$.
+
+We can map the behaviour by creating a truth table:
+\begin{center}
+    \begin{tabular}{|c c c c|c c|}
+        \hline
+        $x_3$& $x_2$ & $x_1$ & $x_0$ & $x_1'$ & $x_0'$ \\
+        \hline
+        0 & 0 & 0 & 1 & 0 & 0 \\
+        \hline
+        0 & 0 & 1 & 0 & 0 & 1 \\
+        \hline
+        0 & 1 & 0 & 0 & 1 & 0 \\
+        \hline
+        1 & 0 & 0 & 0 & 1 & 1 \\
+        \hline
+    \end{tabular}
+\end{center}
+Which also correlates to:
+\begin{align*}
+    x_0' = x_1 \vee x_3 \\
+    x_1' = x_2 \vee x_3
+\end{align*}
+
+The decoder should be exactly the opposite of this, and can be modelled by
+this equation:
+\begin{align*}
+    x_0 = \neg x'_0 \wedge \neg x_1' \\
+    x_1 = x_0' \wedge \neg x_1' \\
+    x_2 = \neg x_0' \wedge x_1' \\
+    x_3 = x_0' \wedge x_1'
+\end{align*}
+
+There is a problem with this because if we break the rules and set more
+than one bit of $x$ to 1, then the encoder fails because it produces two
+1s. The solution is to produce a priority encoder, where one input is
+given priority over another. 
+\begin{center}
+    \begin{tabular}{|c c c c|c c|}
+        \hline
+        $x_3$& $x_2$ & $x_1$ & $x_0$ & $x_1'$ & $x_0'$ \\
+        \hline
+        0 & 0 & 0 & 1 & 0 & 0 \\
+        \hline
+        0 & 0 & 1 & ? & 0 & 1 \\
+        \hline
+        0 & 1 & ? & ? & 1 & 0 \\
+        \hline
+        1 & ? & ? & ? & 1 & 1 \\
+        \hline
+    \end{tabular}
+\end{center}
 \end{document}
