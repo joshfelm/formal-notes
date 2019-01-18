@@ -31,6 +31,7 @@
 \lhead{Introduction to Computer architecture: The Comprehensive Notes}
 \rhead{Josh Felmeden}
 \usepackage{hyperref} 
+\usepackage{mathtools} 
 
 
 % Listings
@@ -92,10 +93,12 @@ Notes}
 
 % Start document
 \begin{document}
+\pagenumbering{roman}
 \maketitle
 
 \tableofcontents
 \newpage
+\pagenumbering{arabic}
 
 \section{Integer representation and arithmetic}%
 \label{sec:reallyboring}
@@ -397,7 +400,7 @@ We can then describe the operation of each logic gate using a truth table.
 If both x and y are 0 (connected to $V_{ss}$), then:
 \begin{enumerate}
     \item Both top P-MOSFETs will be connected.
-    \item Both botton N-MOSFETs will be disconnected.
+    \item Both bottom N-MOSFETs will be disconnected.
     \item r (the output) will be connected to $V_{dd}$
 \end{enumerate}
 
@@ -449,7 +452,7 @@ If x is 0 and y is 1, then:
 If both x and y are 1, then:
 \begin{enumerate}
     \item Both top P-MOSFETs will be disconnected.
-    \item Both botton N-MOSFETs will be connected.
+    \item Both bottom N-MOSFETs will be connected.
     \item r will be connected to $V_{ss}$.
 \end{enumerate}
 
@@ -841,7 +844,7 @@ And can be modelled by this table:
         \hline
         $x$ & $y$ & $r$ \\ \hline
         0 & 0 & 1 \\ \hline
-        0 & 1 & 0 \\ \hilne
+        0 & 1 & 0 \\ \hline
         1 & 0 & 0 \\ \hline
         1 & 1 & 1 \\ \hline
     \end{tabular}
@@ -972,4 +975,742 @@ given priority over another.
         \hline
     \end{tabular}
 \end{center}
+
+\section{Sequential logic}%
+\label{sec:sequential}
+
+Imagine that we need a cyclic $n$-bit counter, such as a component whose
+output steps through the values:
+\begin{equation*}
+    0,1,\cdots,2^n -1, 0,1,\cdots
+\end{equation*}
+
+But is otherwise free running.
+
+We already know how to make an $n$ bit adder, so we can just compute $r
+\leftarrow r + 1$ over and over. It sounds cool, but we can't initialise the
+value, and also we don't let the output of each full-adder settle before
+it's used again as an output. 
+
+The main issue that we have is that combinatorial logic has some
+limitations because we can't control \textit{when} a design computes some
+output, nor remember the output when produced. A good solution is
+\textbf{sequential logic} which demands that there is some way to control
+components, one or more components that remember the state that they're
+in, and a mechanism to perform computation as a sequence of steps, rather
+than continuously.
+
+\subsection{Clocks}%
+\label{sub:Clocks}
+
+A clock is a signal that alternates between 1 and 0. We call the period of
+time where it is 1 as \textit{positive level}, and when it has a value of
+0, it has a \textit{negative level}. Also, when it changes from positive
+to negative, we call this a \textbf{negative edge}, while the opposite of
+this is called a \textbf{positive edge}.
+
+We want to clock to \textit{trigger} events in order to synchronise
+components within a design, while the clock frequency is how many clock
+cycles happen in a unit of time. It's gotta be fast enough that the design
+goals are met, but slow enough that the critical path of a given step is
+not exceeded. The faster the clock ticks, the better things are, but we
+can't go too fast. The clock is therefore a conductor.
+
+An $n$ phase-clock is distributed as $n$ separate signals along $n$
+separate wires. A 2-phase instance is really useful because it has the
+features of a 1-phase clock, such as the clock period etc, but there is a
+guarantee that positive levels of the two clocks don't overlap, and the
+behaviour is parameterisable by altering the clock length ($\delta_i$).
+
+\subsection{Latches and flipflops}%
+\label{sub:Latches}
+
+A bistable component can exist in two stable states, like 0 or 1 at a
+given point. It can:
+\begin{itemize}
+    \item Retain some \textbf{current state} -- Q --, which can also be read as
+        output, and
+    \item be updated to some \textbf{next state} -- Q' -- which is provided as an
+        input.
+\end{itemize}
+
+Under control of an enable signal \textit{en}. We say it is:
+\begin{itemize}
+    \item \textbf{Level-triggered} and hence a latch if it's updated by a
+        given level of \textit{en}, or
+    \item \textbf{Edge triggered} and hence a flipflop if it's updated by
+        a given edge of \textit{en}.
+\end{itemize}
+
+They both have different properties, but both are useful.
+
+\subsubsection{SR component}%
+\label{ssub:SR}
+An "SR" latch/flip-flop component has two inputs: S (for set), and R (for
+reset). When enabled, the following behaviour can be observed:
+\begin{itemize}
+    \item S = 0, R = 0, the component retains Q
+    \item S = 1, R = 0, the components updates to Q = 1,
+    \item S = 0, R = 1, the component updates to Q = 0,
+    \item S = 1, R = 1, the component is metastable.
+\end{itemize}
+
+When it's not enabled, the component is in `storage mode'
+
+It can also be described by the truth table:
+\begin{center}
+    \begin{tabular}{|c c|c c|c c|}
+        \hline
+        $S$ & $R$ & $Q$ & $\neg Q$ & $Q'$ & $\neg$ $Q'$ \\ \hline
+        0 & 0 & 0 & 1 & 0 & 1 \\ \hline
+        0 & 0 & 1 & 0 & 1 & 0 \\ \hline
+        0 & 1 & ? & ? & 0 & 1 \\ \hline
+        1 & 0 & ? & ? & 1 & 0 \\ \hline
+        1 & 1 & ? & ? & ? & ? \\ \hline
+    \end{tabular}
+\end{center}
+
+\subsubsection{D component}%
+\label{ssub:D}
+A "D" latch/flip-flop component has a single input - $D$. When it's
+enabled, the following behaviour can be observed:
+\begin{itemize}
+    \item $D$ = 1, the component updates to $Q$ = 1
+    \item $D$ = 0, the component updates to $Q$ = 0
+\end{itemize}
+
+When it's not enabled, the component is in storage mode, and retains $Q$.
+The behaviour can be modelled by this truth table:
+\begin{center}
+    \begin{tabular}{|c|c c|c c|}
+        \hline
+        $D$ & $Q$ & $\neg Q$ & $Q'$ & $\neg Q'$ \\ \hline
+        0 & ? & ? & 0 & 1 \\ \hline
+        1 & ? & ? & 1 & 0 \\ \hline
+    \end{tabular}
+\end{center}
+
+How do we design a simple SR latch? We use two \textit{cross-coupled} NOR
+gates. It can be shown through these equations:
+\begin{align*}
+    S \bar \wedge Q = \neg Q \\
+    R \bar \wedge \neg Q = Q
+\end{align*}
+
+There's a loop here, because in order to know the output from the top NOR
+gate, we need to know the output from the bottom one, and vice versa. So
+what gives?? Well, it's alright if we look at the behaviour of a NOR gate.
+
+We know that a NOR gate gives us a 1 only when both inputs are 0. If
+either input is 1, then NOR will produce a 0. This is really important for
+our gate to actually function.
+
+If we set $S$ = 0, then the output from the top NOR gate is forced to
+produce 0. Then, if $R$ is 0, then the output is 1. Similarly, if $R$ is 0,
+the output for THAT NOR gate is 1. Therefore, we get what we want. The
+reverse is true when $R$ is 1 and $S$ is 0.
+
+There is some form of issue, though, because if both $R$ and $S$ are 0,
+then either the top NOR gate spits out 1, or the bottom NOR gate does.
+That's just the way it is. There's no logic error, it's just a bit weird.
+
+There's just one case left to study. If $S$ and $R$ are 1. In the truth
+table, we stated that we didn't care what happened, but in the
+implementation, then both $Q$ and $\neg Q$ are both 0, which is clearly a
+bloody issue because $Q$ cannot equal $\neg Q$. What happens now? Well,
+the latch has to settle in some case, either $Q = 1$ or $Q = 0$. We have 0
+control over what happens. We don't want this behaviour at all. This is
+what meta stability means. It's stable in some sense, but kind of not.
+
+\subsubsection{Updates}%
+\label{ssub:Updates}
+We want to be able to control when updates occur, because without this,
+it's not really a latch yet. To do this, we have an AND gate before we get
+to the criss-cross NOR gated latch, so we AND S and the enable signal, and
+R and the enable signal, and then pass the results from this into the old
+S and R respectively. This is a technique known as \textbf{gating}.
+
+Ok, this just in. WE CAN GET RID OF THE ISSUE OF META-STABILITY. Yep, you
+heard that right. We force $R = \neg S$, so we get either $S = 0, R = 1$
+or $S = 1, R = 0$. Dope, right?
+
+The difference between a latch and a flip-flop is that is has a little
+triangle on the symbol, indicating that it's edge triggered.
+
+For a latch, the point value of $Q$ only changes when the enable signal is
+1, it then matches the input $D$. Some people call this a `transparent'
+latch, because it's like the latch isn't even there.
+
+In a flip flop, the input only changes to the input $D$ on the edges of
+the clock (when the enable switch is on).
+
+\subsubsection{Registers}%
+\label{ssub:Registers}
+We normally group these components into \textbf{registers}, which is an
+$n$ bit register that can then store an $n$ bit value. We take each latch
+as a single bit.
+
+\subsection{Returning to the original issue}%
+\label{sub:original}
+So we have some data path of computation and/or storage components, and a
+control path, that tells the components in the data path what to do and
+when to do it.
+
+What we have is some latch based register, that takes in $\phi_1$, the
+first clock signal as an enable signal. This gives an input to some
+combinatorial logic, which then passes the result into another latch based
+register that takes in $\phi_2$, the second clock signal. This register
+passes the information back to the first register. And so on. This creates
+a kind of buffer that gives us a counter that we wanted. The two registers
+mean that the loop is broken, because it is impossible for both registers
+to be enabled at the same time; breaking the infinite loop that we would
+have without them.
+
+The combinatorial logic in the middle is just a big boy ripple carry
+adder. There is also a reset signal that is NOTED, and then ANDED with the
+individual bits of the ripple carry adder, meaning that when the RESET
+signal is 1, it becomes 0, thereby resetting all bits, because $x \wedge 0
+= 0$.
+
+\subsection{Memory Component}%
+\label{sub:memory}
+
+An $n$-bit register based on latches or flip-flops has a couple of
+limitations:
+\begin{enumerate}
+    \item Each latch or flip-flop in the register needs a fairly big
+        number of transistors. This limits the viable capacity
+    \item The register is also not addressable, because an address or
+        index allows dynamic rather than static reference to some stored
+        data. That means that we have something like variables, when we
+        want an array.
+\end{enumerate}
+
+The solution to these limitations is to have a memory component. The
+memory is connected to a \textbf{user} which could be a CPU by control
+signals, a data bus, and an address bus. Sound familiar? We'll also say
+that the memory has a capacity of $n = 2^{n'}$ addressable words and each
+word is $w$ bits, where $n \gg w$.
+
+There are a number of ways to classify a given memory component:
+\begin{enumerate}
+    \item Volatility
+    \begin{itemize}
+        \item \textbf{Volatile} means that the content is lost when the
+            component is powered off
+        \item \textbf{Non volatile} means that the content is not lost
+            when the component is powered off
+    \end{itemize}
+    \item Interface type:
+    \begin{itemize}
+        \item \textbf{Synchronous} where a clock or pre-determined timing
+            information synchronises steps
+        \item \textbf{Asynchronous} where a protocol synchronises steps
+    \end{itemize}
+    \item Access type
+    \begin{itemize}
+        \item \textbf{Random vs. Constrained} access to content.
+        \item \textbf{Random Access Memory (RAM)} which can be read from
+            \textit{and} written to.
+        \item \textbf{Read Only Memory (ROM)} which can only be read to
+    \end{itemize}
+\end{enumerate}
+
+We're going to focus on a \textbf{volatile, synchronous RAM}.
+
+\subsubsection{History of memory}%
+\label{ssub:history-mem}
+
+In the olden days, we had \textbf{delay line} memory, that contained
+mercury. There is a speaker at one end to store sound waves into the line
+and a microphone at the other end to read them out.
+
+Values are stored in the sense that the corresponding waves take some time
+to propagate, when they get to one end, they are either replaced, or fed
+back into the other.
+
+This is known as sequential access because you need to wait for the data
+you want to appear.
+
+After delay line came \textbf{magnetic-core} memory, where the basic idea
+is that the memory is a matrix of small magnetic rings or cores which can
+be magnetically polarised to store values. Wires are threaded through the
+cores to control them (so to read or write values). The magnetic
+polarisation is retained, so this is non-volatile. Sometimes, main memory
+is termed \textbf{core-memory} (or \textbf{core dump}), which is in
+reference to this.
+
+\subsubsection{Low-level implementation}%
+\label{ssub:Low-level implementation}
+
+There are two kinds of RAM that we can use: \textbf{Static RAM} or (SRAM)
+and \textbf{Dynamic RAM} or (DRAM).
+
+SRAM is:
+\begin{itemize}
+    \item manufacturable in lower densities 
+    \item More expensive to manufacture
+    \item Faster to access
+    \item Easier to interface with
+    \item Ideal for latency optimised contexts (like cache memory)
+\end{itemize}
+
+DRAM is:
+\begin{itemize}
+    \item Manufacturable in higher densities.
+    \item Less expensive to manufacture
+    \item Slower to access
+    \item Harder to interface with
+    \item Ideal for capacity optimised contexts (like main memory)
+\end{itemize}
+
+Simply, an \textbf{SRAM cell} resembles two NOT gates on the inner loop.
+It basically carries around a signal that is reinforced by the NOT gates.
+On the outside, there are two transistors that are connected to some
+control signal $wl$. The transistors allow access to the values inside the
+loop. To read from this, we pre-charge the transistors to 1. This is
+logically inconsistent, but it means that we allow one of them to be
+overridden after we allow access to the inside of the loop (through $wl$).
+To write to this, we charge the left transistor (or $bl$) to the value,
+and the right one to the opposite (since it is called $\neg bl$).
+
+An issue that we might find is different signal strengths. We're going to
+kind of brush it under the carpet and not think about it.
+
+In total, we'd need 6 transistors: 2 for each of the 2 NOT gates, and one
+each for the two on the outside. Therefore, it's known as a \textbf{6t}
+SRAM cell. It's loads less than the 20 or so required by the latches and
+flip-flops. This therefore solves one of the limitations of the latches.
+
+A \textbf{DRAM} cell is constructed only using 1 single transistor and a
+capacitor (kind of like a battery because it stores charge). The
+transistor again has an enable signal $wl$, and some input $bl$. If we
+want to read, then we set $bl$ to 1. If the contents is 1, then there is a
+discharge through $bl$, else there will not be.  To be able to write, we
+set $bl$ to the required value, and then set $wl$ to 1. After this, the
+capacitor is charged with the required value.
+
+The issue with this cell is that the capacitor can only do limited
+charges. Also, the same issue as before, because the signal strength might
+not be enough for the required circuit. Additionally, the charge stored in
+the capacitor will decay over time. We need some refresh thing in the
+background to ensure that the value is not lost over time.  Reading from a
+DRAM cell means that the value is destroyed, so we need to rectify that
+through the refresh mechanism. The latency is long from a DRAM cell
+because the capacitor has a long access time.
+
+\subsubsection{Higher level implementation}%
+\label{ssub:high-level}
+A \textbf{memory device} is constructed from (roughly) three components:
+\begin{enumerate}
+    \item A \textbf{memory array} (or matrix) of replicated cells with
+        \textit{r} rows and \textit{c} columns.
+    \item A \textbf{row decoder} which given an address (de)activates
+        associated cells in that row, and
+    \item A \textbf{column decoder} which given an address (de)selects
+        associated cells in that column
+\end{enumerate}
+
+Along with additional logic to allow use:
+\begin{enumerate}
+    \item \textbf{Bit line conditioning} to ensure that the bit lines are
+        strong enough to be effective,
+    \item \textbf{Sense amplifiers} to ensure that the output from the
+        array is usable.
+\end{enumerate}
+
+To access these bad boys, we get an input to the row decode from the
+address bus, and an output from the column decode. It's kind of like a
+multiplexer and then a demultiplexer.
+
+The difference between DRAM and SRAM is simply that the cells in the
+middle are DRAM rather than SRAM.
+
+DRAM also has buffers (both for the row and the column). 
+
+\section{Finite State Machines}%
+\label{sec:FSMs}
+
+\subsection{Automata Theory}%
+\label{sub:automata}
+
+First things first, we need some definitions:
+\begin{itemize}
+    \item \textbf{Alphabet}: a non-empty set of symbols
+    \item \textbf{String}: with respect to some alphabet $\Sigma$ is a
+        sequence of finite length, whose elements are members of $\Sigma$.
+    \item \textbf{Language}: a set of strings.
+\end{itemize}
+
+Finite state machines are a model of computation. What does this mean?
+It's a set of allowable (or possible) operations. It is basically an
+idealised computer that is in some finite set of states at a given point
+in time. It accepts an input string (with respect to some alphabet) one
+symbol at a time. Each symbol produces a change in state. Once it's run
+out of inputs, the computer stops. Depending on the state it stops in, it
+can either \textit{accept} or \textit{reject} the string. For a language
+of all possible strings that the computer could accept, the
+computer \textbf{accepts} the language.
+
+Finite state machines do not have any memory. The more advanced machine
+that you have, the more memory you have. We're looking at a kind of
+mid-rate deal, that does not have any memory.
+
+For a more formal definition of FSMs, it is a tuple:
+\begin{equation*}
+    C = (S,s,A,\Sigma,\Gamma,\delta,\omega)
+\end{equation*}
+
+With the following definitions:
+\begin{itemize}
+    \item $S$ is a finite set of states that includes a \textbf{start
+        state}, $s \in S$
+    \item $A \subseteq S$, a finite set of \textbf{accepting states}
+    \item An \textbf{input alphabet} $\Sigma$ and an \textbf{output
+        alphabet} $\Gamma$
+    \item A \textbf{transition function}:
+        \begin{equation*}
+            \delta : S \times \Sigma \rightarrow S
+        \end{equation*}
+    \item An \textbf{output function}:
+        \begin{equation*}
+            \omega : S \rightarrow \Gamma
+        \end{equation*}
+        In the case of a \textbf{Moore FSM}, or
+        \begin{equation*}
+            \delta : S \times \Sigma \rightarrow \Gamma
+        \end{equation*}
+        In the case of a \textbf{Mealy FSM} 
+\end{itemize}
+
+An empty input is called $\epsilon$
+
+We need to design an FSM that decides whether a binary sequence $X$ has an
+odd number of 1 elements in it. The \textit{accepting state} is
+$S_{\text{odd}}$.
+
+For example, say we have the input string $X = \langle 1,0,1,1 \rangle$
+the transition are:
+\begin{equation*}
+    \rightarrow S_{even} \xrightarrow{X_0 = 1} S_{odd} \xrightarrow{X_1 =
+0} S_{odd} \xrightarrow{X_2 = 1} S_{even} \xrightarrow{X_3 = 1}
+    S_{odd}
+\end{equation*}
+
+So the input is accepted because there are an odd number of 1 elements.
+
+The real world example of this is to use a regular expression (or Regex).
+
+\subsection{FSMs in hardware}%
+\label{sub:hardware-fsm}
+
+Using an FSM with a latch based implementation is that:
+\begin{enumerate}
+    \item The state is retained in a register
+    \item $\delta$ and $\omega$ are simple combinatorial logic
+    \item Within the current clock cycle:
+        \begin{enumerate}
+            \item $\omega$ computes the output from the current state and
+                input
+            \item $\delta$ computes the next state from the current state
+                and input
+        \end{enumerate}
+    \item The next state is latched by an appropriate feature in the
+        clock.
+\end{enumerate}
+
+This is a computer that we can actually build now!
+
+We have two options as to the choice of encoding the state of the machine:
+
+There is \textbf{binary encoding}:
+\begin{align*}
+    S_0 \mapsto \langle 0, 0, 0 \rangle \\
+    S_1 \mapsto \langle 1, 0, 0 \rangle \\
+    S_2 \mapsto \langle 0, 1, 0 \rangle \\
+    S_3 \mapsto \langle 1, 1, 0 \rangle \\
+    S_4 \mapsto \langle 0, 0, 1 \rangle \\
+    S_5 \mapsto \langle 1, 0, 1 \rangle 
+\end{align*}
+
+Or, there is \textbf{One- hot encoding}:
+\begin{align*}
+    S_0 \mapsto \langle 1, 0, 0, 0, 0, 0 \rangle \\
+    S_1 \mapsto \langle 0, 1, 0, 0, 0, 0 \rangle \\
+    S_2 \mapsto \langle 0, 0, 1, 0, 0, 0 \rangle \\
+    S_3 \mapsto \langle 0, 0, 0, 1, 0, 0 \rangle \\
+    S_4 \mapsto \langle 0, 0, 0, 0, 1, 0 \rangle 
+    S_5 \mapsto \langle 0, 0, 0, 0, 0, 1 \rangle 
+\end{align*}
+
+There is a trade off here because there is more space required for the
+one-hot, but there is less energy required because we are only flipping
+two bits at a time.
+
+Now, we want to design an FSM that acts like a cyclic counter modulo $n$
+(rather than $2^n$ as before). If $n = 6$ for example, we want a component
+whose output $r$ steps through values:
+\begin{equation*}
+    0, 1, 2, 3, 4, 5, 0, 1, \cdots
+\end{equation*}
+
+The first couple of steps of our algorithm state that we need to
+enumerate each state, and then give them some abstract label. We can
+represent this using a table:
+
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        & $\delta$ & $\omega$ \\ \hline
+        $Q$ & $Q'$ & $r$ \\ \hline
+        $S_0$ & $S_1$ & 0 \\ \hline
+        $S_1$ & $S_2$ & 1 \\ \hline
+        $S_2$ & $S_3$ & 2 \\ \hline
+        $S_3$ & $S_4$ & 3 \\ \hline
+        $S_4$ & $S_5$ & 4 \\ \hline
+        $S_5$ & $S_0$ & 5 \\ \hline
+    \end{tabular}
+\end{center}
+
+Next, we need to design the state assignment step:
+\begin{equation*}
+    S_i \mapsto i (0 \le i \le 5)
+\end{equation*}
+
+Since $2^3 = 8 > 6$, we can represent them using 6 concrete values,
+namely:
+\begin{align*}
+    S_0 \mapsto \langle 0, 0, 0 \rangle = 000_{2}\\
+    S_1 \mapsto \langle 1, 0, 0 \rangle = 001_{2} \\
+    S_2 \mapsto \langle 0, 1, 0 \rangle = 010_{2} \\
+    S_3 \mapsto \langle 1, 1, 0 \rangle = 011_{2} \\
+    S_4 \mapsto \langle 0, 0, 1 \rangle = 100_{2} \\
+    S_5 \mapsto \langle 1, 0, 1 \rangle = 101_{2} 
+\end{align*}
+
+And capture:
+\begin{align*}
+    &Q = \langle Q_0, Q_1, Q_2 \equiv \text{the current state} \\
+    &Q' = \langle Q'_0, Q'_1, Q'_2 \rangle \equiv \text{the next state}
+\end{align*}
+in a 3-bit register (so like 3 latches or 3 flip-flops)
+
+We can rewrite the abstract labels to give us some concrete truth table:
+\begin{center}
+    \begin{tabular}{|c c c|c c c|c c c|}
+        \hline
+        $Q_2$ & $Q_1$ & $Q_0$ & $Q'_2$ & $Q'_1$ & $Q'_0$ & $r_2$ & $r_1$ & $r_0$ \\ \hline
+        0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\ \hline
+        0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 1 \\ \hline
+        0 & 1 & 0 & 0 & 1 & 1 & 0 & 1 & 0 \\ \hline
+        0 & 1 & 1 & 1 & 0 & 0 & 0 & 1 & 1 \\ \hline
+        1 & 0 & 0 & 1 & 0 & 1 & 1 & 0 & 0 \\ \hline
+        1 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 1 \\ \hline
+        1 & 1 & 0 & ? & ? & ? & ? & ? & ? \\ \hline
+        1 & 1 & 1 & ? & ? & ? & ? & ? & ? \\ \hline
+    \end{tabular}
+\end{center}
+
+The big block of `don't care' means that we should never really reach
+those. We can also apply the technique of Karnaugh maps.
+
+And that's it for the Dan Page bit of the course!
+
+\section{Data, control, and instructions}%
+\label{sec:Data}
+
+Abstraction is pretty great. A higher level only needs to know how to
+interface with the level directly below it. So, why should we care about
+hardware? Well, it's kind of important because if we write a program
+that's too slow, or it isn't running right, having a grasp of how a
+computer works lower down the levels of abstraction will really help us
+to be able to fix whatever problems might arise.
+
+A processor is dictated by two separate functions:
+\begin{itemize}
+    \item \textbf{Control}: the information and instructions
+    \item \textbf{Data}: the information operated on to get the result.
+\end{itemize}
+
+These two influences form two paths into the processor logic.
+
+The definition of \textbf{data} is simply some stored information. It can
+be stored or formatted in a number of ways. Data stores information and
+forms input to, and outputs from, calculations.
+
+Data is stored in storage elements. There are many different storage
+elements in modern processing systems. During this course, we only need to
+focus on two: \textbf{memory} and \textbf{registers}. For this section, we
+can treat them both as \textit{black boxes}, meaning that we don't really
+care what's going on inside. Processor instructions always operate on data
+in registers, and if they're lucky, they get to operate on data in memory,
+too.
+
+\textbf{Control} is also information, but the usage differs slightly from
+data. It specifies what needs to be done and is applied to a system,
+rather than consumed by it.
+
+\subsection{Instructions}%
+\label{sub:Instructions}
+Instructions are really useful for telling the computer exactly what we
+want to be doing. For example, if an instruction ``A" is called, then the
+processor should do ``X". At a high level, we can treat them as abstract
+symbols, whose value causes different processor behaviour. Instructions
+need to be \textbf{decoded} before they can be used.
+
+An instruction is \textit{also} information. However, it has a defined
+purpose, which is to specify the exact amount of work that needs to be
+done by a processor. This leads it to have a specific form and formatting.
+Only a subset of all possible control values are actually valid
+instructions.
+
+Instructions allow the encoding of control information that is necessary
+to control a computing system. The trick is to use a unique code (called
+the \textbf{op-code}) to signify a unique function.
+
+There are many different possible encodings of instructions for the same
+meaning. Each system has its own tailored decode module to figure out the
+meaning of the op-codes to generate control signals.
+
+There is more than one way to make a decoder. It could be combinatorial
+logic, demultiplexer based, or lookup based.
+
+\section{Memory}%
+\label{sec:Memory}
+
+Memory, simply, is a place to store information. There are two basic
+operations that we can perform on memory: \textbf{read} and
+\textbf{write}. Each piece of information in memory is assigned to a
+unique address. In order to access or update information, we need to
+specify this address to a memory, and then our information can be returned
+or changed. Addresses are specified as indexes. Values can be op-codes.
+
+A single memory location can combine both an instruction and some data.
+This can be useful for constant based operations. Consider
+\lstinline|ADD1| or something that loads a constant, such as
+\lstinline|MOVE2|. We could express \lstinline|ADD| as 1, therefore we
+could also express \lstinline|ADD1| as \lstinline|11|. There is a memory
+hierarchy that looks like this:
+\begin{enumerate}
+    \item Register
+        \begin{itemize}
+            \item 32 words
+            \item Access time of $<1$ ns
+        \end{itemize}
+        \item L1 cache
+            \begin{itemize}
+                \item ~32KB
+                \item ~1ns access time
+                \item Part of SRAM
+            \end{itemize}
+        \item L2 cache
+        \begin{itemize}
+            \item ~512KB
+            \item 5-10ns access time
+            \item Part of SRAM
+        \end{itemize}
+        \item L3 cache
+        \begin{itemize}
+            \item 1-8MB
+            \item 10-100ns access time
+            \item Part of SRAM
+        \end{itemize}
+    \item Main memory (DRAM)
+    \begin{itemize}
+        \item 1-16GB
+        \item ~100ns access time
+    \end{itemize}
+    \item Hard disk/SSD
+        \begin{itemize}
+            \item 100-1000GBs
+            \item ~10ms access time
+        \end{itemize}
+\end{enumerate}
+
+\subsection{Addressing}%
+\label{sub:Addressing}
+Addressing is when we want to access memory, we need to specify which
+memory address to use. For example: \lstinline|MEM[10]| means to access
+memory address 10. Ideally, we could specify a memory address directly
+every time, but that's not always possible. Sometimes, we want to specify
+a sequence of addresses. Therefore, we have invented a load of different
+ways to specify a memory address.
+
+\subsubsection{Immediate addressing}%
+\label{ssub:immediate}
+Immediate addressing is when data is supplied \textbf{in an instruction}.
+There is no real memory address and all information is embedded in the
+instruction. Also, data is immediately available. It's really fast and
+simple (the simplest). An example looks like: \lstinline|rl <- 42|.
+
+All of the information is embedded in instruction, so it's predictable.
+This makes it really fast. It's pretty easy to understand and it's good
+for optimisers to analyse. Unfortunately, in the words of the mighty Dan
+Page, there's no free lunch. There is a lack of flexibility and it's gotta
+be inserted statically. There's a limited range of instructions (seeing as
+it's limited by the permitted number of operand bits in the opcode).
+
+\subsubsection{Direct addressing}%
+\label{ssub:direct}
+An instruction like: \lstinline|MEM[10]| is pretty cool, but how is it
+formed? It's formed in the kind of format: Operation | Operand1 |
+Operand2. For example \lstinline|6, 10, 42|. The exact memory address used
+is embedded in the instruction. This is known as \textbf{direct
+addressing}. The exact memory address used is embedded in the instruction.
+
+Direct addressing has the same pros and cons as Immediate
+addressing~\ref{ssub:immediate}. But, it's a little slower in return for
+a larger range.
+
+\subsubsection{Memory-indirect addressing}%
+\label{ssub:memory-indirect}
+
+Memory-indirect addressing solves the problem of limited range by storing
+the address to be accessed in memory itself. 
+
+An example would be: MEM[MEM[42]] which means to go and look at the memory
+address in 42 and fetch the value. That value is the address to write the
+value in r1 to.
+
+It's good because it's got a larger range and the source memory location
+for the address may be dynamically changed.
+
+Unfortunately, there are some bad points. The first memory address is
+still statically compiled. The range restriction is just changed to the
+initial memory range. It's also slower than direct addressing.
+
+\subsubsection{Register-Indirect addressing}%
+\label{ssub:register-indirect}
+
+This method provides even more flexibility. It uses the register's value
+as the memory address: MEM[r1] <- r1.
+
+There are loads of advantages to register indirect addressing like the
+memory address can be dynamically computed and the value does not need to
+be stored in the instruction thereby reducing code size. The register is
+internal to the processor so it's faster and more energy efficient.
+
+This also allows for native support of pointers. Accessing indirectly is
+equivalent to a dereferencing operation, like *p in C.
+
+\subsubsection{Indexed addressing}%
+\label{ssub:indexed}
+Sometimes, you just gotta define a base address and access memory based on
+this. It's pretty useful for stacks, arrays, and caches etc. Indexed
+addressing extends indirect addressing to support this. We have a
+\textbf{base} and an \textit{offset}.
+
+Normally, the base and the offset are both stored in the registers, but
+this doesn't have to be the case. We get instructions like: MEM[r1 + r2]
+<- r3. Here, r1 is the base and r2 is the offset. Base and offset can be
+varied independently.
+
+Many implementations support the base and offset construct natively.
+Architectures often have a dedicated register to help, normally called
+something like the stack pointer or the base register.
+
+The stack/base registers may or may not be general purpose depending on
+the architecture. The offset usually comes from an additional general
+purpose register. An example of indexed addressing based on an array. 
+
 \end{document}
