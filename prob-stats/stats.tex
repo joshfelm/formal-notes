@@ -435,4 +435,70 @@ significant effect on time for the variable group (F2.57 = 154.88, $p <
 showed significant difference between the group C and the group A
 ($p<0.05$)'. You could even give some mean values if you really wanted to
 flex.
+
+Don't forget that \textbf{Likert}, although it's ordinal, can be treated
+as continuous.
+
+If we go back to the memorisation test, what can we do to the data to make
+some more difference? The goal of a study is to find a signal in a lot of
+noise. For t-tests, we can find the noise by:
+\begin{equation*}
+    \frac{\text{differece between gorup means}}{\text{variability of
+    groups}}
+\end{equation*}
+
+The actual math for a paired t test is:
+\begin{equation*}
+    t = \frac{\bar {x1} - \bar {x2}}{s/\sqrt{n}}
+\end{equation*}
+
+The top bit of the fraction is the difference between the group means (or
+to \textit{maximise} this, we want this to be big). We want the standard
+deviation of the differences to be small. The bottom bit of the fraction
+is the \textit{standard error} of the mean. Why do we need to divide by
+$\sqrt n$? This comes from the central limit theorem. You don't need to
+understand this, but it's just the way it is. $n$ is the sample size.
+
+$\sqrt n$ is called adding a \textit{penalty} for using a sample for using
+a sample instead of the entire population. The penalty is big when the
+sample is really small.
+
+Both signal and noise are in the units of your data. If signal = 6 and
+noise = 2, then the t-value is 3, so the difference is 3 times the size of
+the standard error. If signal is 6 and noise is 6, then the t-value = 1.
+The signal is at the same scale as the noise. Essentially, the t-values
+are \textit{how distinguishable the data is from the noise}.
+
+How do we know our t-value is any good, and how's it related to the
+p-value? This is where t-distributions come in.
+
+Every time we do a test, we get a different t-value. If we take all the
+t-values and we plot them, we get something called a \textbf{sampling
+distribution}.
+
+Fortunately, the properties of t-distributions are really well understood
+so we can just plot them without having to collect many samples. A
+specific t-distribution is defined by the \textit{degrees of freedom}.
+
+T-distributions assume that you draw repeated random samples from a
+population where the null hypothesis is true. It also explains two-tail vs
+one-tail tests. If we do one-tail, we need to multiply the p-value by 2.
+
+If the p-value is too small, there could be 3 reasons why:
+\begin{enumerate}
+    \item The difference is not large enough (your signal is weak)
+    \item Too much noise
+    \item Not enough data
+\end{enumerate}
+
+How much data is enough? The larger the sample size, the more
+t-distributions become a z-distribution. After this, we can go back to
+using a Z-score (which is the number of standard deviations away from the
+mean).
+
+So, why use a t-test? There are some cases when we want to use less sample
+to speed up the experiment.
+
+
+
 \end{document}
