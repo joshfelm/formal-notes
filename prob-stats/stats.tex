@@ -492,13 +492,66 @@ If the p-value is too small, there could be 3 reasons why:
 \end{enumerate}
 
 How much data is enough? The larger the sample size, the more
-t-distributions become a z-distribution. After this, we can go back to
+t distributions become a z distribution. After this, we can go back to
 using a Z-score (which is the number of standard deviations away from the
 mean).
 
 So, why use a t-test? There are some cases when we want to use less sample
 to speed up the experiment.
 
+\section{Normality testing}%
+\label{sec:normality}
+
+Given the mean and the standard deviation of a data set, a theoretical
+normal distribution has proportions in the shape of a bell. This
+theoretical normal distribution can be compared to the actual distribution
+of the data. The actual data distribution will have some slight
+differences (such as maybe the mean is a bit different, or the standard
+deviation is a bit off). How do we tell if the data is statistically
+different from the computed normal curve? There are a few methods that we
+can use, \textbf{Q-Q probability plots}, \textbf{Kolmogorov-Smirnov test}
+and the \textbf{Shapiro-Wilks test}. There are a few others, but we're not
+going to concern ourselves with those.
+
+\subsection{Quantile quantile probability plot}%
+\label{sub:q-q}
+
+If two sets come from a population with the same distribution, then the
+points should really fall along some straight line. This test is basically
+just a plot of the quantiles for the \textit{first} data set against the
+quantiles of the second data set. The steps we take are:
+\begin{enumerate}
+    \item Order the data
+    \item Plot them against the appropriate quantile from the standard
+        normal distribution
+    \item Search for nine values on the normal distribution (or split it
+        into 10 areas)
+    \item Find the values that make it happen
+    \item Plot the smallest value in our sample of size nine against what
+        we expect to get as the smaller value in a sample of the same size
+        from the standard normal distribution (and also do that with all
+        pairs).
+\end{enumerate}
+
+Q-Q plots are really good graphical tools for \textbf{large samples}, but they're
+not so good for small sample sizes.
+
+Statistical tests for normality are more precise because there are actual
+probabilities that are calculated.
+
+\subsection{Kolmogorov-Smirnov}%
+\label{sub:Kolmogorov-Smirnov}
+
+This test works the best when data sets have size of $n > 50$. It's not
+sensitive to problems in the tails.
+
+\subsection{Shapiro-Wilks}%
+\label{sub:Shapiro-Wilks}
+This test works the best when the data sets have size of $n < 50$, but
+it's not so great if several values are the same.
+
+\section{A very (not really) simple flowchart to decide what test to use}%
+\label{sec:help}
 
 
 \end{document}
