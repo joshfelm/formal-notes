@@ -1713,4 +1713,70 @@ The stack/base registers may or may not be general purpose depending on
 the architecture. The offset usually comes from an additional general
 purpose register. An example of indexed addressing based on an array. 
 
+
+\section{Compilers}%
+\label{sec:Compilers}
+We're going to be looking at an 8 bit machine and how we'd go about
+building a machine. Anytime you start with producing a computer or
+processor, we need to make an instruction set. How do we design an
+instruction set while keeping it simple?
+
+\subsection{Instruction set}%
+\label{sub:Instruction set}
+Firstly, in any machine, we need some \textit{registers}. We need one or
+two things to hold the arithmetic logic. The registers we have are:
+\begin{itemize}
+    \item \textbf{PC} - The program counter
+    \item \textbf{AREG} - Holds the arithmetic stuff
+    \item \textbf{BREG} - Same as AREG
+    \item \textbf{OREG} - Holds the instruction and the operand that comes
+        with the instruction
+\end{itemize}
+
+These two registers are about the minimum that we can get away with. Now,
+we have two parts: the \textbf{function} and the \textbf{operand}. These
+are both 4-bits long, meaning that each instruction is 8-bits long. In
+terms of the instructions, there are three or four different classes of
+instructions:
+\begin{itemize}
+    \item Load
+    \begin{itemize}
+        \item LDAM - load from A
+        \item LDBM - Load from B
+        \item STAM - Store in A
+    \end{itemize}
+    \item Load (constants)
+    \begin{itemize}
+        \item LDAC - Load A with a constant
+        \item LDBC - Load B with a constant
+        \item LDAP - Load address in program: This means that we can
+            supply an address of the program as an operand, and store it
+            in a register, and this means that we can use it as a
+            callback.
+    \end{itemize}
+    \item Indirect loads
+    \begin{itemize}
+        \item LDAI - Load A indirectly
+        \item LDBI - Load B indirectly
+        \item STAI - Store A indirectly
+    \end{itemize}
+    \item Arithmetic operations and branches
+    \begin{itemize}
+        \item ADD - Adds
+        \item SUB - subtracts
+        \item BR - Branch always
+        \item BRZ - Branch if zero
+        \item BRN - Branch if negative
+        \item BRB - Branch to the contents of the B register
+    \end{itemize}
+\end{itemize}
+
+We now have 15 instructions, so we have one more instruction: PFIX, which
+is a prefix. This means that we are able to encode a 16-bit value by first
+supplying the PFIX with the first half, and then the function with the
+second half. It attaches the operand to the operand of the next
+instructions. Even this instruction set is able to do some quite
+complicated things, such as actually be a compiler. 
+
+
 \end{document}
