@@ -1,0 +1,169 @@
+%%=====================================================================================
+%%
+%%       Filename:  database-n-cloud.tex
+%%
+%%    Description:  Notes for database and cloud written up nicely
+%%
+%%        Version:  1.0
+%%        Created:  06/04/19
+%%       Revision:  none
+%%
+%%         Author:  Josh Felmeden (), nk18044@bristol.ac.uk
+%%   Organization:  
+%%      Copyright:  Copyright (c) 2019, Josh Felmeden
+%%
+%%          Notes:  
+%%
+%%=====================================================================================
+
+% Preamble
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+
+% Set indentation and line skip for paragraph
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+
+% Headers setup
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Databases and the Cloud: The notes}
+\rhead{Josh Felmeden}
+\usepackage{hyperref} 
+\usepackage{mathtools} 
+
+
+% Listings
+\usepackage[]{listings,xcolor} 
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+
+\lstdefinestyle{Common}
+{
+    extendedchars=\true,
+    language={[Visual]Basic},
+    frame=single,
+    %===========================================================
+    framesep=3pt,%expand outward.
+    framerule=1.4pt,%expand outward.
+    xleftmargin=3.4pt,%make the frame fits in the text area. 
+    xrightmargin=3.4pt,%make the frame fits in the text area.
+    %=========================================================== 
+    rulecolor=\color{Red}
+}
+
+\lstdefinestyle{A}
+{
+    style=Common,
+    backgroundcolor=\color{Yellow!10},
+    basicstyle=\small\color{Black}\ttfamily,
+    keywordstyle=\color{Orange},
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Red},
+    commentstyle=\color{Green}
+}
+
+\lstdefinestyle{B}
+{
+    style=Common,
+    backgroundcolor=\color{Black},
+    basicstyle=\scriptsize\color{White}\ttfamily,
+    keywordstyle=\color{Orange},
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Red},
+    commentstyle=\color{Green}
+}
+
+\usepackage[]{amsmath} 
+\usepackage[]{booktabs} 
+\usepackage[symbol]{footmisc} 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+% Title
+\title{Databases and the Cloud: The Notes}
+\date{2018\\ December}
+\author{Josh Felmeden}
+
+% Start document
+\begin{document}
+\pagenumbering{roman}
+\maketitle
+
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{The Internet}%
+\label{sec:The Internet}
+End systems are connected via the \textbf{communication links} that
+consist of the different types of physical media. Usually, the end systems
+are not directly attached by a single link, but rather they are attached
+through a router.
+
+There are two kinds of host: \textit{clients} and \textit{servers}. A
+program or machine that responds to request and others is called a
+\textbf{server} while a program or machine that sends the requests to the
+server is called a \textbf{client}.
+
+The internet is made possible by the development, testing, and
+implementation of the \textit{internet standards}. They are developed by
+the Internet Engineering Task Force (or the IETF). Their documents are
+known as RFCs (request for comments). There are a number of protocols,
+such as TCP, IP, HTTP, and SMTP (this one is used for emails). There are
+more than 2000 RFCs.
+
+\subsection{Protocols}%
+\label{sub:Protocols}
+A \textbf{protocol} is a set of rules that govern the communication to
+ensure a standard of communication. It also consists of messages sent and
+actions taken in response to replies or other such events.
+
+A simple protocol could be where one machine sends a message (called a
+\textit{request}) and another machine replies with a response. This can
+then be repeated.
+
+\subsection{Internet Layers}%
+\label{sub:internet-layers}
+\begin{itemize}
+    \item HTTP
+    \begin{itemize}
+        \item Makes request
+        \item Reads and handles the response
+    \end{itemize}
+    \item TCP
+        \begin{itemize}
+            \item Breaks data up into packets
+            \item Puts the packets back in order and reassembles messages
+        \end{itemize}
+    \item IP
+        \begin{itemize}
+            \item Attaches to and from addresses to each packet
+            \item Reads and groups packets based on the address
+        \end{itemize}
+    \item Physical internet
+    \begin{itemize}
+        \item Send bits to local routers
+        \item Receives bits and assembles into packets
+    \end{itemize}
+\end{itemize}
+
+\subsection{HTTP: Hyper text transfer protocol}%
+\label{sub:http}
+What's the difference between the web and the internet? Well, the internet
+is the computer network itself (or the whole infrastructure): while the
+web (or the world wide web) is an application that runs on that
+infrastructure.
+
+It's probably the most common application protocol that there is on the
+web (but there are others like video streaming and FTP and the like).
+
+\end{Document}
