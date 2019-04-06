@@ -1776,7 +1776,74 @@ is a prefix. This means that we are able to encode a 16-bit value by first
 supplying the PFIX with the first half, and then the function with the
 second half. It attaches the operand to the operand of the next
 instructions. Even this instruction set is able to do some quite
-complicated things, such as actually be a compiler. 
+complicated things, such as actually be a compiler.
+
+The arithmetic units will be used for both doing the arithmetic and for
+computing the addresses. For example, it will have to add the PC to the
+operand etc.
+
+Let's start with some registers. So, we have the registers that are
+attached to the arithmetic unit via some multiplexers. We also might need
+one of the values to address the memory. If we're reading data from the
+memory, then we need another multiplexer to be able to take values from
+either the memory or the ALU. We also need to be able to write to the
+memory, but because we've set up the instructions so that we can only
+write to memory from the A register, we only need to connect it to the
+AREG.
+
+The rest of the machine can be seen online, so I won't be documenting it
+here because it doesn't really make sense to be described in words.
+
+\section{Hex Architecture}%
+\label{sec:Hex Architecture}
+Having defined the instruction set above, we need to work out what we
+actually want to do with it. So what we have is some block of memory. In
+the case of our \textit{simple machine}, we can split up the memory,
+working from the bottom, into:
+\begin{itemize}
+    \item Jump (that jumps to the beginning of the program)
+    \item The stack pointer. This initially points to the top of the
+        stack. As we call the functions, we then \textit{decrement} the
+        stack pointer, so that we can get back to the place we came from.
+        We can keep doing this with no problems.
+    \item Global variables
+    \item Constants
+    \item Strings
+    \item Program
+    \item Stack
+\end{itemize}
+
+\subsection{The stack}%
+\label{sub:the-stack}
+As we lay out the information in the stack, when we do a procedure call,
+we execute some instructions that load the return address into the AREG.
+This means that the stack now holds the address that is stored in the
+AREG, and then we decrement the stack pointer.
+
+We might also want to pass some parameters to the function, and these are
+also stored in the stack (right above the return state value). We can
+still use the same instructions to access the incoming parameters because
+we know the offset.
+
+If we take the following example:
+\begin{lstlisting}[style=B]
+LDBM 1
+STAI 0
+LDAC -5
+OPR ADD
+STAM 1
+LDAM 1
+LDAI 6
+BRN L207
+BR L206
+\end{lstlisting}
+
+So, we've jumped to this function. Now, we load the stack pointer that is
+in memory location 0. We then load -5, which is the space required for
+the local variables of the function. We then ADD the two together, and
+then place the result back into the stack at memory location 1. Now, we're
+loading up one of the incoming parameters, and then testing to see if
+the result is negative or not.
 
 
 \end{document}
