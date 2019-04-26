@@ -377,9 +377,355 @@ Buttons can have these types:
 \label{sub:CSS}
 Use HTML for the structure, and then CSS for the styling. This includes
 layout, appearance, and some behaviours. You can customise ANYTHING. If
-you want emphasised words to be underlined, then by golly 
+you want emphasised words to be underlined, then by golly you can do that.
 
+CSS stands for Cascading Style Sheets. CSS describes how HTML elements are
+to be displayed on screen. CSS saves a lot of work. It can control the
+layout of a number of multiple web pages all at once. It can be added to
+HTML elements in 3 ways
 
+\begin{itemize}
+    \item \textbf{Inline} which means that it uses the style attribute in
+        HTML elements
+    \item \textbf{Internal} which means tat it uses a \lstinline|<style>|
+        element in the \lstinline|<head>| section.
+    \item \textbf{External} which means that it links to a CSS file. This
+        is the recommended method btw. 
+\end{itemize}
 
+Linking to a stylesheet looks something like this:
 
+\begin{lstlisting}[style=B]
+<link rel="stylesheet" href="styles.css">
+\end{lstlisting}
+
+This goes in the head tag of any web page. External style sheets have a
+few advantages, namely that a single style sheet can control a lot of
+pages. In general, you have a number of different pages that share a
+common style. You can define the style sheet in a single document and then
+have all of the HTML files refer to the same CSS file. It also facilitates
+\textit{global changes} because if you're using external styles, you make
+a change in one place and then it's automatically propagated to all of the
+pages in the system. Finally, it allows for the \textit{separation} of
+content and design. With the external CSS, all of the design is housed in
+the CSS and the data is in HTML.
+
+Oh, also note that there are two kinds of reference: absolute (for example
+the absolute reference of a page like
+\lstinline|href="http://www.example.com/theme.css"|) while the relative
+looks like \lstinline|href="/themes/theme.css"|.
+
+Here's an example of a style sheet:
+\begin{lstlisting}[style=B ]
+h1 {
+    font-family: sans-serif;
+}
+
+.lecture {
+    font-weight: bold;
+}
+
+em { font-style: normal; }
+em.room { font-style: italic; }
+\end{lstlisting}
+
+\subsection{Data Formats and Operations}%
+\label{sub:Data Formats and Operations}
+In 2015, Bristol elected a councillor for each of the 24 wards. Here are
+the results for this:
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{Candidate} & \textbf{Party} & \textbf{Votes} \\
+        \hline
+        Chris Davies & Liberal Democrat & 2435 \\
+        \hline
+        Christopher Louis Orlik & Labour & 1499 \\
+        \hline
+        Glenn Royston Vowles & Green & 722 \\
+        \hline
+        Claire Lisa Louise Hayes & Uk Independence & 625 \\
+        \hline
+        Anthony Paul Lee & Conservative & 590 \\
+        \hline
+        Domenico Hill & Trade Unionists and Socialist Coalition & 37 \\
+        \hline
+    \end{tabular}
+\end{center}
+
+Here's what the structure would look like if it was written in C:
+\begin{lstlisting}[style=B]
+struct Candidate {
+    char  name[100];
+    char party[100];
+};
+
+struct Ward {
+    char name[100];
+    int electorate;
+};
+
+struct Result {
+    struct Candidate candidate;
+    struct Ward ward;
+    int votes;
+};
+\end{lstlisting}
+
+Here's how it would look in Java:
+\begin{lstlisting}[style=B]
+class Candidate {
+    String  name;
+    String party;
+};
+
+class Ward {
+    String name;
+    int electorate;
+};
+
+class Result {
+    Candidate candidate;
+    Ward ward;
+    int votes;
+};
+\end{lstlisting}
+
+And here's how we use the data structures
+\begin{lstlisting}[style=B]
+winner.candidate.name = "Chris Davies";
+winner.candidate.party = "Liberal Democrat";
+winner.ward.name = "Knowle";
+winner.ward.electorate = 8820;
+winner.votes = 2435;
+
+System.out.println("In " + winner.ward.name + ", the winner was " +
+winner.candidate.name + " with " + winner.votes + " votes.");
+
+>> "In Knowle, the winner was Chris Davies with 8820 votes."
+\end{lstlisting}
+
+The question now is: How do we read data from storage? Well, what we
+shouldn't do is create our own data format (unless you're a big boy like
+Google/Microsoft). What we should do is to use the existing standards for
+encoding and storing data.
+
+\subsubsection{UNICODE and Encoding}%
+\label{ssub:unicode}
+Every file is a sequence of bytes that can further be broken down into
+bits. What the bytes mean are entirely dependent on how the are encoded
+and what sort of file type it is. 1 byte means that there are 256
+possibilities. This is more than enough for most Western languages, but
+the stupid Chinese have something like 50k characters depending on how you
+count them. We also might want to encode more than the alphanumeric
+characters like icons, emojis, line drawing chars, mathematical symbols
+and so on.
+
+ASCII was invented in the early 60's as a standard character set for
+computers and electronic devices. It's a 7-bit set containing 128 chars.
+It contains all of the English alphanumeric characters and some special
+characters. Unfortunately, once a lot more countries got involved in the
+internet, we needed a few more characters to allow us to represent their
+languages and alphabets. This is where Unicode came in.
+
+The Unicode Consortium develops their Unicode standard. It replaces the
+existing character sets (ASCII) with a new one that is then implemented in
+many language such as HTML, XML, Java, and even the Latex I'm writing this
+in. Unicode defines a crazy 136k characters. \textbf{Encoding} is how
+these numbers are translated into binary numbers to be stored and
+processed in a computer. There are different ways that Unicode characters
+or code points can be encoded. There are some fixed width and some
+variable length encodings.
+
+Line endings are kind of complicated, because in UNIX based devices, the
+ending is written as `LF', or, in binary, `0000 1010'. However, in early
+mac, it's written as `CR', or, in binary, `0000 1101'. Some systems even
+use a combination of the two.
+
+Some network protocols have fixed conventions. For example, HTTP
+uses ASCII and defines a line ending as CRLF.
+
+\subsubsection{Tables and CSV}%
+\label{ssub:tables}
+The simplest `structured' file format is a list file with one entry per
+line. We can read or write to this in a loop. \textit{Tables} are for
+2-dimensional data. Another option we have is a CSV, or \textbf{comma
+separated values}. This might look like:
+
+\begin{lstlisting}[style=A]
+Candidate, Party, Votes
+Chris Davies, Liberal Democrat, 2435
+...
+\end{lstlisting}
+
+\subsubsection{Stream Processing}%
+\label{ssub:stream}
+In a stream, data items arrive one at a time and you only get to see them
+once each. We can use these streams if processing can be done with a
+single pass over the data, or if we only need to access recent data. We
+cannot do stream processing if we nee to do multiple passes through a data
+set or we need random access to items in the data set.
+
+There are a few stream operations: filter, map, and reduce.
+
+\textbf{Filter} means the we only read certain values that matches some
+condition.
+
+\textbf{Maps} apply a function to each of the data items that are received
+through a stream.
+
+\textbf{Reduce} applies a function to the whole stream and then output a
+single output.
+
+We can also chain these operations.
+
+Streams are really important because when we develop data driven web apps,
+we often need to process these streams of data, and if we bear these in
+mind when we write the code, we can structure it accordingly. \textit{Map}
+and \textit{filter} are stateless, per-element tasks. They are easy to
+parallelise. Some \textit{reduce} operations can be done in parallel too. 
+
+\subsection{Representing Data as Trees}%
+\label{sub:tree-data}
+If a list is 1-dimensional, and a table is 2-dimensional, what on earth is
+a 3-dimensional data? Actually, it's pretty easy, we just pick a third
+separator character.
+
+Tree structure (or tree diagram) is a way of representing the hierarchical
+structure of data. It's called tree structure because it resembles a tree
+(duh doi) even though the diagram is generally upside down compared to a
+tree. The top most level is called the \textbf{root} while the bottom most
+ones are called the \textbf{leaves}.
+
+Interestingly, most data can be represented as a tree. If we look at the
+candidate class from above:
+
+\begin{lstlisting}[style=B]
+<candidate>
+    <name>Catherine Slade</name>
+    <party>
+        <name>Green</name>
+    </party>
+    <ward>
+        <name>Bedminster></name>
+        <electorate>9951</electorate>
+    </ward>
+</candidate>
+\end{lstlisting}
+
+Another way to represent this might be:
+
+\begin{lstlisting}[style=B]
+{
+    "name:"Catherine Slade",
+    "party": {"name:": "Green"},
+    "ward": {"name": "Bedminster", "electorate": 9951},
+}
+\end{lstlisting}
+
+Escape characters are used to signify that a character sequence needs to
+get special treatment from the same characters. Here are some now:
+
+\begin{itemize}
+    \item \textbackslash n is a line feed
+    \item \textbackslash r is a carriage return
+    \item \textbackslash \textbackslash \text{ }is a back slash
+    \item \textbackslash " is a double quote.
+\end{itemize}
+
+\subsubsection{XML}%
+\label{ssub:XML}
+
+XML is pretty straightforward to use all over the internet. It's also easy
+to write programs that process the XML documents.
+
+HTML is all about displaying the information, while XML \textbf{describes}
+information. XML is the most common tool for data manipulation and data
+transmission. It can also be used for data storage. XML is both human AND
+machine readable, while also being flexible enough to support platform and
+architecture independent data interchange. XML allows a software engineer
+to create a vocabulary and use it to describe data (also sometime called
+being an \textbf{extensible} language).
+
+The properties of XML include:
+\begin{itemize}
+    \item Information identification
+    \item Information storage
+    \item Portable and non-proprietary
+    \item Data transfer
+\end{itemize}
+
+The components of XML are:
+
+\begin{itemize}
+    \item The declaration
+    \item The root element
+    \item Attributes
+    \item Child elements
+    \item Text data
+\end{itemize}
+
+In XML there are different steps for validation and processing. There are
+a total of 2 validation methods. The first is called DTD, or
+\textbf{Document Type Definition}. The other is called \textbf{schema}.
+
+Here is an example of how this works;
+
+Example XML:
+\begin{lstlisting}[style=B]
+<candidate>
+    <name>Catherine Slade</name>
+    <party>
+        <name>Green</name>
+    </party>
+    <ward>
+        <name>Bedminster></name>
+        <electorate>9951</electorate>
+    </ward>
+</candidate>
+\end{lstlisting}
+
+DTD validation:
+\begin{lstlisting}[style=B]
+<?xml version="1.0"?>
+<!DOCTYPE candidate [
+<!ELEMENT candidate (name, party, ward)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT party (name)>
+<!ELEMENT ward (name, electorate)>
+<!ELEMENT electorate (#PCDATA)>
+]>
+<candidate> ... </candidate>
+\end{lstlisting}
+
+XML schema are another way of describing and XML document structure in XML
+itself. Nuts, right? Schemas are \textit{more powerful} than DTDs. Also,
+an \textbf{XSD} is an \textbf{XML schema definition}.
+
+Example schema:
+\begin{lstlisting}[style=B]
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="candidate">
+        <xs:complexType> <xs:sequence>
+    <xs:element name="name"type="xs:string"/>
+    <xs:element name="party"> <xs:complexType> <xs:sequence>
+        <xs:element name="name"type="xs:string"/>
+    </xs:sequence> </xs:complexType> </xs:element>
+        <xs:element name="ward"> <xs:complexType> <xs:sequence>
+            <xs:element name="name "type="xs:string"/>
+            <xs:element name="electorate"
+                        type="xs:nonNegativeInteger"/>
+        </xs:sequence> </xs:complexType> </xs:element>
+    </xs:sequence> </xs:complexType> </xs:element>
+</xs:schema>
+\end{lstlisting}
+
+\textbf{XML entities} are kinda like escape sequences, and they're also
+used in HTML. For example, there are:
+\begin{itemize}
+    \item $<$ is written by \& lt;
+    \item $>$ is written by \& gt;
+    \item " is written by \& quot;
+\end{itemize}
 \end{document}

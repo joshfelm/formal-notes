@@ -1,0 +1,288 @@
+%%=====================================================================================
+%%
+%%       Filename:  algorithms.tex
+%%
+%%    Description:  Formal algorithms notes
+%%
+%%        Version:  1.0
+%%        Created:  10/04/19
+%%       Revision:  none
+%%
+%%         Author:  Josh Felmeden (), nk18044@bristol.ac.uk
+%%   Organization:  
+%%      Copyright:  Copyright (c) 2019, Josh Felmeden
+%%
+%%          Notes:  
+%%
+%%=====================================================================================
+
+% Preamble
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+
+% Set indentation and line skip for paragraph
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+
+% Headers setup
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Algorithms: Formal Notes}
+\rhead{Josh Felmeden}
+
+% Listings
+\usepackage[]{listings}
+\usepackage[]{xcolor} 
+\definecolor{RoyalBlue}{cmyk}{1, 0.50, 0, 0}
+\lstset{language=[Visual]Basic,
+    keywordstyle=\color{RoyalBlue},
+    basicstyle=\small\ttfamily,
+    commentstyle=\ttfamily\itshape\color{gray},
+    stringstyle=\ttfamily,
+    showstringspaces=false,
+    breaklines=true,
+    frameround=ffff,
+    frame=single,
+    rulecolor=\color{black}
+}
+
+%Other packages
+\usepackage{enumitem} 
+\usepackage{amsfonts} 
+\usepackage[]{amsmath} 
+\usepackage[]{booktabs} 
+\usepackage{tcolorbox} 
+\usepackage[symbol]{footmisc} 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\title{Algorithms: The Notes}
+\author{Josh Felmeden}
+
+\begin{document}
+\pagenumbering{roman}
+\maketitle
+
+\tableofcontents
+\newpage
+\pagenumbering{arabic}
+
+\section{Peak Finding}%
+\label{sec:peak-finding}
+Let $A = a_0, a_1, \cdots, a_{n-1}$ be an array of integers of length $n$.
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        0 & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 \\
+        \hline
+        $a_0$ &$a_1$ & $a_2$ &$a_3$ &$a_4$ &$a_5$ &$a_6$ &$a_7$ &$a_8$
+              &$a_9$  \\
+              \hline
+    \end{tabular}
+\end{center}
+
+A \textbf{peak} is an integer $a_i$ where the adjacent integers are not
+larger than $a_i$. That is to say, if we had the array:
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|c|}
+        \hline
+        \textcolor{red}{4} & 3 & 9 & 10 & \textcolor{red}{14} & 8 & 7 & 2
+                           & \textcolor{red}{2} & \textcolor{red}{2} \\
+        \hline
+    \end{tabular}
+\end{center}
+
+The problem we're faced with is that we need an algorithm to find the
+peaks, when we give it some array of arbitrary length. For example:
+
+\begin{lstlisting}
+int peak(int *A, int len) {
+    if A[0] >= A[1] then
+        return 0
+    end if
+    if A[len - 1] >= A[len - 2] then
+        return len - 1
+    end if
+    for (int i = 1, i < len - 1, i++)
+        if A[i] >= A[i-1] AND A[i] >= A[i+1] then
+            return i
+        end if
+    next
+    return -1
+}
+\end{lstlisting}
+
+What we \textit{can} say is that every integer array has at least
+\textbf{one peak}. This is the same as saying `is peak finding well
+defined'. The proof is that if we let $A$ be an integer array of length
+$n$, then suppose that $A$ does not have a peak (for the sake of
+contradiction). It must be the case that $a_1 > a_0$ because otherwise
+$a_0$ would be a peak. But then, $a_2 > a_1$ because otherwise $a_1$ is a
+peak. This would continue until $a_i > a_{i-1}$ and then we're out of
+options so $a_n$ must be a peak. This is a contradiction so therefore
+every array has to have a peak.
+
+Going back to the above algorithm, this has runtime $O(n)$, or more
+precisely $4(n-1)$ because it runs both $A[0] \text{and} A[n-1]$ twice,
+and $A[1] \cdots A[n-2]$ 4 times.
+
+\subsection{Fast peak finding}%
+\label{sub:fast-peak}
+We can do much better than the initial example algorithm through
+\textbf{recursion}:
+\begin{itemize}
+    \item \lstinline|if (A.length == 1) return 0|
+    \item \lstinline|if (A.length == 2) return (A[0] > A[1]) ? A[0] : A[1]|
+    \item \lstinline|if (A[n/2].isPeak()) return A.length / 2|
+    \item \lstinline|else if (A[n/2 - 1] >= A[n/2]) return fastpeak(A[0,n/2] - 1)|
+    \item \lstinline|else return n/2 + 1 + fastpeak(A[n/2 + 1, n - 1])| 
+\end{itemize}
+
+It's good because right at the end it calls itself, so this makes it more
+effective.
+
+Without the recursive calls, the algorithm looks at the array elements at
+most \textbf{5 times}. If we let $R(n)$ be the number of calls to the fast
+peak finding algorithm, and the input array has length $n$, then we end up
+with:
+\begin{align*}
+    R(1) &= R(2) = 1 \\
+    R(n) &\le R(\lfloor n/2 \rfloor) + 1, \text{for } n \ge 3
+\end{align*}
+
+Solving the recurrence (see later on), we get:
+\begin{align*}
+    R(n) &\le R(\lfloor n/2 \rfloor) + 1 \le R(n/2) + 1 = R(\lfloor n/4
+    \rfloor) + 2 \\
+         &\le R(n/4) + 2 = \cdots \le \lceil \log n \rceil
+\end{align*}
+
+\subsection{Why does it work?}%
+\label{sub:explanation}
+Well, if we look at the steps of the algorithm:
+\begin{enumerate}
+    \item if $A$ is of length 1, then we return 0
+    \item if $A$ is of length 2, then we return the position of the larger
+        element ($A[0]$ or $A[1]$)
+    \item if $A[\lfloor n/2 \rfloor]$ is a peak, then we return $\lfloor
+        n/2 /rfloor$.
+    \item Otherwise, if $A[\lfloor n/2 \rfloor - 1] \ge A[\lfloor n/2
+        \rfloor]$ then we call the algorithm again with $A$ from $0$ to
+        $\lfloor n/2 \rfloor - 1$.
+    \item If this is not the case, then we call the algorithm again with
+        $A$ from $\lfloor n/2 \rfloor + 1$ to $n-1$, and we add $\lfloor
+        n/2 \rfloor + 1$ to this answer.
+\end{enumerate}
+
+It's pretty obvious that steps 1-3 are correct. However, why is step 4
+correct? (step 5 follows from 4).
+\begin{itemize}
+    \item We need to prove that a peak in $A[0, \lfloor n/2 \rfloor - 1]$
+        is a peak in A.
+    \item The critical case is that $\lfloor n/2 \rfloor - 1$ is a peak in
+        $A[0, \lfloor n/2 \rfloor - 1]$.
+    \item The condition in step 4 actually guarantees that $A[0, \lfloor
+        n/2 \rfloor - 1] \ge A[\lfloor n/2 \rfloor]$ and therefore
+        $\lfloor n/2 \rfloor - 1$ is a peak in A as well. This is a really
+        important fact so make sure you remember it.
+\end{itemize}
+
+\section{O notation}%
+\label{sec:o-notation}
+
+The runtime of an algorithm is the function that maps the input length $n$
+to the number of simple operations.
+
+The general order of functions is as follows:
+
+\begin{align*}
+    \log n \le n \le n \log n \le n! \le n^n
+\end{align*}
+
+For a large enough $n$ value, constants seem to matter less, but for
+smaller values of $n$, most of the algorithms are fast anyway (not
+\textit{all} the time though).
+
+An important fact to remember is that an increasing function $f$ grows 
+\textit{asymptotically} at least as fast as an increasing function $g$ if
+there exists an $n_0 \in N$ such that for every $n \ge n_0$ it
+holds. What this means is that the function $f$ grows at least as fast as
+function $g$. For example:
+
+\begin{align*}
+    f(n) = 2n^3, \ g(n) = \frac{1}{2} \cdot 2^n
+\end{align*}
+
+From this, $g(n)$ grows asymptotically at least as fast as $f(n)$ since
+for every $n \ge 16$, we have $g(n) \ge f(n)$. How do we prove this? In
+the following way.
+
+Firstly, we need to find values for $n$ of which the following statements
+hold true:
+
+\begin{align*}
+    \frac{1}{2} \cdot 2^n &\ge 2n^3 \\
+    2^{n-1} &\ge 2^{3 \log n+1} \ ( \text{using n = } 2^{\log n} ) \\
+    n-1 &\ge 2 \log n+1 \\
+    n &\ge 3 \log n+2
+\end{align*}
+
+These statements do indeed hold for every $n \ge 16$ (which follows from
+the racetrack principle (\ref{sub:racetrack}))
+
+\subsection{The Racetrack Principle}%
+\label{sub:racetrack}
+\begin{tcolorbox}
+        \textbf{Racetrack principle:} Let $f$, $g$ be functions and $k$ be
+        an integer. Also suppose that the following hold:
+        \begin{enumerate}
+            \item $f(k) \ge g(k)$
+            \item $f'(n) \ge g'(n)$ for every $n\ge k$
+        \end{enumerate}
+        
+        Then, for every $n \ge k$, it holds that $f(n) \ge g(n)$
+\end{tcolorbox}
+
+If we take an example where $n \ge 3 \log n + 2$ holds for every $n \ge
+16$, we see that
+\begin{itemize}
+    \item $n \ge 3 \log n +2$ holds for $n = 16$
+    \item We then have: $(n)' = 1$ and $(3 \log n + 1)'$ = $3/(n \ln 2)$
+        The result follows:
+\end{itemize}
+
+If we take $\ge$ to mean \textit{grows asymptotically at least as fast}
+then we end up with:
+
+\begin{align*}
+    5 \log n \le 4(n-1) \le n \log (n/2) \le 0.1n^2 \le 0.01 \cdot 2^n
+\end{align*}
+
+\subsection{Big O Notation}%
+\label{sub:big-o}
+
+\begin{tcolorbox}
+    \textbf{Definition:} O-Notation (sometimes called Big O)
+    \medskip
+
+    Let $g : \mathbb{N} \rightarrow \mathbb{N}$ be a function. Then,
+    $O(g(n))$ is the set of functions:
+    \medskip
+
+    \begin{itemize}[label={},itemindent=-5em,leftmargin=5em]
+        \item $O(g(n)) = $ \{$f(n)$ : There exists positive constants $c$
+            and $n_0$ such that $0 \le f(n) \le cg(n)$ for all $n \ge n_0$
+            \}
+    \end{itemize}
+\end{tcolorbox}
+
+Don't forget that $f(n) \in O(g(n))$ means that `g grows asymptotically at
+least as fast as $f$ up to any constant'.
+
+
+
+\end{document}
