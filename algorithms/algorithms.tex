@@ -283,6 +283,65 @@ then we end up with:
 Don't forget that $f(n) \in O(g(n))$ means that `g grows asymptotically at
 least as fast as $f$ up to any constant'.
 
+The way that we calculate Big O is to use the formula above, and then see
+if we can choose some $c$ and some $n_0$ to make sure that $p \le f(n) \le
+cg(n)$ is matched.
 
+Some other properties of O notation is that you can't apply proofs $n$
+times. For example, say we wanted to prove that $n^2 \in O(n)$, what we
+couldn't do is:
+
+\begin{align*}
+    n^2 &= n + n + \underbrace{n + \cdots n}_{n-2 \text{ times}} = O(n) +
+    O(n) + \underbrace{n + \cdots n}_{n-2 \ \text{times}} \\
+        &= O(n) +\underbrace{n + \cdots n}_{n-2 \ \text{times}} = O(n) +
+        O(n) + \underbrace{n + \cdots n}_{n-3 \ \text{times}} \\
+        &= O(n) + \underbrace{n + \cdots n}_{n-3 \ \text{times}} = O(n)
+\end{align*}
+
+For the runtime of an algorithm, we express it with O-notation. This means
+that we can compare the runtimes of algorithms. It is important that we
+find the slowest growing function $f$ so that the runtime is in $O(f)$.
+(Side note, most algorithms have a runtime of $O(2^r)$)
+
+\textbf{Rules for analysis of algorithms}
+\begin{itemize}
+    \item Composition of instructions
+\begin{align*}
+    f \in O(h_1)\ g\in O(h_2) \rightarrow f + g \in O(h_1 + h_2)
+\end{align*}
+    \item Loops: (repetition of instructions)
+\begin{align*}
+    f \in O(h_1), g \in O(h_2) \rightarrow f \cdot g \in O(h_1 \cdot h_2)
+\end{align*}
+\end{itemize}
+
+\section{$\Theta$, Big-$\Omega$ and the RAM model}%
+\label{sec:bigtheta}
+
+O-notation is an \textbf{upper bound} for the runtime of an algorithm.
+What this means is that on any input of length $n$, the runtime is bounded
+by some function $O(f(n))$. If we say an algorithm has a runtime of
+$O(n^2)$, then the actual runtime could also be anything from $O(\log n),
+O(n)$ etc. 
+
+This is good because we get a worst case runtime, but to avoid ambiguities
+there are also other cool notations such as $\Theta$-notation, where
+growth is precisely determined and $\Omega$-notation, which gives us a
+lower bound.
+
+\begin{tcolorbox}
+    \textbf{Definition:} $\Theta$-notation. 
+
+    \bigskip
+
+    Let $g : \mathbb{N} \rightarrow \mathbb{N}$ be a function.
+    $\Theta(g(n))$ is the set of functions:
+    \bigskip
+
+    $\Theta$(g(n)) = \{$f(n)$ : There exists positive constants $c_1, c_2$
+        and $n_0$ such that $0 \le c_1 g(n) \le f(n) \le c_2g(n) \text{ for all }
+        n\ge n_0$
+\end{tcolorbox}
 
 \end{document}
