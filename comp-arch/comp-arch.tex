@@ -1825,11 +1825,11 @@ also stored in the stack (right above the return state value). We can
 still use the same instructions to access the incoming parameters because
 we know the offset.
 
-If we take the following example:
+Let's look at the following example:
 \begin{lstlisting}[style=B]
 LDBM 1
-STAI 0
-LDAC -5
+STAI 0 'bottom location of the stack
+LDAC -5 'The offset required for the locals/variables etc.
 OPR ADD
 STAM 1
 LDAM 1
@@ -1845,5 +1845,98 @@ then place the result back into the stack at memory location 1. Now, we're
 loading up one of the incoming parameters, and then testing to see if
 the result is negative or not.
 
+The actual code of the stack use is that we use:
+\begin{lstlisting}[style=B]
+LDAP
+BR F
+R:
+
+F:
+\end{lstlisting}
+
+LDAP is used because it stores the program location into register A. Next,
+it branches to some function F, with the return value stored in the A
+register. After this, we just decrement the stack pointer in the same way
+discussed above. This can be done recursively, and then we can just read
+back to get the same order as before.
+
+We have a couple of things that we need to be introduced to. There is
+something called a \textbf{lexical analyser}, which takes all of the
+incoming symbols and converts them into a signal, and something called a
+\textbf{syntax analyser}  which converts the symbols into a kind of data
+structure. After it's made into a tree (the kind of data structure that
+the compiler prefers), it looks to simplify it first, and then it solves
+it. For example, in the code:
+
+\begin{lstlisting}[style=B]
+if c then p else q
+\end{lstlisting}
+
+We end up with a data structure that looks like:
+
+\begin{lstlisting}[style=B]
+| if | c | p | q |
+\end{lstlisting}
+
+\section{The general compiler actions}%
+\label{sec:compiler}
+When we translate an if statement, we don't know how long the condition is
+going to be, so we kind of do a rough input for the first pass, and then
+an algorithm goes over the code afterwards to input the necessary offsets
+and such.
+
+When a name (of a variable) is read in, it's looked up in a name table,
+which is essentially a hash table. The very first time it's read in, it's
+input into the name table, but every subsequent time, it is just pointed
+to the memory address associated with the name. We also have to look up
+all of the things like `if', `then', `else' etc. in the same way, so we
+have to hard code those in.
+
+On a reading of an `if' keyword, we have to skip over the symbol so that
+we're clear of the keyword, and then we start reading the condition. On
+top of that, we look for a `then' (recursively). If we don't find that,
+there's an error. At the end of the whole thing, we return a data
+structure as discussed before of the `if'.
+
+If we have a global variable AND a local variable defined as the same
+name, we obviously want the compiler to only mess with the local one if
+it's in the local function. This is part of the \textbf{scope rule}. After
+this, we need to try and \textit{optimise} the code, such as if we see `0
++ x', we could just make it `x'. Similarly, if we see `3+5', we can just
+convert this into `8'.
+
+\subsection{The scope rule}%
+\label{sub:scope-rule}
+When we declare a name, we define a point in the stack that has both the
+name, and the address in memory. This amount of memory is known as the
+\textbf{offset}. The part of the compiler that deals with the declaration
+of local variables is fairly self explanatory for the parts discussed
+previously. When we encounter a name in the middle of the expression, we
+go down the stack, and either find the name and return the offset of the
+stack with the information of the name, or we don't find it and return an
+undefined error.
+
+\subsection{Optimisation}%
+\label{sub:Optimisation}
+The optimisation process does more than just optimise. It also converts
+all of the relational operators into simply an equals to or a less than
+comparator (because the computer is only able to compute less than or
+equals operations). In the case of finding a return node, it will replace
+it with an optimised return node. If we encounter a name, we see if we can
+find a value, and then just return the value as the result. Additionally,
+we see if it was a constant, or a computed value, so then we can convert
+the tree node into a value. What we're doing here is \textit{pruning} the
+tree node.
+
+If we find an `=' symbol, then we can do a few things:
+\begin{itemize}
+    \item If we have `!x = !y', then we can just replace this with `x = y'
+    \item If we have a `!=', then not only look ahead to see if they are
+        both notted (as before), we convert the node into an equals node,
+        and then insert another node to not that, so that we can just deal
+        with equals signs.
+\end{itemize}
+
+%TODO resume bottom david may lecture (page one) from 17 minutes
 
 \end{document}
