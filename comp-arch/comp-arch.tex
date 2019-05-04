@@ -13,13 +13,15 @@
 %%
 %%=====================================================================================
 
-% Preamble
+% Preamble {{{
 \documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
 \usepackage[english]{babel}
 \typearea{12}
 
+% Other packages
+
 % Set indentation and line skip for paragraph
-\setlength{\parindent}{0em}
+\setlength{\parindent}{1em}
 \setlength{\parskip}{1em}
 \usepackage[margin=2cm]{geometry}
 \addtolength{\textheight}{-1in}
@@ -90,6 +92,7 @@
 Notes}
 \date{2018\\ December}
 \author{Josh Felmeden}
+%}}}
 
 % Start document
 \begin{document}
@@ -1937,6 +1940,202 @@ If we find an `=' symbol, then we can do a few things:
         with equals signs.
 \end{itemize}
 
-%TODO resume bottom david may lecture (page one) from 17 minutes
+If we find a `greater than' symbol, we switch around the code, so that we
+always get the `less than' symbol. There are a lot more things that we can
+do, such as using DeMorgan's law to simplify things, remove the 0 operands
+in addition or ORs etc.
+
+Having all these sorted out, we're now in a position where we can start to
+translate the code into machine code that is actually executable.
+
+\subsection{Translation into executable}%
+\label{sub:executable}
+
+\subsubsection{Control structure}%
+\label{ssub:control}
+
+The steps required to translate the code into executable operates much in
+the same way as that of the optimiser; often recursively calling itself
+and so on. It has parameters that keeps track of what to do when the
+statement is finished. For example, if we have a piece of code that says:
+\begin{lstlisting}[style=B]
+if (c1) then
+    while c2 do p
+else
+    q
+end if
+\end{lstlisting}
+
+This would look like this in machine code:
+
+\begin{lstlisting}[style=B]
+c1
+BRZ ELSE
+START:
+c2
+BRZ END
+P
+BR START
+
+ELSE:
+    q
+END:
+\end{lstlisting}
+
+There's a function called `generate statement', that has a few flags:
+\begin{itemize}
+    \item One that has the incoming part of the tree
+    \item A flag that tells you whether once the statement is compiled, if
+        it flows straight through, or output some control
+    \item A flat that tells you where the control needs to go (if there is
+        one)
+\end{itemize}
+
+It compiles itself recursively if it is given a semi-colon list. The
+interesting part of this is that there could be something where the else
+part is empty, in which case the compilation is simplified. We generate
+some labels for the `if' and the `else' parts, and then compile the parts
+of code.
+
+For the `while' code, we set the label for the beginning of the loop, set
+up the condition, and then the code, with a branch back to the start. This
+is how control structures are generated.
+
+Let's look at another example:
+
+\begin{lstlisting}[style=b]
+if (x AND y) then
+    p
+else
+    q
+end if
+\end{lstlisting}
+
+We'd get:
+\begin{lstlisting}[style=B]
+x
+BRZ ELSE
+Y
+BRZ ELSE
+p
+BR END
+
+ELSE:
+q
+END:
+\end{lstlisting}
+
+We don't even need to do any actual logic, because we just check each
+operand in turn, and then branch to the else if either of them are 0.
+
+For the less than function, we just check if one of the parameters is
+zero. If not, then subtract one from the other and branch if negative.
+
+The function calls are a little complicated. If we have the code:
+
+\begin{lstlisting}[style=B]
+P(x,y,z)
+\end{lstlisting}
+
+The problem is that the parameters might be quite complicated. For
+example, there could be procedure calls embedded in the arguments, so we
+have to go digging around trying to find the code. The compiler has some
+counters to this, such as to look inside the parameter list to find any
+embedded functions and call those first, before generating the rest of the
+instructions.
+
+\subsubsection{Assigning variables}%
+\label{ssub:Assigning variables}
+
+When we do a simpler assignment (such as name = othername), we have a left
+hand side and a right hand side, we just check the value of one, and then
+assign it to the other one.
+
+If we have a more complicated one, such as a subscripted (a[i] for
+example) assignation, then we have a \textbf{base pointer} and an
+\textbf{offset}. We check to see whether the offset is a value, in which
+case we just generate an expression for that. However, we might be using
+an index to iterate through an array. In this case, we need to generate
+some code to form the address, and then use the address to store the
+value. Because we have so few registers in the machine, we need some code
+that will get the base, and the offset, and then store the data in the
+stack. After this, we have some code to store it in the appropriate place.
+
+If we ever run out of registers, the compiler just slaps them on the
+stack.
+
+\subsubsection{Translating expressions}%
+\label{ssub:expressoins}
+This final step just handles the logical operations, the function calls
+and other such things like that.
+
+\subsubsection{Code buffer}%
+\label{ssub:buffer}
+As seen before, when we have an `if' statement, we're going to have a
+`branch zero' to some else tag, and then do the statement. But, because we
+don't know how many lines of code we need to process before placing the
+`else' tag, we need to put the label into the buffer. The buffer then
+fixes up the offset. The offset might be longer than the 4 bits that we
+get for the buffer, so we might also need a prefix. Jesus, who does this?
+
+\section{Changing instruction sets}%
+\label{sec:changing-sets}
+\textbf{Bootstrapping} is where you write a language in its own language.
+It originated in something like 1960. When we move a language from one
+instruction set to another, we need something called \textit{ocode}.
+
+When we write a compiler, we write them in a suitable source. So, we have
+a compiler that is written in language x, that compiles in language y.
+Now, we will also need something that compiles language y and so on. But,
+with bootstrapping, the source and the executable are the same language,
+so things are good and alright.
+
+At some point, we might want to stop writing our source in a language, so
+we write a new compiler, and then we get a new language, and eventually,
+we can push out the old language entirely, and this is how you make a new
+language and it's compiler in bootstrapping form. If we didn't have C,
+this would be really hard, because we'd have to go right down to machine
+code, or a macro generator (one that kind of brute forces it). Notice that
+because we're going to throw away the old language, it doesn't matter how
+inefficient it is, as long as we get to the right destination.
+
+The process of adding new features is pretty much the same: we create a
+`new' language, which is just the old language with added bells and
+whistles, and then apply that to the compiler, and then away we go.
+
+Let's explore an example of this. Say we wanted to add another `special
+character' (the likes of `\textbackslash n') then we make a compiler that
+recognises the new one, and then use that in recognising the new code
+itself.
+
+If we wanted to add a new key word (for example `until'), then we need to
+declare the new keyword, and then add a line in the list of ones that
+recognises the key word, and then pretty much just copy the while code,
+but have a NOT at the end of the condition.
+
+\subsection{Optimising a language}%
+\label{sub:optimising-bootstrapping}
+If we want to add some optimisations to the language using bootstrapping,
+then we need to do the following.
+
+\begin{itemize}
+    \item We have the source code $S_i$ and an executable $E_i$. We
+        compile the source with the executable to produce the same thing:
+        $E_i = E_i(S_i)$
+    \item We want to produce the optimised source $(S_{i+1})$, and this
+        will be compiled with the same executable: $E_i(S_{i+1})$, this
+        produces something else that won't be the same as either, so we'll
+        call it $O_i$ because it can optimise. However, it hasn't had the
+        optimisations applied to it.
+    \item We now need to apply the optimisations to the compiler itself:
+        $O_i(S_{i+1}) = E_{i+1}$.
+    \item Now, we're left with $E_{i+1}(S_{i+1}) = E_{i+1}$
+\end{itemize}
+
+Sometimes, the object code is smaller, even though the source code is
+bigger because of the optimisations. Conversely, it might just make the
+code a bit worse, and you just won't know until you've tried it.
+
+% TODO resume david may 9th lecture down (second from top) from 33 minutes
 
 \end{document}
