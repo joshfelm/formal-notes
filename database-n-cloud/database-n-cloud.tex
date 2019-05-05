@@ -30,6 +30,7 @@
 
 \usepackage{hhline} 
 \usepackage{mathtools} 
+\usepackage[T1]{fontenc}
 
 % Headers setup
 \usepackage{fancyhdr}
@@ -49,47 +50,32 @@
     showstringspaces=false
 }
 
-
-\lstdefinestyle{Common}
-{
-    extendedchars=\true,
-    language={HTML},
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=HTML,
+    backgroundcolor=\color{lstgrey},
     frame=single,
-    %===========================================================
-    framesep=3pt,%expand outward.
-    framerule=1.4pt,%expand outward.
-    xleftmargin=3.4pt,%make the frame fits in the text area. 
-    xrightmargin=3.4pt,%make the frame fits in the text area.
-    %=========================================================== 
-    rulecolor=\color{Red}
-}
-
-\lstdefinestyle{A}
-{
-    style=Common,
-    backgroundcolor=\color{Yellow!10},
-    basicstyle=\small\color{Black}\ttfamily,
-    keywordstyle=\color{Orange},
+    xleftmargin=0.7cm,
+    frame=tlbr, framesep=0.2cm, framerule=0pt,
+    basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+    captionpos=b,
+    tabsize=2,
+    keywordstyle=\color{Magenta}\bfseries,
     identifierstyle=\color{Cyan},
-    stringstyle=\color{Red},
-    commentstyle=\color{Green}
+    stringstyle=\color{Yellow},
+    commentstyle=\color{Gray}\itshape
 }
+\makeatother
 
-\lstdefinestyle{B}
-{
-    style=Common,
-    backgroundcolor=\color{Black},
-    basicstyle=\scriptsize\color{White}\ttfamily,
-    keywordstyle=\color{Orange},
-    identifierstyle=\color{Cyan},
-    stringstyle=\color{Red},
-    commentstyle=\color{Green}
-}
-
+% Other packages
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet} 
 \usepackage[]{amsmath} 
 \usepackage[]{booktabs} 
 \usepackage[symbol]{footmisc} 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
 
 % Title
 \title{Databases and the Cloud: The Notes}
@@ -235,7 +221,7 @@ document.
 HTML (or hypertext markup language) consists of a fixed set of
 \textit{tags} that describe how information should be displayed. For
 example:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}
 <p> This is some text </p>
 <h1> This is some header </h1>
 \end{lstlisting}
@@ -248,7 +234,7 @@ HTML5 is different from HTML because it's simpler, but also \textbf{semantic}
 has how it should be displayed). It also has some more features.
 
 Example HTML5:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -267,16 +253,16 @@ A block-level element always starts on a new line and takes up the full
 width available. Conversely, an inline element doesn't start on a new line
 and it only takes up as much width as is necessary.
 
-The \lstinline|<div>| tag is a block level tag that has no specific
+The \lstinline{<div>} tag is a block level tag that has no specific
 meaning. This is OK to use for layout purposes, but you should not use it
 as a replacement for something that should be a semantic tag. Because the
 semantic tags are mostly a new addition to HTML5, older frameworks used
-\lstinline|<div>| all over the place to structure the pages.
+\lstinline{<div>} all over the place to structure the pages.
 
 \subsubsection{Attributes}%
 \label{ssub:Attributes}
 In this example:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <p id="today">
     28 September
 </p>
@@ -290,7 +276,7 @@ In this example:
 
 \subsubsection{Links}%
 \label{ssub:Links}
-Almost anything can go inside a \lstinline|<a>| tag: text, images, other
+Almost anything can go inside a \lstinline{<a>} tag: text, images, other
 HTML elements. The href could be a full URL, or it can be relative to the
 current page.
 
@@ -310,11 +296,11 @@ Here are some basic rules:
         write.
     \item HTML5 allows attribute values without quotes but again, it's bad
         because it looks ugly
-    \item ALWAYS add the \lstinline|alt| attribute to images, because if,
+    \item ALWAYS add the \lstinline{alt} attribute to images, because if,
         for some reason, the image can't be displayed, you need some
         alternate text to display. It's also used for people using screen
         readers.
-    \item In HTML5, the \lstinline|html| and \lstinline|body| tag can be
+    \item In HTML5, the \lstinline{html} and \lstinline{body} tag can be
         omitted, but, again, it's \textbf{bad}. It can crash some XML
         software.
     \item To ensure that everything is interpreted and has correct search
@@ -342,14 +328,14 @@ The \textbf{action} attribute defines the action to be performed when the
 form is submitted. Normally, the data from the form is sent to a web page
 on the server when the user clicks on the submit button. For example:
 
-\begin{lstlisting}[style=B ]
+\begin{lstlisting}[]
 <form method="post"
 action="/action_page.php">
 </form>
 \end{lstlisting}
 
 In this example, the data is sent to a page on the server called
-\lstinline|"/action_page.php"|. This page contains a script that will
+\lstinline{"/action_page.php"}. This page contains a script that will
 handle the form data such as storing it in a database.
 
 There are two (2) methods to send form data, \textbf{GET} and
@@ -360,8 +346,8 @@ and it's more secure because the data is not visible in the URL.
 
 \subsubsection{Validation in forms}%
 \label{ssub:form-validation}
-If you use \lstinline|type="number"|, then it won't let you type in
-letters. It you use \lstinline|required|, then the browser won't let you
+If you use \lstinline{type="number"}, then it won't let you type in
+letters. It you use \lstinline{required}, then the browser won't let you
 submit if the field is empty.
 
 Place holder is text that can be displayed while the field is empty. It's
@@ -390,15 +376,15 @@ HTML elements in 3 ways
 \begin{itemize}
     \item \textbf{Inline} which means that it uses the style attribute in
         HTML elements
-    \item \textbf{Internal} which means tat it uses a \lstinline|<style>|
-        element in the \lstinline|<head>| section.
+    \item \textbf{Internal} which means tat it uses a \lstinline{<style>}
+        element in the \lstinline{<head>} section.
     \item \textbf{External} which means that it links to a CSS file. This
         is the recommended method btw. 
 \end{itemize}
 
 Linking to a stylesheet looks something like this:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <link rel="stylesheet" href="styles.css">
 \end{lstlisting}
 
@@ -415,11 +401,11 @@ the CSS and the data is in HTML.
 
 Oh, also note that there are two kinds of reference: absolute (for example
 the absolute reference of a page like
-\lstinline|href="http://www.example.com/theme.css"|) while the relative
-looks like \lstinline|href="/themes/theme.css"|.
+\lstinline{href="http://www.example.com/theme.css"}) while the relative
+looks like \lstinline{href="/themes/theme.css"}.
 
 Here's an example of a style sheet:
-\begin{lstlisting}[style=B ]
+\begin{lstlisting}[]
 h1 {
     font-family: sans-serif;
 }
@@ -457,7 +443,7 @@ the results for this:
 \end{center}
 
 Here's what the structure would look like if it was written in C:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 struct Candidate {
     char  name[100];
     char party[100];
@@ -476,7 +462,7 @@ struct Result {
 \end{lstlisting}
 
 Here's how it would look in Java:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 class Candidate {
     String  name;
     String party;
@@ -495,7 +481,7 @@ class Result {
 \end{lstlisting}
 
 And here's how we use the data structures
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 winner.candidate.name = "Chris Davies";
 winner.candidate.party = "Liberal Democrat";
 winner.ward.name = "Knowle";
@@ -555,7 +541,7 @@ line. We can read or write to this in a loop. \textit{Tables} are for
 2-dimensional data. Another option we have is a CSV, or \textbf{comma
 separated values}. This might look like:
 
-\begin{lstlisting}[style=A]
+\begin{lstlisting}[]
 Candidate, Party, Votes
 Chris Davies, Liberal Democrat, 2435
 ...
@@ -603,7 +589,7 @@ ones are called the \textbf{leaves}.
 Interestingly, most data can be represented as a tree. If we look at the
 candidate class from above:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <candidate>
     <name>Catherine Slade</name>
     <party>
@@ -618,9 +604,9 @@ candidate class from above:
 
 Another way to represent this might be:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 {
-    "name:"Catherine Slade",
+    "name":"Catherine Slade",
     "party": {"name:": "Green"},
     "ward": {"name": "Bedminster", "electorate": 9951},
 }
@@ -675,7 +661,7 @@ a total of 2 validation methods. The first is called DTD, or
 Here is an example of how this works;
 
 Example XML:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[language=XML]
 <candidate>
     <name>Catherine Slade</name>
     <party>
@@ -689,7 +675,7 @@ Example XML:
 \end{lstlisting}
 
 DTD validation:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <?xml version="1.0"?>
 <!DOCTYPE candidate [
 <!ELEMENT candidate (name, party, ward)>
@@ -706,7 +692,7 @@ itself. Nuts, right? Schemas are \textit{more powerful} than DTDs. Also,
 an \textbf{XSD} is an \textbf{XML schema definition}.
 
 Example schema:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:element name="candidate">
@@ -738,7 +724,7 @@ useful in web applications. They're kinda like CSS selectors but have a
 different syntax.
 
 The final thing to worry about with XML is the XSLT. This stupid acronym
-means \textbf{eXtensible Stylesheet Transformation Language} and it's used
+means \textit{eXtensible Stylesheet Transformation Language} and it's used
 for transforming XML documents into other documents, such as HTML, PDFs,
 and even back into XML documents.
 
@@ -755,7 +741,7 @@ format of name/value pairs. Also, data is separated by commas. Curly
 braces hold objects, and square brackets hold arrays.
 
 Here's an example of some JSON:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 {   
     "name:" "David",
     "id": 101,
@@ -785,7 +771,7 @@ Templating is a method in which we can provide a template for a sentence
 and then just fill in the necessary blanks with the required words. For
 example:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 {
     "id":2,
     "name":"Bedminster",
@@ -810,7 +796,7 @@ data, and then Apache FreeMarker displays this data using the templates.
 
 Here's an example of some FreeMarker code:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 <#include "header"> <!--include other templates-->
 <#if name??> <!-- condidionally display the elements-->
     <p> Hello, ${name}</p>
@@ -957,14 +943,14 @@ Constraints are useful because your DBMS doesn't know anything about the
 thing you're writing your database about, so it can't know what needs to
 be really strictly monitored. This is what a constraint looks like:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 CONSTRAINT key-constr UNIQUE (name, street, town)
 \end{lstlisting}
 
 The `key-constr' is a name to be used in error messages, and the `unique'
 part tells the DBMS what a key is. For example, if we run this:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 INSERT INTO BankBranches
     VALUES ('HSBC', 'Queens St', Bristol, '22-11-12');
 INSERT INTO BankBranches
@@ -1099,10 +1085,221 @@ With the following table:
 And we want to build a table containing only the titles of units that have
 20 credit points or more, we can do the following:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 SELECT title FROM Unit WHERE cp >= 20
 \end{lstlisting}
 
 This would give us the necessary results.
+
+Here are some more fancy instructions: 
+
+\begin{center}
+    \begin{tabular}{c|c|c}
+        \multicolumn{3}{l}{\textbf{CWMarks}} \\
+        \multicolumn{3}{c}{}
+        \\
+        student & CW1 & CW2 \\ \hhline{=|=|=}
+        1 & 60 & 73 \\
+        2 & 28 & 54 \\
+        3 & 72 & 70
+    \end{tabular}
+\end{center}
+
+\begin{lstlisting}[]
+SELECT student, CW1*0.6 + CW*0.4 AS average
+    FROM CWMarks
+    WHERE CW1*0.6 + CW2*0.4 >= 40
+\end{lstlisting}
+
+Results in:
+
+\begin{center}
+    \begin{tabular}{c|c}
+        student & average \\ \hhline{=|=}
+        1 & 65.2 \\
+        3 & 71.2
+    \end{tabular}
+\end{center}
+
+\subsubsection{NULL data}%
+\label{ssub:NULL}
+
+SQL treats NULL data as an absence of data, or a `I don't know'.
+Typically, built in functions and operators return NULL when \textit{any}
+of their inputs are NULL. For example:
+
+\begin{itemize}
+    \item \lstinline{3*NULL = NULL}
+    \item \lstinline{CONCAT('hello',NULL) = NULL} 
+    \item \lstinline{NULL > 8 = NULL} 
+\end{itemize}
+
+However, there are a couple of exceptions:
+
+\begin{itemize}
+    \item \lstinline{NULL is NULL = 1}
+        \item \lstinline{NULL IS NOT NULL = 0} 
+\end{itemize}
+
+In general, always know if your data can be null, and if it cannot, then
+declare the field as \lstinline[language=SQL]{NOT NULL}. If your data
+\textit{can} be null, consider the \lstinline[language=SQL]{IS NULL} case
+in your selections.
+
+\subsection{Product and Join}%
+\label{sub:product-join}
+
+Let's say that there are two databases, unit and lecturer. If we wanted to
+know who the unit director is for the databases unit, we currently don't
+have a way of knowing this. So, what we do is, we can take the
+\textbf{Cartesian product} of the two tables, which means that we get all
+of the possible combinations of data, and after this, we remove the ones
+that don't make sense.
+
+There are two ways we can do this. Looking at the following example:
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \multicolumn{4}{c}{\textbf{Mage}} \\
+        \multicolumn{4}{c}{} \\
+        \hline
+        \textbf{id} & \textbf{name} & \textbf{mage} & \textbf{spell} \\
+        \hhline{|=|=|=|=|}
+        1 & Harry & 1 & 1 \\ \hline
+        1 & Harry & 1 & 2 \\ \hline
+        2 & Hermione & 2 & 1 \\ \hline
+    \end{tabular}
+\end{center}
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+        \multicolumn{2}{c}{\textbf{Spell}} \\
+        \multicolumn{2}{c}{} \\
+        \hline
+        \textbf{id} & \textbf{spell} \\ \hhline{|=|=|}
+        1 & Expelliarmus \\ \hline
+        2 & Lumos \\ \hline
+    \end{tabular}
+\end{center}
+
+If we do the Join of Mage and Spell on id = Mage, then we get the
+following:
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \textbf{id} & \textbf{name} & \textbf{mage} & \textbf{spell} &
+        \textbf{id} & \textbf{name} \\ \hhline{|=|=|=|=|=|=|}
+        1 & Harry & 1 & 1 & 1 & Expelliarmus \\ \hline
+        \color{red}\st{1} & \color{red}\st{Harry} & \color{red}\st{1} &
+        \color{red}\st{1} & \color{red}\st{2} & \color{red}\st{Lumos} \\ \hline
+        \color{red}\st{1} & \color{red}\st{Harry} & \color{red}\st{1} &
+        \color{red}\st{2} & \color{red}\st{1} & \color{red}\st{Expelliarmus} \\ \hline
+        1 & Harry & 1 & 1 & 2 & Lumos \\
+        \hline
+        2 & Hermione & 2 & 1 & 1 & Expelliarmus \\ \hline
+        \color{red}\st{2} & \color{red}\st{Hermione} & \color{red}\st{2} & \color{red}\st{1} & \color{red}\st{2} & \color{red}\st{Lumos} \\ \hline
+
+    \end{tabular}
+\end{center}
+
+The \lstinline[language=SQL]|Join| keyword glues tables together by using
+their keys (normally).
+
+\subsubsection{Select-From-Where}%
+\label{ssub:Select-From-Where}
+This query is an incredibly useful query, and forms as a skeleton for all
+other queries. For example, if we wanted to find all of the lecturers in
+the same group as anther person, when can do a `select from where' query
+on tables that are joined together:
+
+\begin{lstlisting}
+    SELECT R.name
+    FROM Lecturer L JOIN Lecturer R ON L.rgroup = R.rgroup
+    WHERE L.name = 'Peter'
+\end{lstlisting}
+
+\subsubsection{Join variants}%
+\label{ssub:variants-join}
+
+There are a few variants of the join command, and we'll go over them here.
+
+\begin{itemize}
+    \item \textbf{Natural join} joins the tables on their \textit{common
+        columns}.
+    \item \textbf{Left join} is another kind of join, but I don't really
+        know what it does.
+    \item \textbf{Right join}
+    \item \textbf{Inner join} is the normal join that we already know
+    \item \textbf{Outer join} is called the full outer join
+    \item \textbf{Cross join} is written `table1, table2'
+\end{itemize}
+
+\subsubsection{Set operations}%
+\label{ssub:set-operations}
+\begin{itemize}
+    \item \lstinline|Query1 UNION ALL Query2| also called the \textit{bag
+        union} 
+    \item \lstinline|Query1 UNION Query2| 
+    \item \lstinline|Query1 INTERSECT Query2| 
+    \item \lstinline|Query1 EXCEPT Query2| 
+\end{itemize}
+
+Oh yeah don't forget about \textit{entity relationship diagrams} where the
+* means that it's a primary key, and there are primary and foreign key
+relationships.
+
+\subsection{Aggregation and nested queries}%
+\label{sub:aggregation}
+
+Imagine we have a table of all the students in a course, and we want to
+know the average grade of each of the students over all the units:
+
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+        \multicolumn{3}{c}{\textbf{Enrol}} \\
+        \multicolumn{3}{c}{} \\
+        \hline
+        \textbf{Student} & \textbf{Unit} & \textbf{Grade} \\
+        \hhline{|=|=|=|}
+        200 & 100 & 60 \\ \hline
+        200 & 101 & 50 \\ \hline
+        201 & 100 & 70 \\ \hline
+        201 & 101 & 60 \\ \hline
+        201 & 102 & 80 \\ \hline
+    \end{tabular}
+\end{center}
+
+How would we do this?
+
+The first thing we can do is group by a certain value, for example the
+student ID. But, what happens to the other values, that change? Well, this
+is where aggregation comes in. We have a few options for what to do with
+this list of values. For example, we can take an average, take the
+maximum, etc. What we \textbf{can't} do is to have more cells overflowing.
+We can also take two different columns as the grouping factor.
+
+Adding to our trust `Select from where' skeleton, we can now add
+\lstinline[language=SQL]|GROUP BY|, and now, we get something looking like this:
+
+\begin{lstlisting}[language=SQL]
+SELECT columns
+FROM table
+WHERE condition
+GROUP BY keycolumn
+\end{lstlisting}
+
+It's important in SQL to list the key column in the columns if you want it
+to appear in the output. For example, going back to the first table, if we
+perform \lstinline[language=SQL]|SELECT student, AVG(grade) AS average FROM enrol GROUP BY student|, we'd get:
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{Student} & \textbf{Average} \\ \hhline{|=|=|}
+        200 & 55 \\ \hline
+        201 & 70 \\ \hline
+    \end{tabular}
+\end{center}
+
 
 \end{document}
