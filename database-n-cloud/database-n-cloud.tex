@@ -63,7 +63,7 @@
     tabsize=2,
     keywordstyle=\color{Magenta}\bfseries,
     identifierstyle=\color{Cyan},
-    stringstyle=\color{Yellow},
+stringstyle=\lst@ifdisplaystyle\color{Yellow}\else\color{Green}\fi,
     commentstyle=\color{Gray}\itshape
 }
 \makeatother
@@ -328,7 +328,7 @@ The \textbf{action} attribute defines the action to be performed when the
 form is submitted. Normally, the data from the form is sent to a web page
 on the server when the user clicks on the submit button. For example:
 
-\begin{lstlisting}[]
+\begin{lstlisting}
 <form method="post"
 action="/action_page.php">
 </form>
@@ -443,7 +443,7 @@ the results for this:
 \end{center}
 
 Here's what the structure would look like if it was written in C:
-\begin{lstlisting}[]
+\begin{lstlisting}[language=c]
 struct Candidate {
     char  name[100];
     char party[100];
@@ -462,7 +462,7 @@ struct Result {
 \end{lstlisting}
 
 Here's how it would look in Java:
-\begin{lstlisting}[]
+\begin{lstlisting}[language=java]
 class Candidate {
     String  name;
     String party;
@@ -589,7 +589,7 @@ ones are called the \textbf{leaves}.
 Interestingly, most data can be represented as a tree. If we look at the
 candidate class from above:
 
-\begin{lstlisting}[]
+\begin{lstlisting}[language=XML]
 <candidate>
     <name>Catherine Slade</name>
     <party>
@@ -692,7 +692,7 @@ itself. Nuts, right? Schemas are \textit{more powerful} than DTDs. Also,
 an \textbf{XSD} is an \textbf{XML schema definition}.
 
 Example schema:
-\begin{lstlisting}[]
+\begin{lstlisting}[language=XML]
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
     <xs:element name="candidate">
@@ -950,7 +950,7 @@ CONSTRAINT key-constr UNIQUE (name, street, town)
 The `key-constr' is a name to be used in error messages, and the `unique'
 part tells the DBMS what a key is. For example, if we run this:
 
-\begin{lstlisting}[]
+\begin{lstlisting}[language=SQL]
 INSERT INTO BankBranches
     VALUES ('HSBC', 'Queens St', Bristol, '22-11-12');
 INSERT INTO BankBranches
@@ -1085,7 +1085,7 @@ With the following table:
 And we want to build a table containing only the titles of units that have
 20 credit points or more, we can do the following:
 
-\begin{lstlisting}[]
+\begin{lstlisting}[language=SQL]
 SELECT title FROM Unit WHERE cp >= 20
 \end{lstlisting}
 
@@ -1105,7 +1105,7 @@ Here are some more fancy instructions:
     \end{tabular}
 \end{center}
 
-\begin{lstlisting}[]
+\begin{lstlisting}[language=SQL]
 SELECT student, CW1*0.6 + CW*0.4 AS average
     FROM CWMarks
     WHERE CW1*0.6 + CW2*0.4 >= 40
@@ -1212,8 +1212,8 @@ other queries. For example, if we wanted to find all of the lecturers in
 the same group as anther person, when can do a `select from where' query
 on tables that are joined together:
 
-\begin{lstlisting}
-    SELECT R.name
+\begin{lstlisting}[language=SQL]
+SELECT R.name
     FROM Lecturer L JOIN Lecturer R ON L.rgroup = R.rgroup
     WHERE L.name = 'Peter'
 \end{lstlisting}
@@ -1301,5 +1301,220 @@ perform \lstinline[language=SQL]|SELECT student, AVG(grade) AS average FROM enro
     \end{tabular}
 \end{center}
 
+Here's a cool list of all of a lot of the aggregation functions:
+
+\begin{itemize}
+    \item \lstinline[language=SQL]|MIN()| 
+    \item \lstinline[language=SQL]|MAX()| 
+    \item \lstinline[language=SQL]|AVG()| 
+    \item \lstinline[language=SQL]|SUM()| 
+    \item \lstinline[language=SQL]|COUNT()| 
+    \item \lstinline[language=SQL]|COUNT(DISTINCT)| 
+    \item \lstinline[language=SQL]|COUNT(*)| 
+\end{itemize}
+
+To avoid problems, each column specifier in the SELECT part should return
+\textbf{at most} one value when it's evaluated on a group. This is 
+\textit{guaranteed} if each column is either mentioned in the GROUP BY
+clause, an aggregate function application, or a constant.
+
+Another thing we can add is the \lstinline[language=SQL]|HAVING| keyword.
+If we want to select from some table with 2 conditions, then this `having'
+keyword allows us to use a second condition to further expand our query.
+For example:
+
+\begin{lstlisting}[language=SQL]
+SELECT columns
+    FROM table
+    WHERE condition1
+    GROUP BY key_column
+    HAVING condition2
+\end{lstlisting}
+
+Oh, did you think we were done? NO, there's also the
+\lstinline[language=SQL]|ORDER BY| key word which, weirdly, orders the
+results. We cal also add on the DESC or the ASC filter to sort the results
+in descending or ascending order respectively. And there's a
+\lstinline[language=SQL]|LIMIT| keyword, that limits the results by the
+number you give it.
+
+\subsubsection{Nested Queries}%
+\label{ssub:nested-queries}
+In the following table, if we wanted to find all the lecturers in the same
+research group as `Peter', how would we do it?
+
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+        \multicolumn{3}{c}{\textbf{Lecturer}} \\
+        \multicolumn{3}{c}{} \\ \hline
+        \textbf{ID} & \textbf{Name} & \textbf{Rgroup} \\ \hhline{|=|=|=|}
+        1 & David & null \\ \hline
+        2 & Steven & 80 \\ \hline
+        3 & Janet & 83 \\ \hline
+        4 & Nick & 80 \\ \hline
+    \end{tabular}
+\end{center}
+
+The query would look something like this:
+
+\begin{lstlisting}[language=SQL]
+SELECT name
+FROM Lecturer
+WHERE rgroup = (
+    SELECT rgroup
+    FROM Lecturer
+    WHERE name = 'Peter'
+)
+\end{lstlisting}
+
+Another thing we could do is to find the titles of the units whose
+director is in the hardware group:
+
+\begin{lstlisting}[language=SQL]
+SELECT title
+FROM Unit
+WHERE director IN (
+    SELECT id
+    FROM Lecturer JOIN Rgroup
+        ON Lecturer.rgroup = Rgroup.id
+    WHERE Rgroup.name = 'Hardware'
+)
+\end{lstlisting}
+
+There are even more cool things that we can do with nested queries, like
+get the deviation from he student's overall average for each unit grade:
+
+\begin{lstlisting}[language=SQL]
+SELECT Enrol.student, unit, grade - T.average
+    FROM (
+        SELECT student, AVG(grade) AS average
+        FROM Enrol
+        GROUP BY student
+    ) AS T /* new table needs to be named */
+    JOIN Enrol ON Enrol.student = T.student
+\end{lstlisting}
+
+As an additional note, if you're going to aggregate over the whole table,
+don't use GROUP BY, use something like:
+
+\begin{lstlisting}[language=SQL]
+SELECT COUNT(name) FROM student
+\end{lstlisting}
+
+\subsection{Normalisation}%
+\label{sub:Normalisation}
+Oh boy! Normalisation! This is the process where your tables get into
+shape. Tables that are in normal form are no longer plagued by certain
+kinds of redundancy (bad) and dependency (bad). These things can cause all
+kinds of anomalies when inserting, updating and deleting data.
+
+\subsubsection{Functional dependencies}%
+\label{ssub:functional-dependencies}
+
+\begin{center}
+    \begin{tabular}{c c c c c}
+        \multicolumn{5}{c}{\textbf{Cities in the UK}} \\
+        \multicolumn{5}{c}{} \\ \hline
+        City & c\_pop & Region & r\_pop & Country \\ \hhline{=====}
+        Bristol & 0.44M & SW & 5.2M & England \\ 
+        Bath & 88.8K & SW & 5.2M & England \\ 
+        Manchester & 0.52M & NW & 7M & England \\ \hline
+    \end{tabular}
+\end{center}
+
+If you do this, you're an idiot. Why would you keep all of these region
+and region data separate, when you could just reference it in another
+table? You lend yourself vulnerable to \textbf{update anomalies} because
+of the population of the SW region increases, you gotta update it in a
+load of tables.
+
+Also, you might get \textbf{insert anomalies}, which is because we can't
+have a city that's not in a region, or have a region with no cities.
+
+\textbf{Delete anomalies} are also bad because if we remove the last city
+in a region, the region would cease to exist.
+
+By definition, a functional dependency is an attribute (A) that depends on a
+set of attributes (XS), just if the value of the attribute is uniquely
+determined after fixing set attributes. We write the dependency as $XS
+\rightarrow A$.
+
+Look at the following table for an example:
+
+\begin{center}
+    \begin{tabular}{c c c}
+        \multicolumn{3}{c}{\textbf{Lecturer}} \\
+        \multicolumn{3}{c}{} \\ \hline
+        *uname & fname & lname \\ \hhline{===}
+        csxdb & David & Bernhard \\ \hline
+        csxds & David & Smith \\ \hline
+    \end{tabular}
+\end{center}
+
+We have the following dependencies:
+\begin{itemize}
+    \item \{uname\} $\rightarrow$ fname
+    \item \{uname\} $\rightarrow$ lname
+    \item \{uname, fname\} $\rightarrow$ fname
+    \item \{uname\} $\rightarrow$ uname
+    \item \{fname\} $\not \rightarrow$ lname
+\end{itemize}
+
+Some of these are \textit{trivial} because they are already in the set
+they are said to be functionally dependent with.
+
+Fixing these dependencies isn't too hard. If we know all of the functional
+dependencies, we just pick them out, and slap them in another table with a
+foreign key.
+
+\subsubsection{Normal Forms}%
+\label{ssub:Normal-Forms}
+
+This is an example of a terrible table:
+
+\begin{center}
+    \textbf{Bad table} 
+
+    \begin{tabular}{c c c}
+        \hline
+        name & username & units \\ \hhline{===}
+        "David" & "csxdb" & "COMSM0016, COMS10010" \\
+        "Alice" & "csxaw" & "" \\
+        "John" & "csxjs" & "COMS20002" \\ \hline
+    \end{tabular}
+\end{center}
+
+Let's go through the normalisation steps.
+
+\begin{center}
+    \textbf{1NF} 
+\end{center}
+
+Let's normalise to 1NF.
+
+\begin{center}
+    \begin{tabular}{c c}
+        \multicolumn{2}{c}{\textbf{Lecturers}} \\
+        \multicolumn{2}{c}{} \\ \hline
+        
+        name & *username \\ \hline
+        David & csxdb \\
+        Alice & csxaw \\
+        John & csxjs \\ \hline
+    \end{tabular}
+    \quad \quad
+    \begin{tabular}{c c}
+        \multicolumn{2}{c}{\textbf{Units}} \\
+        \multicolumn{2}{c}{} \\ \hline
+        
+        *unit & director \\ \hline
+        COMSM0016 & csxdb \\ 
+        COMS10010 & csxdb \\
+        COMS20002 & csxjs \\ \hline
+    \end{tabular}
+\end{center}
+
+Here, the username is the foreign key for the director part of the
+Lecturers table. 
 
 \end{document}
