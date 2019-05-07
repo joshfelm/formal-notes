@@ -17,26 +17,26 @@
 \documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
 \usepackage[english]{babel}
 \typearea{12}
+% }}}
 
-% Other packages
-
-% Set indentation and line skip for paragraph
-\setlength{\parindent}{1em}
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
 \setlength{\parskip}{1em}
 \usepackage[margin=2cm]{geometry}
 \addtolength{\textheight}{-1in}
 \setlength{\headsep}{.5in}
+% }}}
 
-% Headers setup
+% Headers setup {{{
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\lhead{Introduction to Computer architecture: The Comprehensive Notes}
+\lhead{Introduction to Computer Architecture: The (almost) Comprehensive
+Notes}
 \rhead{Josh Felmeden}
-\usepackage{hyperref} 
-\usepackage{mathtools} 
+% }}}
 
-
-% Listings
+%Listings 
+% Listings {{{
 \usepackage[]{listings,xcolor} 
 \lstset
 {
@@ -45,54 +45,41 @@
     showstringspaces=false
 }
 
-
-\lstdefinestyle{Common}
-{
-    extendedchars=\true,
-    language={[Visual]Basic},
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\makeatletter
+\lstset{language=[Visual]Basic,
+    backgroundcolor=\color{lstgrey},
     frame=single,
-    %===========================================================
-    framesep=3pt,%expand outward.
-    framerule=1.4pt,%expand outward.
-    xleftmargin=3.4pt,%make the frame fits in the text area. 
-    xrightmargin=3.4pt,%make the frame fits in the text area.
-    %=========================================================== 
-    rulecolor=\color{Red}
-}
-
-\lstdefinestyle{A}
-{
-    style=Common,
-    backgroundcolor=\color{Yellow!10},
-    basicstyle=\small\color{Black}\ttfamily,
-    keywordstyle=\color{Orange},
+    xleftmargin=0.7cm,
+    frame=tlbr, framesep=0.2cm, framerule=0pt,
+    basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\ttfamily\fi,
+    captionpos=b,
+    tabsize=2,
+    keywordstyle=\color{Magenta}\bfseries,
     identifierstyle=\color{Cyan},
-    stringstyle=\color{Red},
-    commentstyle=\color{Green}
+    stringstyle=\color{Yellow},
+    commentstyle=\color{Gray}\itshape
 }
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
 
-\lstdefinestyle{B}
-{
-    style=Common,
-    backgroundcolor=\color{Black},
-    basicstyle=\scriptsize\color{White}\ttfamily,
-    keywordstyle=\color{Orange},
-    identifierstyle=\color{Cyan},
-    stringstyle=\color{Red},
-    commentstyle=\color{Green}
-}
+% }}}
 
+% Other packages {{{
+\usepackage{lmodern}
 \usepackage[]{amsmath} 
 \usepackage[]{booktabs} 
+\usepackage{tcolorbox} 
 \usepackage[symbol]{footmisc} 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\rmdefault}
+% }}}
 
-% Title
+% Title {{{
 \title{Introduction to Computer Architecture: The (almost) Comprehensive
 Notes}
-\date{2018\\ December}
 \author{Josh Felmeden}
-%}}}
+% }}}
 
 % Start document
 \begin{document}
@@ -157,7 +144,7 @@ Now, we're going to create a really simple algorithm (it's going to be called
 ADD), and is going to look like $\text{ADD}(\hat x, \hat y, n, b, ci)$, where b
 is the base, ci is the carry in and n is the length of x and y. We would then
 have the algorithm as follows:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 for i = 0 to (n-1)
     r(i) += (x(i) + y(i) + c(i)) mod b
     if(x(i) + y(i) + c(i) < b)
@@ -196,11 +183,11 @@ Let's step through this algorithm:
 Where the at the end, $\hat r = \langle 1 2 1 \rangle$, as stated by the last
 column.
 
-In the algorithm above, the bit inside the for loop can be represented by $F_i$,
-where it has the inputs $\hat x_i, \hat y_i, \hat c_i$ and has outputs 
-$\hat r_i,c_{xi+1}$. We don't have to know what the function is, but we can write
-down their behaviour. Because we know what should happen\footnote[1]{These tables
-took so damn long please appreciate them}.
+In the algorithm above, the bit inside the for loop can be represented by
+$F_i$, where it has the inputs $\hat x_i, \hat y_i, \hat c_i$ and has
+outputs $\hat r_i,c_{xi+1}$. We don't have to know what the function is,
+but we can write down their behaviour. Because we know what should
+happen\footnote[1]{These tables took so damn long please appreciate them}.
 
 \begin{center}
     \begin{tabular}{|c c c|c|c|}
@@ -1829,7 +1816,7 @@ still use the same instructions to access the incoming parameters because
 we know the offset.
 
 Let's look at the following example:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 LDBM 1
 STAI 0 'bottom location of the stack
 LDAC -5 'The offset required for the locals/variables etc.
@@ -1849,7 +1836,7 @@ loading up one of the incoming parameters, and then testing to see if
 the result is negative or not.
 
 The actual code of the stack use is that we use:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 LDAP
 BR F
 R:
@@ -1871,13 +1858,13 @@ structure. After it's made into a tree (the kind of data structure that
 the compiler prefers), it looks to simplify it first, and then it solves
 it. For example, in the code:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 if c then p else q
 \end{lstlisting}
 
 We end up with a data structure that looks like:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 | if | c | p | q |
 \end{lstlisting}
 
@@ -1958,7 +1945,7 @@ The steps required to translate the code into executable operates much in
 the same way as that of the optimiser; often recursively calling itself
 and so on. It has parameters that keeps track of what to do when the
 statement is finished. For example, if we have a piece of code that says:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 if (c1) then
     while c2 do p
 else
@@ -1968,7 +1955,7 @@ end if
 
 This would look like this in machine code:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 c1
 BRZ ELSE
 START:
@@ -2003,7 +1990,7 @@ is how control structures are generated.
 
 Let's look at another example:
 
-\begin{lstlisting}[style=b]
+\begin{lstlisting}[]
 if (x AND y) then
     p
 else
@@ -2012,7 +1999,7 @@ end if
 \end{lstlisting}
 
 We'd get:
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 x
 BRZ ELSE
 Y
@@ -2033,7 +2020,7 @@ zero. If not, then subtract one from the other and branch if negative.
 
 The function calls are a little complicated. If we have the code:
 
-\begin{lstlisting}[style=B]
+\begin{lstlisting}[]
 P(x,y,z)
 \end{lstlisting}
 
@@ -2136,6 +2123,156 @@ Sometimes, the object code is smaller, even though the source code is
 bigger because of the optimisations. Conversely, it might just make the
 code a bit worse, and you just won't know until you've tried it.
 
-% TODO resume david may 9th lecture down (second from top) from 33 minutes
+\section{Garbage collection}%
+\label{sec:garbage-collection}
+
+Garbage collection (and memory allocation) can get pretty hard to
+understand, and therefore we have some techniques to automate this. The
+techniques aren't new; they've been around for ages. It was originally
+made for some random language, but now has been adopted for a few other
+ones.
+
+We have something called a \textit{heap} with some globals underneath it,
+then the stack, and then the program and some constants. What we want to
+do is automatically allocate some memory in the heap when the program
+needs it, and then deallocate it when the program is done with it.
+
+We might write something like \lstinline|x = [1,2,5]|, and so the garbage
+algorithm will now have some objects:
+
+\begin{enumerate}
+    \item Size
+    \item Flag (used to mark the elements in the heap that are
+        needed)
+    \item Address
+\end{enumerate}
+
+The next step is to identify which parts of the heap are needed. What we
+want to be able to do is to go through the region and mark all the objects
+in the heap that are pointed to by the items in the program (by things in
+the stack really). In other words, we want to know which items in the
+stack are pointing to elements in the heap.
+
+There are a few options for doing this. The compiler might leave a map for
+the variables that are used, but sometimes, the language doesn't do this.
+Another method is just to guess. Finally, we could just explicitly mark
+the data. Hardware designers would be really cross with you for this
+because they'd need 65-bit designs now.
+
+What we're going to do is steal a bit from the words in memory.
+Unfortunately, you lose some functionality. Sometimes, the bottom bits
+aren't even used in memory addressing, which sounds kind of weird.  When
+we do this, it means that every time we add up, we need to subtract 1 from
+the result because the final bit is used for the flag, but this means that
+we need to change the compilation.
+
+Now, we step through the stack and see which items are pointing to the
+heap. When we find one, we set the flag in the address. Not only this, but
+we need to set those items that the heap memory points to (multiple
+pointers and whatnot).
+
+To make space available, we have a pointer in the heap, that goes from
+bottom to top. To avoid fragmenting it, we move the objects down so that
+they're \textbf{compacted}. BUT, if we just do this willy nilly, then
+we'll run into errors because all of the pointers will be messed up and
+there's no easy way to find out what items are pointing to a given entity.
+So, there's another step that we need to consider.
+
+\subsection{Compacting}%
+\label{sub:Compacting}
+To move the items down, we need to consider the items that are pointing to
+a given entity. To do this, we start at the bottom of the stack. If an
+item is not \textit{marked} (i.e. doesn't has a flag), then we skip over
+it. We know how much to skip by because the size is at the bottom of the
+entity. If it is marked, then we store the address that it will be moved to
+at the bottom. We're allowed to do this because there's a spare word in
+each data item. When we find another item, we do the same; recording the
+final position of each item, until each marked item has a destination
+recorded
+
+Having done this, we can return to scanning the stack. When we step
+through the stack and identify the pointers to the heap, we can now update
+the pointers in the stack to the `final address' information that we
+recorded before. We have to carry on this process through into the
+globals, and also the heap itself.
+
+Finally, we can go back once more to the stack, and perform the copies.
+The items that are not marked, are replaced, and the old marked locations
+are unmarked, ready to be overwritten.
+
+This is a fairly simple collector, but there are simpler ones because this
+one can deal with arbitrary sized data.
+
+\subsection{Marking}%
+\label{sub:Marked pointers?}
+We're not done with this yet, however. When we mark an object in the heap,
+we then also need to mark the items that the new marked item is pointing
+to (else it will be erased). The most obvious one is to recursively mark
+the items. This is not a good solution to the problem, unfortunately. This
+is because to do something recursively, we need a stack, which uses some
+memory. The issue with this is that we need to allocate a relatively large
+amount of space for this stack.
+
+An alternative position is to iteratively mark the items (go to the items
+that the thing points to and mark it. Rinse and repeat). This would take
+so many iterations, which means that the performance take a hit, rather
+than the size (as with the recursive method).
+
+Thankfully, there is a solution that isn't huge or slow. The way that
+we're going to do it is to implement some more pointers: one to
+\textbf{current} and one to \textbf{next} and one to \textbf{previous} .
+When we want to move down a level, we update the \textit{current} pointer
+to the new item, the previous to the current, and the next to the
+following item.
+
+Most of the time, we do a combination of the above (such as using
+iteration to a certain depth, and then using the third one). This third
+one is called the `stop the world' algorithm, because when it runs out of
+memory, it stops. 
+
+Garbage collection is really hard because there are lots of points in
+which things can go wrong, such as the program trying to access the data
+as the collector is moving the data. This can be solved using locks and so
+on, but you get the point: garbage collection is real hard. 
+
+\section{Communication, Interrupts, and Protection}%
+\label{sec:interrupts}
+We need some means by which two independent devices can communicate. So
+far, we've looked at the two phase clock. However, when we start
+communicating between computers, they each have their own clocks, so we
+need some kind of encoding standard so that the data can be read. The
+traditional method is the `handshake'. This means that computer A sends
+out a request, computer B confirms the request, computer A confirms the
+confirmation, and then data transfer can continue.
+
+In layman's terms, the sender puts the request on the data wire. We
+assert the request to confirm that the data is actually valid. Now, the
+sender waits until the receiver puts the acknowledge wire on. The sender
+can then take off the request from the data wire, and then the wire can
+change state.
+
+There are a few optimisations that can be done to this, but this is called
+the `return to 0' scheme. A faster way of doing this is to do it on the
+edges of the changes, to make it faster. It almost halves the data
+transfer rate, but it's still not perfect because it's impossible to
+guarantee the transmission speed of the wire, because the receiver might
+see the request at a time when the data becomes invalid.
+
+An alternative to this is that we have three signals: REQ0, REQ1, and ACK.
+If we want to request a 0, we make REQ0 1, and wait for the ACK to be 1.
+Next, we might want to request a 1, so we make REQ1 1, and wait for ACK to
+change state (remember that it was 1 so now we wait for it to become 0).
+We might then want another 0, so we change the REQ0 to 0 once more, and
+wait for the ACK to change state. This repeats. This is a good method
+because it doesn't matter how long it takes for the signal to reach
+because we are only waiting for the changes in the signals.
+
+Did you want another method? No?? Tough. This one has four wires for
+transmission. Now we have 2 bits of transmission. You could EVEN have 6
+wires, and once 3 change state, the recipient responds. This means we can
+encode 20 values. These two aren't hugely used, but some psychopaths do
+use it.
+
+% TODO resume david may 3 from bottom 17 minutes
 
 \end{document}
