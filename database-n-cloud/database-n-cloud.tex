@@ -69,6 +69,8 @@ stringstyle=\lst@ifdisplaystyle\color{Yellow}\else\color{Green}\fi,
 \makeatother
 
 % Other packages
+\usepackage{needspace}
+\usepackage{tcolorbox}
 \usepackage{soul}
 \usepackage{babel,dejavu,helvet} 
 \usepackage[]{amsmath} 
@@ -404,6 +406,7 @@ the absolute reference of a page like
 \lstinline{href="http://www.example.com/theme.css"}) while the relative
 looks like \lstinline{href="/themes/theme.css"}.
 
+\begin{minipage}{\textwidth}
 Here's an example of a style sheet:
 \begin{lstlisting}[]
 h1 {
@@ -417,6 +420,7 @@ h1 {
 em { font-style: normal; }
 em.room { font-style: italic; }
 \end{lstlisting}
+\end{minipage}
 
 \subsection{Data Formats and Operations}%
 \label{sub:Data Formats and Operations}
@@ -461,6 +465,7 @@ struct Result {
 };
 \end{lstlisting}
 
+\begin{minipage}{\textwidth}
 Here's how it would look in Java:
 \begin{lstlisting}[language=java]
 class Candidate {
@@ -479,6 +484,7 @@ class Result {
     int votes;
 };
 \end{lstlisting}
+\end{minipage}
 
 And here's how we use the data structures
 \begin{lstlisting}[]
@@ -517,6 +523,7 @@ characters. Unfortunately, once a lot more countries got involved in the
 internet, we needed a few more characters to allow us to represent their
 languages and alphabets. This is where Unicode came in.
 
+\begin{minipage}{\textwidth}
 The Unicode Consortium develops their Unicode standard. It replaces the
 existing character sets (ASCII) with a new one that is then implemented in
 many language such as HTML, XML, Java, and even the Latex I'm writing this
@@ -525,6 +532,7 @@ these numbers are translated into binary numbers to be stored and
 processed in a computer. There are different ways that Unicode characters
 or code points can be encoded. There are some fixed width and some
 variable length encodings.
+\end{minipage}
 
 Line endings are kind of complicated, because in UNIX based devices, the
 ending is written as `LF', or, in binary, `0000 1010'. However, in early
@@ -586,6 +594,7 @@ structure of data. It's called tree structure because it resembles a tree
 tree. The top most level is called the \textbf{root} while the bottom most
 ones are called the \textbf{leaves}.
 
+\begin{minipage}{\textwidth}
 Interestingly, most data can be represented as a tree. If we look at the
 candidate class from above:
 
@@ -601,6 +610,7 @@ candidate class from above:
     </ward>
 </candidate>
 \end{lstlisting}
+\end{minipage}
 
 Another way to represent this might be:
 
@@ -691,6 +701,7 @@ XML schema are another way of describing and XML document structure in XML
 itself. Nuts, right? Schemas are \textit{more powerful} than DTDs. Also,
 an \textbf{XSD} is an \textbf{XML schema definition}.
 
+\begin{minipage}{\textwidth}
 Example schema:
 \begin{lstlisting}[language=XML]
 <?xml version="1.0"?>
@@ -709,6 +720,7 @@ Example schema:
     </xs:sequence> </xs:complexType> </xs:element>
 </xs:schema>
 \end{lstlisting}
+\end{minipage}
 
 \textbf{XML entities} are kinda like escape sequences, and they're also
 used in HTML. For example, there are:
@@ -740,6 +752,7 @@ JSON syntax is derived from JavaScript syntax, such as the Data is in the
 format of name/value pairs. Also, data is separated by commas. Curly
 braces hold objects, and square brackets hold arrays.
 
+\begin{minipage}{\textwidth}
 Here's an example of some JSON:
 \begin{lstlisting}[]
 {   
@@ -749,6 +762,7 @@ Here's an example of some JSON:
     ["COMS10010", "COMS2XXXX"]
 }
 \end{lstlisting}
+\end{minipage}
 
 
 JSON is cooler than XML in some aspects because:
@@ -794,6 +808,8 @@ specialised language called `FreeMarker Template Language' (FTL). A
 general purpose programming language such as Java is used to prepare the
 data, and then Apache FreeMarker displays this data using the templates.
 
+\begin{minipage}{\textwidth}
+
 Here's an example of some FreeMarker code:
 
 \begin{lstlisting}[]
@@ -805,6 +821,7 @@ Here's an example of some FreeMarker code:
     <p>${m.type}: ${m.text}</p>
 </#list> <!--create some output for each element in a list-->
 \end{lstlisting}
+\end{minipage}
 
 And this is the extent of the Web! Hope you enjoyed! xoxo
 
@@ -968,6 +985,7 @@ You also can't drop tables that a table has some foreign key to, because
 then the DBMS will get angry (if you set up the constraints right - again,
 stops you from being stupid).
 
+\begin{minipage}{\textwidth}
 \subsection{Projection Selection and Null}%
 \label{sub:projection}
 This handy little table will show you the kind of similarities there are
@@ -986,7 +1004,9 @@ ones:
         Unbounded iteration & Aggregation
     \end{tabular}
 \end{center}
+\end{minipage}
 
+\begin{minipage}{\textwidth}
 \subsubsection{Projection}%
 \label{ssub:projection}
 If we had this table:
@@ -1001,7 +1021,7 @@ If we had this table:
         4 & d & yes
     \end{tabular}
 \end{center}
-
+\end{minipage}
 If we were to do `project y,x', we'd end up with:
 
 \begin{center}
@@ -1091,6 +1111,7 @@ SELECT title FROM Unit WHERE cp >= 20
 
 This would give us the necessary results.
 
+\begin{minipage}{\textwidth}
 Here are some more fancy instructions: 
 
 \begin{center}
@@ -1110,6 +1131,7 @@ SELECT student, CW1*0.6 + CW*0.4 AS average
     FROM CWMarks
     WHERE CW1*0.6 + CW2*0.4 >= 40
 \end{lstlisting}
+\end{minipage}
 
 Results in:
 
@@ -1218,6 +1240,7 @@ SELECT R.name
     WHERE L.name = 'Peter'
 \end{lstlisting}
 
+\begin{minipage}{\textwidth}
 \subsubsection{Join variants}%
 \label{ssub:variants-join}
 
@@ -1233,6 +1256,7 @@ There are a few variants of the join command, and we'll go over them here.
     \item \textbf{Outer join} is called the full outer join
     \item \textbf{Cross join} is written `table1, table2'
 \end{itemize}
+\end{minipage}
 
 \subsubsection{Set operations}%
 \label{ssub:set-operations}
@@ -1271,12 +1295,14 @@ know the average grade of each of the students over all the units:
 
 How would we do this?
 
+\begin{minipage}{\textwidth}
 The first thing we can do is group by a certain value, for example the
 student ID. But, what happens to the other values, that change? Well, this
 is where aggregation comes in. We have a few options for what to do with
 this list of values. For example, we can take an average, take the
 maximum, etc. What we \textbf{can't} do is to have more cells overflowing.
 We can also take two different columns as the grouping factor.
+\end{minipage}
 
 Adding to our trust `Select from where' skeleton, we can now add
 \lstinline[language=SQL]|GROUP BY|, and now, we get something looking like this:
@@ -1451,6 +1477,7 @@ Look at the following table for an example:
     \end{tabular}
 \end{center}
 
+\begin{minipage}{\textwidth}
 We have the following dependencies:
 \begin{itemize}
     \item \{uname\} $\rightarrow$ fname
@@ -1459,6 +1486,7 @@ We have the following dependencies:
     \item \{uname\} $\rightarrow$ uname
     \item \{fname\} $\not \rightarrow$ lname
 \end{itemize}
+\end{minipage}
 
 Some of these are \textit{trivial} because they are already in the set
 they are said to be functionally dependent with.
@@ -1467,7 +1495,7 @@ Fixing these dependencies isn't too hard. If we know all of the functional
 dependencies, we just pick them out, and slap them in another table with a
 foreign key.
 
-\subsubsection{Normal Forms}%
+\subsubsection{First normal form}%
 \label{ssub:Normal-Forms}
 
 This is an example of a terrible table:
@@ -1485,12 +1513,6 @@ This is an example of a terrible table:
 \end{center}
 
 Let's go through the normalisation steps.
-
-\begin{center}
-    \textbf{1NF} 
-\end{center}
-
-Let's normalise to 1NF.
 
 \begin{center}
     \begin{tabular}{c c}
@@ -1516,5 +1538,160 @@ Let's normalise to 1NF.
 
 Here, the username is the foreign key for the director part of the
 Lecturers table. 
+
+\begin{minipage}{\textwidth}
+\subsubsection{Second normal form}%
+\label{ssub:2nf}
+
+\begin{tcolorbox}
+    Definition: \textbf{key attribute}
+
+    \bigskip
+
+    An attribute is said to be a \textit{key attribute} if it is part of
+    some (candidate key), otherwise it's a \textit{non-key attribute} 
+\end{tcolorbox}
+
+\bigskip
+
+For a database to be in 2NF, we need:
+\begin{itemize}
+    \item The database to be in 1NF
+    \item There are no dependencies where XS $\rightarrow$ A where A is a
+        non-key attribute and
+    \item XS is all key attributes but is not a superkey
+\end{itemize}
+\end{minipage}
+
+This looks like:
+
+\begin{center}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \multicolumn{1}{|c|}{\textbf{*house}} & \textbf{*postcode} & 
+        \textbf{city} \\ \hhline{|=|=|=|}
+        MVB & BS8 1UB & Bristol \\ \hline
+        Flat D.01 & BS8 4UN & Bristol \\ \hline
+        Flat D.02 & BS8 4UN & Bristol \\ \hline
+        House of Commons & SW1 0AA & London \\ \hline
+        30 & EC3A 8BF & London \\ \hline
+    \end{tabular}
+
+    $\downarrow{\text{to 2NF}}$
+
+    \begin{tabular}{|l|c|}
+        \hline
+        \textbf{*house} & \textbf{*postcode} \\ \hhline{|=|=|}
+        MVB & BS8 1UB \\ \hline
+        Flat D.01 & BS8 4UN \\ \hline
+        Flat D.02 & BS8 4UN \\ \hline
+        House of Commons & SW1 0AA \\ \hline
+        30 & EC3A 8BF \\ \hline
+    \end{tabular}
+    \quad
+    \begin{tabular}{|c|c|}
+        \hline
+        \textbf{*postcode} & \textbf{city} \\ \hhline{|=|=|}
+        BS8 1UB & Bristol \\ \hline
+        BS8 4UN & Bristol \\ \hline
+        SW1 0AA & London \\ \hline
+        EC3A 8BF & London \\ \hline
+    \end{tabular}
+\end{center}
+
+\subsubsection{Third normal form and transitive dependencies}%
+\label{ssub:3nf}
+
+
+Transitive dependencies are where you have something like $A \rightarrow B
+\rightarrow C$. For example, in this table:
+
+\begin{center}
+    \begin{tabular}{|l|c|c|}
+        \hline
+        \multicolumn{1}{|c|}{\textbf{*postcode}} & \textbf{city} &
+        \textbf{region} \\ \hhline{|=|=|=|}
+        BS8 1UB & Bristol & SW \\ \hline
+        BS8 4UN & Bristol & SW \\ \hline
+        SW1 0AA & London & L \\ \hline
+        EC3A 8BF & London & L \\ \hline
+    \end{tabular}
+\end{center}
+
+\begin{minipage}{\textwidth}
+We have the dependency \{postcode\} $\rightarrow$ \{city\} $\rightarrow$
+region. Therefore, for a schema to be in 3NF we need:
+\begin{itemize}
+    \item The schema to be in 2NF
+    \item The schema to have no \textit{non-trivial} dependencies $XS
+        \rightarrow A$ with:
+        \begin{itemize}
+            \item A is a non-key attribute
+            \item XS contains a non-key attribute, but not a superkey
+        \end{itemize}
+\end{itemize}
+\end{minipage}
+
+From the table above, we end up with these two tables:
+
+\begin{center}
+    \begin{tabular}{|c|c|}
+        \hline
+        \multicolumn{1}{|c|}{\textbf{*postcode}} & \textbf{city} \\
+        \hhline{|=|=|}
+        BS8 1UB & Bristol \\ \hline
+        BS8 4UN & Bristol \\ \hline
+        SW1 0AA & London \\ \hline
+        EC3A 8BF & London \\ \hline
+    \end{tabular}
+    \quad
+    \begin{tabular}{|c|c|}
+        \hline
+        \multicolumn{1}{|c|}{\textbf{*city}} & \textbf{region} \\
+        \hhline{|=|=|}
+        Bristol & SW \\ \hline
+        London & L \\ \hline
+    \end{tabular}
+\end{center}
+
+\subsubsection{BCNF - Boyce Codd Normal Form (3.5NF)} 
+\label{ssub:bcnf}
+
+Just when you thought we had enough normal forms, here's another one. The
+problem we currently have is the following:
+
+\begin{center}
+    \begin{tabular}{|c|c|c|}
+        \hline
+        \textbf{student} & \textbf{email} & \textbf{society} \\
+        \hhline{|=|=|=|}
+        bb16801 & bilbo@... & Cheese and Wine \\ \hline
+        bb16801 & bilbo@... & Hoverboard \\ \hline
+        mm16280 & mickey@... & Hoverboard \\ \hline
+        cl16343 & calvin@... & Pantosoc \\ \hline
+        ht16991 & hobbes@... & Pantosoc \\ \hline
+    \end{tabular}
+\end{center}
+
+The functional dependencies are:
+\begin{itemize}
+    \item \{student\} $\rightarrow$ \{studnet\} which is trivial.
+    \item \{student, society\} $\rightarrow$ \{email\} (LHS superkey)
+    \item \{student\} $\rightarrow$ \{email\} which is the problem
+\end{itemize}
+
+A sensible schema that's in 3NF is normally also in BCNF because you need
+some effort to not be. Basically, 3NF is in BCNF automatically unless it
+contains at least two composite candidate keys that overlap. 
+
+Every schema can be decomposed to 3NF in a way that is both
+\textit{lossless} and \textit{dependency preserving} (which means that no
+functional dependencies are removed). For BCNF and higher, this is no
+longer the case. In general, we should normalise to 3NF unless there is a
+really really good reason not to. Then, continue to BCNF if it's possible
+and sensible.
+
+\subsection{JDBC: SQL in Java}%
+\label{sub: JDBC}
 
 \end{document}
