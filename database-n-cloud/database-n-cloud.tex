@@ -1694,4 +1694,258 @@ and sensible.
 \subsection{JDBC: SQL in Java}%
 \label{sub: JDBC}
 
+Picture this: we have a login system with a username and a password box.
+The SQL might look something like this (if we enter `Gandalf' for username
+and `Mellon' for password):
+
+\begin{lstlisting}[language=SQL]
+SELECT id FROM Users WHERE name = 'Gandalf' AND pass = 'Mellon';
+\end{lstlisting}
+
+We can do something called \textbf{preparing a statement} so that we are
+able to pass in the text from the textboxes. This is what a prepared
+statement looks like:
+
+\begin{lstlisting}[language=SQL]
+stmt = prepare (
+    "SELECT id FROM users WHERE name = ? AND pass = ?"
+);
+
+result = execute(stmt,
+    ["Gandalf", "Mellon"]);
+\end{lstlisting}
+
+A Java database API is called a JDBC. An implementation comes with the
+Java installation. Its classes are in the java.sql and javax.sql packages.
+
+To connect, we type the following:
+
+\begin{lstlisting}[language=Java]
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+// in a function
+Connection c = DriverManager.getConnection(
+    CONNECTION_STRING
+);
+
+// do stuff
+c.close();
+\end{lstlisting}
+
+All JDBC methods throw the checked exception `java.sql.SQLException':
+
+\begin{lstlisting}[language=Java]
+try {
+    // database stuff
+} catch (SQLException e) {
+    // handle or bail
+}
+\end{lstlisting}
+
+The result looks like this:
+
+\begin{lstlisting}[language=Java]
+PreparedStatement s = c.prepareStatement(
+    "SELECT id, email FROM Users" + 
+    "WHERE name = ? AND pass = ?"
+);
+
+ResultSet r = s.executeQuery();
+while (r.next()) {
+    String email = r.getString("email");
+    id = r.getInt("id");
+    // do somthing
+}
+s.close();
+\end{lstlisting}
+
+And finally:
+
+\begin{lstlisting}[language=Java]
+try {
+    c = openconnection();
+    doStuff(c);
+} catch (SQLException e) {
+    //handle exception
+} finally {
+    try {
+        if (c != null) { c.close(); }
+    } catch (SQLException e) {
+        // handle exception
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Transaction}%
+\label{ssub:Transaction}
+\begin{tcolorbox}
+    \textbf{Transaction}: a sequence of one or more operations on the
+    database that must be executed as one.
+\end{tcolorbox}
+
+\paragraph{ACID}%
+\label{par:ACID}
+
+\begin{itemize}
+    \item \textbf{Atomicity:} Either all the operations in the transaction
+        are completed or none of them are.
+    \item \textbf{Consistency:} If the database was consistent before the
+        transaction, it is consistent afterwards.
+    \item \textbf{Isolation:} Transactions execute independently. If two
+        transactions complete at the same time, then it should be the same
+        result if they were to operate one after the other
+    \item \textbf{Durability:} Once the transaction is committed, the
+        effects should not be lost through some later failure.
+\end{itemize}
+
+Most of the DBMSs have a transaction manager that takes care of the ACID
+properties so we don't need to worry about it. Normally, this is achieved
+through some form of \textit{locking} or \textit{timestamps}. For
+durability, \textit{transaction logs} are kept.
+
+By default, every statement runs in its own transaction unless it is not
+autocommitted.
+
+\section{Security}%
+\label{sec:Security}
+
+\subsection{Web Security}%
+\label{sub:web-security}
+
+Rule number 1 of security is that all data coming from the client is
+assumed to be malicious until you've properly validated it.
+
+\subsubsection{Sessions and cookies}%
+\label{ssub:sessions}
+
+HTTP is \textit{stateless} which means that you can send a request, get a
+response, and then the connection ends. If you send another request, the
+server doesn't and can't know that it's coming from the same person.
+
+Cookies come in because then we get some state between requests. If a
+response contains a \textbf{cookie} header, then all of the further
+requests to the same server will include this header.
+
+\textbf{Session hijacking} is when you break into someone's account by
+stealing a copy of their session data. This can be made harder by not
+using predictable session tokens, using TLS encryption, or expiring the
+inactive sessions.
+
+A \textbf{session token} is a cryptographically random (about 128-bit
+entropy) that isn't linked to the username or password. It might look
+like: 4d58f7a-5ff6-4523-a344-f8125381dc9c.
+
+What you \textit{shouldn't} do is to include a password or other secret
+data in a cookie. Not even in encrypted/encoded format. Also never
+authenticate people by checking if their name appears in the cookie
+because anyone can manually set `COOKIE=admin' in their browser.
+
+To get a secure cookie, there are two things we can set:
+
+\begin{itemize}
+    \item \textbf{HttpOnly} means that the cookie is not accessible by
+        JavaScript which means that it is protected against scripting
+        attacks.
+    \item \textbf{Secure} means that the cookie will only be sent for TLS
+        encrypted requests.
+\end{itemize}
+
+We should always try to use these unless you're not sure if you're using
+TLS in which case just leave off the "secure" bit.
+
+JSON web tokens were supposed to be an alternative to cookies for
+non-browser clients such as apps and APIs, but they're really easy to get
+wrong and terrible, terrible things have happened with these in the past.
+
+\subsubsection{SOP, CORS, XSS, CSRF}%
+\label{ssub:SOP, CORS, XSS, CSRF}
+
+\paragraph{XSS: Cross-Site Scripting}%
+\label{par:XSS}
+
+An XSS attack looks like:
+
+\begin{lstlisting}[language=HTML]
+<script>alert("OH NO");</script>
+\end{lstlisting}
+
+Whenever you show user-generated content (such as a blog or forum post),
+remember rule number 1. You don't want people to be able to write their
+own JS to be able to alter the page view or even worse (such as stealing
+data of the person viewing the page).
+
+One of the ways we can avoid this is to HTML escape any user-generated
+content that you display in a HTML page, or offer them some library that
+they can use (like markdown).
+
+Another defence is to use HTTP security headers, where, if it's set, only
+the whitelisted scripts are allowed to execute.
+
+\paragraph{CSRF: Cross-Site request forgery}%
+\label{par:CSRF: Cross-Site request forgery}
+
+Let's say that you are logged into some forum on your computer as well as
+some random bank. On the forum, someone says `Click this
+\underline{link!}', and the code is:
+
+\begin{lstlisting}
+<a href="bank.example.org/transfer?destination=alice&amount=100">link</a>
+\end{lstlisting}
+
+You click on one site that causes another action on another site that
+you're logged into. Most of th responsibility lies with the target site
+(the bank in this case) if it allows this kind of thing to happen but as a
+user you can help by logging out of the important sites when you're not
+using them.
+
+Some of the defences you can employ are to check the referrer and the
+origin of the HTTP headers. If necessary, use the per-request CSRF
+security tokens (more on this in a second). You can also re-authenticate
+before really important operations (such as changing a password). For an
+API, you can also require custom `X-' headers.
+
+CSRF tokens are a one-time token that is a hidden field in a form.
+
+\paragraph{SOP and CORS}%
+\label{par:SOP and CORS}
+
+SOP, or \textbf{Same Origin Policy}, mean that browsers only allow JS
+requests to the same origin (this means the same protocol, host, port,
+etc) as the source of the script.
+
+CORS, or \textbf{Cross Origin Resource Sharing} , is where you set a
+header in your responses to sites that are using open data from some
+resource that you're hosting. You whitelist certain domains that are
+allowed.
+
+\subsubsection{TLS: Transport Layer Security}%
+\label{ssub:TLS}
+
+Let's say that we want to encrypt your traffic with a key so that anyone
+that's listening doesn't know what's going on. The problem with this is
+that an attacker could actually be on the path to the real server, which
+is actually more likely than some rando listening in.
+
+Okay, so this might not work, another idea that might work is that
+browsers have root certificates from CAs built in. Servers buy
+certificates from CAs, so this seems okay. Let's encrypt is a free CA by
+Mozilla that should be good enough for most sites. Always try and use TLS
+if you have a domain name of your own. 
+
+\subsubsection{Password Storage}%
+\label{ssub:Password Storage}
+If you're a genuine idiot, then you'll store passwords in plain text. Just
+don't do this. It's just as bad to store them in base64, or any form of
+encoding because this adds 0 to the security of the password. Hashing is
+also bad because if two people pick the same password, then they get the
+same hash.
+
+What you should do is to pick a random \textit{salt} for each user and
+store the \textit{hash} of the salt and the password so that it doesn't
+show up that users have the same passwords. You can also iterate the hash
+(or \textit{stretch}) to slow down the brute force attacks.
+
+
+
 \end{document}
