@@ -66,6 +66,9 @@ Notes}
 % }}}
 
 % Other packages {{{
+\usepackage{bookmark}
+\usepackage{hyperref}
+\usepackage{hhline}
 \usepackage{lmodern}
 \usepackage[]{amsmath} 
 \usepackage[]{booktabs} 
@@ -1508,6 +1511,8 @@ those. We can also apply the technique of Karnaugh maps.
 And that's it for the Dan Page bit of the course!
 
 \part{Digital Logic and Computer Processors}
+\label{part2}
+
 \section{Data, control, and instructions}%
 \label{sec:Data}
 
@@ -1705,6 +1710,195 @@ The stack/base registers may or may not be general purpose depending on
 the architecture. The offset usually comes from an additional general
 purpose register. An example of indexed addressing based on an array. 
 
+\section{Memory Hierarchy}%
+\label{sec:memory-hierarchy}
+
+The ideal computer and the ideal memory have slightly different
+definitions. The idea computer will have:
+
+\begin{itemize}
+    \item Zero-cycle Latency instruction execution and data supply
+    \item Infinite capacity instruction execution and data supply
+    \item Zero cost instruction execution and data supply
+    \item Perfect Control flow
+    \item Infinite bandwidth data supply
+\end{itemize}
+
+The ideal memory will have:
+
+\begin{itemize}
+    \item Zero access time
+    \item Zero cost
+    \item Infinite capacity
+    \item Infinite bandwidth
+\end{itemize}
+
+Unfortunately, bigger memory means that it takes longer to determine the
+location. Faster is also more expensive because of the memory technology.
+Also, higher bandwidth is more expensive because of the increased need for
+ports, banks, and higher frequency.
+
+\subsection{DRAM}%
+\label{sub:DRAM}
+One bit of data is stored as a charge on the capacitor. It also has one
+transistor for reading or writing. It loses charge when read and it also
+loses charge over time
+
+\subsection{SRAM}%
+\label{sub:SRAM}
+This consists of two cross-coupled inverters that store one bit. Six
+transistors are needed for this (two for each inverter and two for the
+read/write). It retains the memory if it's powered so there's no need for
+a refresh.
+
+\subsection{Memory bank (generic)}%
+\label{sub:memory-bank}
+A memory bank is a 2D storage array of memory cells (made up of either
+SRAM or DRAM cells). To access a cell in the bank, we decode the row from
+the instruction, and activate the lines. Next, we decode the column
+address and select a subset of the row via the bit lines. Finally, we
+amplify the row data and send this as output.
+
+\subsection{Comparisons}%
+\label{sub:SRAM vs DRAM}
+Here is a table showing the differences between SRAM and DRAM:
+
+\begin{center}
+    \begin{tabular}{r|l}
+        \textbf{SRAM} & \textbf{DRAM} \\ \hhline{=|=}
+        Volatile & Volatile \\ 
+        Faster access (no capacitor required) & Slower access (capacitor
+        required) \\ 
+        Lower density & Higher density \\ 
+        Higher cost & Lower cost \\ 
+        No need for refreshing to keep the data & Refreshing is mandatory
+        \\ 
+        Can be used for logic & Capacitors are bad for logic operations
+    \end{tabular}
+\end{center}
+
+Here is a comparison between hard disk against flash drives
+
+\begin{center}
+    \begin{tabular}{r|l}
+        \textbf{Hard disk} & \textbf{Flash drive} \\ \hhline{=|=}
+        Non-volatile & Non-volatile \\
+        Data stored as magnetisation patterns on circular disks & Data
+        stored in floating gate transistors \\
+        Mechanical (has moving parts) & No moving parts \\
+        Slower & Faster \\
+        Cheaper & More expensive
+    \end{tabular}
+\end{center}
+
+\subsection{Locality}%
+\label{sub:Locality}
+Locality just means that things that are nearby are related. For example,
+things that just happened give a pretty good estimate for the future.
+Additionally, things that are close together are normally related (such as
+people you sit close to are normally your friends).
+
+This is the same in memory:
+\begin{itemize}
+    \item \textbf{Temporal locality} is a typical program that accesses
+        the same memory location repeatedly for a short time.
+    \item \textbf{Spatial locality} is a program that references a cluster
+        of nearby addresses. The instructions tend to be in sequence and
+        arrays or data structures are stored in nearby memory locations.
+\end{itemize}
+
+\subsubsection{Caching}%
+\label{ssub:Caching}
+Caching exploits both temporal and spatial locality. Recently accessed
+data is automatically stored in a fast memory because the typical access
+time is much faster (since the memory is physically closer). Similarly,
+information that is stored in memory addresses that are \textit{nearby}
+recently accessed addresses mean that typical access time decreases
+because a program is likely to want to access the nearby memory.
+
+\section{Instruction Set Architectures (ISAs)}%
+\label{sec:ISAs}
+No, an ISA is not one of those bank account. Actually, it's a contract
+between the software and the hardware. More specifically, it's the
+definition of the instructions that are supported by a particular
+processor. The ISA specifies the exact behaviour of instructions fed to
+the processor. The ISA specifies the exact behaviour of instructions fed
+to the processor. The ISA should be designed sympathetically for the
+programming language that will write code for it.
+
+An ISA includes (but is not limited to):
+\begin{itemize}
+    \item Op-codes
+    \item Data types
+    \item Registers
+    \item Memory addressing modes
+    \item Memory architecture
+    \item Interrupt and exception handling
+    \item I/O
+\end{itemize}
+
+An instruction is a definition of a unique operation code as well as some
+contextual information. For example, the instruction `1 01' could be
+decoded with:
+\begin{itemize}
+    \item 1 As the op-code (move in this case)
+    \item 01 as the argument. Here, we have the constant immediate value
+        1.
+\end{itemize}
+
+\subsection{Decoding}%
+\label{sub:Decoding}
+All instructions need to be uniquely decodable. It'd be outrageous if some
+strings decoded to two different things. Some ISAs don't defined all of
+the possible bit-strings, which is allowed, but can cause some problems if
+an undefined instruction is stumbled upon.
+
+\subsection{Creating Instructions}%
+\label{sub:Creating Instructions}
+So, to create an ISA, we need to have a list of instructions and their
+possible arguments. The actual purpose of the ISA will influence which
+instructions make it to the final set of instructions.
+
+Most instructions naturally fall into one of these classes:
+
+\begin{itemize}
+    \item Arithmetic
+    \item Comparison
+    \item Memory 
+    \item Control flow
+\end{itemize}
+
+Simple processors only need those 4 classes, but some high performance
+ones might employ:
+
+\begin{itemize}
+    \item Vector processing
+    \item Digital signal processing
+\end{itemize}
+
+When we select the instructions to be a part of the ISA, we need to think
+about the tasks in hand. There are two categories: RISC and CISC:
+
+\subsection{Categories}%
+\label{sub:Categories}
+
+\subsubsection{RISC}%
+\label{ssub:RISC}
+RISC is the reduced instruction set computer. The aim is to produce a
+minimal set of instructions that are fast and lightweight to execute. Each
+instruction should hold a similar runtime, and complex instructions should
+be made up of a few simple ones. Normally, the instructions in the RISC
+model have a fixed length. RISC machines run fast in general, but they
+need a lot of instructions to do a complex job.
+
+\subsubsection{CISC}%
+\label{ssub:CISC}
+CISC is the complex instruction set computer. They are pretty much the
+opposite of a RISC. If there is a specialised operation to be done, then
+add a dedicated instruction. Because there are a lot of instructions that
+are complicated, the programs are smaller. The processor is normally quite
+complex and slow unfortunately, along with mixed length instructions which
+leads to unpredictability and compiler nightmares. 
 
 \part{8-bit computer and Software Applications}
 \section{Compilers}%
