@@ -1427,13 +1427,13 @@ There is \textbf{binary encoding}:
     S_5 \mapsto \langle 1, 0, 1 \rangle 
 \end{align*}
 
-Or, there is \textbf{One- hot encoding}:
+Or, there is \textbf{One-hot encoding}:
 \begin{align*}
     S_0 \mapsto \langle 1, 0, 0, 0, 0, 0 \rangle \\
     S_1 \mapsto \langle 0, 1, 0, 0, 0, 0 \rangle \\
     S_2 \mapsto \langle 0, 0, 1, 0, 0, 0 \rangle \\
     S_3 \mapsto \langle 0, 0, 0, 1, 0, 0 \rangle \\
-    S_4 \mapsto \langle 0, 0, 0, 0, 1, 0 \rangle 
+    S_4 \mapsto \langle 0, 0, 0, 0, 1, 0 \rangle \\
     S_5 \mapsto \langle 0, 0, 0, 0, 0, 1 \rangle 
 \end{align*}
 
@@ -1655,8 +1655,8 @@ Operand2. For example \lstinline|6, 10, 42|. The exact memory address used
 is embedded in the instruction. This is known as \textbf{direct
 addressing}. The exact memory address used is embedded in the instruction.
 
-Direct addressing has the same pros and cons as Immediate
-addressing~\ref{ssub:immediate}. But, it's a little slower in return for
+Direct addressing has the same pros and cons as immediate
+addressing (\ref{ssub:immediate}). But, it's a little slower in return for
 a larger range.
 
 \subsubsection{Memory-indirect addressing}%
@@ -1899,6 +1899,123 @@ add a dedicated instruction. Because there are a lot of instructions that
 are complicated, the programs are smaller. The processor is normally quite
 complex and slow unfortunately, along with mixed length instructions which
 leads to unpredictability and compiler nightmares. 
+
+\subsection{Options}%
+\label{sub:Options}
+
+There are a few options for ISAs to take into account:
+
+\subsubsection{Instruction choices}%
+\label{ssub:instr-choices}
+For many operations, you may have a set of choices (such as \lstinline|r0 <- r0 + r1|). How many ways can we do this?
+
+We could have multiple accumulators ACC1 and ACC2 such that:
+
+\begin{enumerate}
+    \item \lstinline|ACC1 <- r0|
+    \item \lstinline|ACC2 <- r1|
+    \item \lstinline|ACC1 <- ACC1 + ACC2|
+    \item \lstinline|r0 <- ACC1| 
+\end{enumerate}
+
+This only takes four very simple instructions. Another option would be to
+use a stack:
+
+\begin{enumerate}
+    \item \lstinline|PUSH [r0]| 
+    \item \lstinline|PUSH [r1]| 
+    \item \lstinline|ADD| 
+    \item \lstinline|POP [r0]| 
+\end{enumerate}
+
+Where r0 is assumed to be a memory address. We could even simplify it down
+to three instructions:
+
+\begin{enumerate}
+    \item \lstinline|ACC <- r0          : MOV ACC, r0|
+    \item \lstinline|ACC <- ACC + r1    : ADD r1| 
+    \item \lstinline|r0 <- ACC          : MOV r0, ACC| 
+\end{enumerate}
+
+Or even two:
+
+\begin{enumerate}
+    \item \lstinline|MOV ACC, r1| 
+    \item \lstinline|ADD r0, r0, ACC| 
+\end{enumerate}
+
+How can we possible choose between all of these possibilities? Well, we
+kind of just need to take into account all of the tradeoffs.
+
+Here is a comparison of the tradeoffs:
+
+\begin{center}
+    \begin{tabular}{c|c}
+        \textbf{Tradeoff 1: More instructions $\rightarrow$ more bits} &
+        \textbf{Tradeoff 2: More operands $\rightarrow$ more bits} \\ \hhline{=|=}
+        More instructions, greater information & More bits, more work \\
+        \hline
+        More space, more energy & More space, more energy
+    \end{tabular}
+\end{center}
+
+The choices of instruction specificity really impacts how a machine might
+be programmed. It can imply a choice of paradigm, and here are some
+examples:
+\begin{itemize}
+    \item Implicit source and destination $\rightarrow$ stack machine
+    \item Implicit destination $\rightarrow$ Accumulator machine
+    \item Explicit source and destinations $\rightarrow$ register machine.
+\end{itemize}
+
+Now, we need to cover the useful space of execution needs. This means that
+we need no repetition, no coverage where it's not needed, Minimum size
+to get the job done, check if the instruction inclusion is harmful
+(Amdahl's law).
+
+\subsection{Amdahl's law}%
+\label{sub:Amdahl's law}
+If a new instruction is added to speed up an operation by $s$ times, this
+law gives the maximum overall speedup:
+
+\begin{align*}
+    \text{speedup } = \frac{s}{1+f(s-1)}
+\end{align*}
+
+Where $0 \le f \le 1$ is the fraction of time spent NOT running the
+operation in question in the original design.
+
+\subsection{Encoding instructions}%
+\label{sub:encoding}
+Now we've selected our set of instructions, we need to encode them
+\textit{unambiguously}. A common way to separate them is to do it into
+\textbf{op-codes} and \textbf{operand} areas. 
+
+Space is a major factor in deciding the instruction encodings. Ultimately,
+anything can be improved at the cost of it taking more space. The
+instruction lengths can vary, too. Some instructions need to provide more
+information than others and therefore it'll be a longer instruction. If an
+instruction can be shorter, then that's good. Variable length instructions
+can save space too.
+
+Unfortunately, it's not all plain sailing to use variable length
+instructions:
+
+\begin{center}
+    \begin{tabular}{l|p{65mm}}
+        \textbf{Pros} & \textbf{Cons} \\ \hhline{=|=}
+        Size efficient & Almost infinite amount of possibilities causing
+        complex decoding \\ \hline
+        Can be extended to support more operands & Pipeline slowdown \\
+        \hline
+        Optimal in some sense & 
+    \end{tabular}
+\end{center}
+
+In comparison, fixed length instructions might be sub-optimal. They also
+might limit the length of immediates. The major advantage is that it has
+a simplified decode stage. It also tends to be a winner in most modern
+designs.
 
 \part{8-bit computer and Software Applications}
 \section{Compilers}%
@@ -2470,6 +2587,58 @@ wires, and once 3 change state, the recipient responds. This means we can
 encode 20 values. These two aren't hugely used, but some psychopaths do
 use it.
 
-% TODO resume david may 3 from bottom 17 minutes
+\subsection{Transferring data}%
+\label{sub:Transferring data}
+When we communicate between devices, we need a way to transfer the data.
+When a device receives some information, it has to take it into some flip
+flop to be able to understand the data. Unfortunately, the flip flop COULD
+change state at the exact same time as the clock signal, which would make
+it enter the meta-stable state. As long as you wait a while, the flip flop
+will stabilise, but if the circuit isn't designed appropriately, then the
+computer will fail (a mistake that has actually been made in the past).
+
+Now we know how it works physically, we need to know how to code these. We
+could of course have another register (or a special memory location) that
+behaves just like any other memory location, but the memory is solely
+reserved for data transfer. Normally, we have a system to allow the
+program to transmit data (or wait to communicate) while the program is
+still going (asynchronously), and this is usually achieved through
+interrupts.
+
+\subsection{Interrupts}%
+\label{sub:Interrupts}
+The basic idea is that the program tries to communicate some data, and
+then the interrupt occurs once the transfer has completed, meaning that
+the program is able to continue supplying data.
+
+In order to make an interrupt system work, we need to transfer control on
+some specific address. This is kind of like a subroutine call, but it can
+happen at any point in time. We also need to restore the position we were
+at. So, unlike a subroutine call, we don't always have the location of the
+program, so we need to save the state automatically.
+
+Because of this, we have another register (where the PC is transferred)
+before the control is transferred to the desired device. On top of this,
+the address for the control to be handled to is stored at the bottom of
+memory and they are called `\textbf{interrupt vectors}'.
+
+We have another thing called an `in kernel' flag. The \textit{kernel} is
+the innermost part of the operating system is called the \textbf{kernel},
+and the flag denotes whether or not we are in the kernel (or handling an
+interrupt in other words).
+
+If we are trying to transfer some data to the buffer, and then we get
+another interrupt to get some data from the buffer, we might lose some
+data. We therefore need some safeguard to stop the interrupts getting data
+from the same buffer once the interrupt is received.
+
+An optimisation of this can be used and this is quite important. If we
+have some memory system, and some processor able to access the memory (as
+well as some I/O), then when we transfer data from the I/O, the process is
+very similar to what we discussed above. Somewhere in memory space, we
+want to create a situation where the user cannot corrupt the memory. We
+have some system that protects the program from overwriting the kernel (so
+that we have something left if a program crashes). The kernel also does
+some scheduling (like the OS does). 
 
 \end{document}
