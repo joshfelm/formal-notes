@@ -1,0 +1,289 @@
+%%=====================================================================================
+%%
+%%       Filename:  oop.tex
+%%
+%%    Description:  A quick overview of OOP
+%%
+%%        Version:  1.0
+%%        Created:  15/05/19
+%%       Revision:  none
+%%
+%%         Author:  Josh Felmeden (), nk18044@bristol.ac.uk
+%%   Organization:  
+%%      Copyright:  Copyright (c) 2019, Josh Felmeden
+%%
+%%          Notes:  
+%%
+%%=====================================================================================
+
+% Preamble {{{
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+\usepackage{hhline} 
+\usepackage{mathtools} 
+\usepackage[T1]{fontenc}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{A quick overview of OOP}
+\rhead{Josh Felmeden}
+\usepackage{hyperref} 
+% }}}
+
+% Listings {{{
+\usepackage[]{listings,xcolor} 
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=Java,
+    backgroundcolor=\color{lstgrey},
+    frame=single,
+    xleftmargin=0.7cm,
+    frame=tlbr, framesep=0.2cm, framerule=0pt,
+    basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+    captionpos=b,
+    tabsize=2,
+    keywordstyle=\color{Magenta}\bfseries,
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Yellow},
+    commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+% }}}
+
+
+% Other packages {{{
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet} 
+\usepackage{amsmath} 
+\usepackage{booktabs} 
+\usepackage{tcolorbox} 
+\usepackage[symbol]{footmisc} 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+% }}}
+
+% Title {{{
+\title{A quick overview of OOP}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+\pagenumbering{roman}
+\maketitle
+\tableofcontents
+
+\newpage
+\pagenumbering{arabic}
+
+\section{An object's Birth}%
+\label{sec:An object's Birth}
+
+An object in Java is probably the most crucial piece of information
+(because it's called \textbf{object} oriented programming duh). An object
+has behaviour, attributes, and identity. An object combines both
+\textit{data} and \textit{methods} (which manipulate the data) in a single
+unique entity.
+
+A \textbf{class} is like the blueprint of an object. Classes act like a
+module or unit of description. Here is an example class:
+
+\begin{lstlisting}
+class Robot {
+    String name;
+    int numLegs;
+    float powerLevel;
+
+    void talk(String phrase) {
+        if (powerLevel >= 1.0f) {
+            System.out.println(name + " says " + phrase);
+            powerLevel -= 1.0f;
+        } else {
+            System.out.println(name +  " is too weak to talk.");
+        }
+    }
+
+    void charge(float amount) {
+        System.out.println(name + " charges.");
+        powerLevel += amount;
+    }
+}
+
+\end{lstlisting}
+
+A class is different to an object. Creating an object is called
+\textit{instantiating} an object.
+
+\section{Java basics}%
+\label{sec:basics}
+Remember, a class is an immutable blueprint for an object. It has both
+methods and fields. An object is a stateful and unique instantiation of a
+class. Remember, a class is an immutable blueprint for an object. It has both
+methods and fields. An object is a stateful and unique instantiation of a
+class.
+
+Some people don't like Java because they say that `nouns' (objects)
+shouldn't dictate program structure. It potentially overemphasises data
+over algorithms. Additionally, classes and their relations put limitations
+and rigidity on reusability and modularity. It's often difficult to reform
+the code for parallelisation and so on
+
+People also say that Java is stupidly verbose (wordy) and this doesn't
+need to be the case.
+
+Java is kind of like C, except that lots of things are automated like:
+\begin{itemize}
+    \item Exception handling
+    \item Garbage collection
+    \item Default values
+\end{itemize}
+
+It also doesn't use pointers which is really nice.
+
+\subsection{Static elements}%
+\label{sub:static}
+Static methods can access static data and can change the value of it.
+Static methods are unable to use non-static data members or call
+non-static methods directly. Static code blocks can be used to initialise
+the static data members, and more importantly, they are executed before
+the main method at the time of class loading.
+
+\section{An object's life}%
+\label{sec:life-object}
+\textit{Attributes} capture what objects can be. Each object has its own
+copy of attributes, and they can be a few things:
+\begin{itemize}
+    \item Plain data types (such as bool, char, int, ...)
+    \item References to other objects
+    \item ...
+\end{itemize}
+
+Methods, on the other hand, capture what objects actually do. Methods take
+parameters and return values. They are able to be \textit{overloaded}
+(same name, different parameters).
+
+\subsection{References}%
+\label{sub:References}
+When we write something like:
+
+\begin{lstlisting}
+Adder adder = new Adder();
+\end{lstlisting}
+
+Here, `adder' is NOT an object. It's just a reference to an object. In
+fact, we can create many more references to the same object. We're not
+allowed to create a reference to nothing.
+
+\subsection{the Heap}%
+\label{sub:the Heap}
+The heap is memory that's set aside for dynamic allocation. Unlike the
+stack, there's no enforced pattern to the allocation and deallocation of
+blocks from the heap, so you can allocate a block at any time and free it
+at any time. This means that it's a lot more complicated to keep track of
+which parts of the heap are allowed to be freed or allocated at any given
+time. We look at one of the methods in computer architecture actually. 
+
+\subsection{Reference equality}%
+\label{sub:reference}
+The `==' operator checks for equality just as you might expect.
+Unfortunately, it refers to the reference equality, not the equality of
+object attributes. If we want to check whether two different objects have
+the same value, we need to use the \lstinline|equals()| method.
+
+\subsection{This keyword}%
+\label{sub:This keyword}
+The `this' keyword provides a reference to the current object whose method
+is being executed. It can also be used inside a method or constructor, but
+not in a static element. Within a constructor, you can also use this in
+order to refer to another constructor method of the current object under
+construction.
+
+\subsection{Object scope}%
+\label{sub:Object scope}
+The cope of argument variables and local variables are the same as in C.
+However, objects do not just vanish when the creation reference goes out
+of scope. As long as there's a single reference somewhere in the program,
+the object is kept on the heap.
+
+\section{Inheritance}%
+\label{sec:Inheritance}
+Sub-classes and polymorphism are parts of OOP that are used quite a lot.
+In order to fight code duplication with inheritance, we can define a
+parent class that defines attributes and methods that are common to the
+subclasses you plan to create. After this, we just extend the parent class
+with subclasses that add and/or override the parent class's
+characteristics.
+
+An \textbf{abstract class} is one that prevents us from making instances
+of a class that we apply the abstract keyword to. They are often ones that
+are conceptual and don't need instances (such as a generic shape). The
+benefits of inheriting means that we don't have to repeat ourselves. The
+code can also be maintained way easier, and it also facilitates
+\textbf{polymorphism} (which is a reference that can be made to any object
+of a sub-class of the references class).
+
+\subsection{Dispatch}%
+\label{sub:Dispatch}
+When an overridden method is called via a reference, the actual method to
+execute is selected based on the \textit{type} of the object referenced,
+rather than the reference type. This is known as dynamic method dispatch.
+Since this dispatch decision cannot be made at compile time, dynamic
+dispatch refers to the choice of code execution (so the method call)
+resolved at runtime.
+
+Dispatch is based on two or more types:
+
+\begin{itemize}
+    \item \textbf{Single dispatch}, which could be something like
+        \lstinline|mammal.makeNoise();|. This resolves mammal to its
+        underlying type and calls its make function rather than the
+        mammals.
+    \item \textbf{Double dispatch}, which looks like \lstinline|(mammal1 &
+        mammal2).makeNoise();|. You might do this for collision detection
+        in games (for example).
+    \item \textbf{Multiple dispatch} which we'll look at now
+\end{itemize}
+
+\subsubsection{Multiple Dispatch}%
+\label{ssub:Multiple Dispatch}
+
+
+\paragraph{Big switch}%
+\label{par:Big switch}
+
+In the case of rock paper scissors, we can just write out each possible
+outcome in a big switch statement. This can be good because it means that
+the code is relatively easy to step through. Unfortunately, it makes
+adding or removing types a big job that won't be verified by a compiler.
+We also need a type field for all types and we have to keep track of all
+the types. Switch statements also tend to grow and show up as code
+replication throughout the project.
+
+\paragraph{Function table}%
+\label{par:Function table}
+
+
+
+\end{document}
