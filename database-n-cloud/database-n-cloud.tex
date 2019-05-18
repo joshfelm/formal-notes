@@ -1946,6 +1946,216 @@ store the \textit{hash} of the salt and the password so that it doesn't
 show up that users have the same passwords. You can also iterate the hash
 (or \textit{stretch}) to slow down the brute force attacks.
 
+In general, just use a library. Don't implement your own crypto without a
+PhD or you'll have a bad time.
+
+\subsection{Database security}%
+\label{ssec:Database security}
+The most dangerous thing that is posed to a database is an SQL injection.
+With this tool, many accounts can be breached because the data can be
+dumped out of the database.
+Also, leaks happen in the weirdest places, like VTech was breached because
+people just don't really give it a decent password. Also, there was almost
+0 protection on the data. The passwords were hashed with MD5, which is
+actual trash.
+
+\subsubsection{SQL injection}%
+\label{ssub:SQL injection}
+An SQL injection happens where the data from a form is interpolated into a
+string, and then the whole string is parsed as SQL. Because the user could
+actually provide SQL code in the form, this becomes dangerous. An example
+of bad code is:
+
+\begin{lstlisting}[language=SQL]
+execute("SELECT * FROM Member " + 
+        "WHERE login_name = '" + name +
+        "' AND password = '" + pw + "'")
+\end{lstlisting}
+
+If we supply the name as `David', and the password as \lstinline|' OR '' = '| 
+then the equivalent SQL statement produced would be:
+
+\begin{lstlisting}[language=SQL]
+SELECT * FROM Member
+WHERE login_name = 'David'
+AND password = '' OR '' = ''
+\end{lstlisting}
+
+Since \lstinline|'' = ''| always evaluates to true, we can just get the
+results from this database (it will return everything). The way we can fix
+this is to have prepared statements:
+
+\begin{lstlisting}[language=SQL]
+s = prepare("SELECT * FROM Member " +
+            "WHERE login_name = ? " +
+            "AND password = ?")
+s.execute(name,pw)
+\end{lstlisting}
+
+This eliminates the risk because the data is never parsed as SQL.
+
+One way that people think will fix it is to backslash escape (insert \
+before ' and \ ). This is because user supplied data can contain the
+escape characters so that the user data gets parsed as SQL.
+
+\subsubsection{Direct Object reference}%
+\label{ssub:Direct Object reference}
+
+The my account page for a website could look something like
+`www.kidspass.co.uk/accounts/\textit{ID}'. You could just change
+the account ID in the URL and see someone elses account (something that ha
+happened to online banking services too in previous years).
+
+An example could be that your website has three style sheets (red.css,
+green.css, and blue.css) in the folder \lstinline|/var/www/styles|. Your server
+responds to `GET /page?colour=red.css' with the page and then the contents
+of `/var/www/ + colour'.
+
+But, what if we request \lstinline|GET /page?colour=../../etc/hosts|? This would
+get us \lstinline|/var/www/../../etc/hosts = /etc/hosts|. The host file
+often reveals the internal network configuration. Other interesting files
+are \lstinline|/etc/passwd| which contains user account information. This
+attack gets any file on the system that the web server has access to. Of
+course, we could solve this by sanitizing the colour parameter, but the
+root problem is that it's a direct reference to a filename. 
+
+A way to solve it would be to make it an indirect reference. The way we do
+this would be to have the request as \lstinline|GET /page?colour=1|, and
+then the SQL would be \lstinline[language=SQL]|SELECT file FROM Styles WHERE id = ?| and then have a table like:
+
+\begin{center}
+    \begin{tabular}{c|l}
+        \textbf{id} & \textbf{file} \\ \hhline{=|=}
+        1 & red.css \\
+        2 & green.css \\
+        3 & blue.css
+    \end{tabular}
+\end{center}
+
+This indirect reference means that the user can only pass an id that the
+application tries to match against the styles table to get a filename. An
+invalid id cannot fetch a file that's not in the table. Of course, you
+don't have to use a database for this, but if you do protect it against an
+SQL injection. Compared to sanitizing the filename, it's a bit harder
+because you have to register all valid files in the database.
+
+Another example is that you run a bank website. When customers log in,
+they're redirected to
+\lstinline|https://acme-bank.example.com/user/userid|. What happens if
+someone edits the user id in the URL bar? The vulnerability is that
+anything that is sent by the browser can be modified by the user.
+
+Handling a \lstinline|GET /account/id| request could look like:
+
+\begin{lstlisting}[language=SQL]
+execute("SELECT * FROM Account " +
+        "WHERE id = ?", id);
+execute("SELECT * FROM Account " +
+        "WHERE id = ? AND owner = ?",
+        id, currentUser());
+\end{lstlisting}
+
+Now, the currently logged in userid is used in the query, so that a user
+is not able to refer to someone else's account.
+
+\subsubsection{Session keys}%
+\label{ssub:Session keys}
+Session keys are the maximum security possible, but it's high effort.
+Whenever a user logs in, it finds all the objects that they have access to
+and then create a temporary session key for each one. Only ever accept the
+session keys as references. Again, you can't reference someone else's
+account. This is an indirect reference.
+
+A \textbf{business key} is something that your users can understand (such
+as a username etc) and it's good to keep business keys and primary keys
+(from the database) separate. If security measures require it, hide the
+database keys from users. The security gain is that you need someone's
+database key to refer to their objects (accounts, documents etc.) which is
+different to their username, which you can get by social engineering for
+example. This also solves the problem of people wanting to chang their
+username and people complaining because their automatically assigned
+customer number ends with 666 or other such ridiculousness.
+
+Whenever a user tries to access an object, check whether the user is
+allowed to access this object. The workflow for \lstinline|GET /account/id| 
+is:
+
+\begin{enumerate}
+    \item Sanitize id
+    \item Get the subject (that's currently logged in)
+    \item Check whether this subject is allowed to access this object
+    \item Log the request if necessary
+    \item Return the object if it's allowed.
+\end{enumerate}
+
+Sanitizing the id means that we reject things like `aaa' if it's supposed
+to be a number (on top of the standard SQL protection).
+
+\section{The Cloud}%
+\label{sec:The Cloud}
+
+Cloud computing is really good because:
+\begin{itemize}
+    \item Faster speed to market
+    \item Optimization of resources
+    \item Increased operational efficiency
+\end{itemize}
+
+Cloud computing is also able to scale along both axes. \textit{Vertical
+scaling} means that we just get a bigger server. This technique is good
+because we don't need to change the code. Unfortunately, it's costly and
+also servers can't grow indefinitely. Conversely, \textit{horizontal
+scaling} means that we just get lots of small servers. You only get an
+incremental cost, which is nice, but unfortunately, we now have a
+distributed system.
+
+\subsection{AWS}%
+\label{ssub:AWS}
+AWS is a really cool service that allows us to do loads of different
+things. In the example of hosting a wordpress blog, we use Amazon Route 53
+for the DNS, and a single Amazon EC2 instance with full stack on the host.
+This has its risks, though, because it has a single point of failure. This
+method is suitable for 1 user.
+
+If we wanted something with more than 100 users, this wouldn't work, so we
+can separate the single host into the web host, and the database host. We
+then use a manage database (RDS). With this service, there's no failover,
+which could prove to be bad.
+
+If we wanted some even bigger service, we would need it to be highly
+available. We could have 2 web services that are in different availability
+zones with elastic load balancing. This is still not perfect because it's
+got moderate performance but low efficiency.
+
+Finally, if we wanted a big infrastructure (such as about 100,000 users),
+then we just shift some load around, such as static content to S3 storage
+and cloudfront CDN.
+
+\subsubsection{Autoscaling}%
+\label{ssub:Autoscaling}
+Autoscaling is important because sometimes shit blows up (such as
+black Friday). For this, it adds and removes servers based on load, which
+means that it's way more cost effective. It also increases elasticity and
+resilience of service.
+
+\subsection{Something as a Service (XaaS)}%
+\label{sub:XaaS}
+
+The three things that we can have as a service are:
+\begin{itemize}
+    \item Infrastructure (IaaS) - Rent virtual machines directly
+    \item Platform (PaaS) - Rent machines and OS and basic SW stack (add
+        your own applications)
+    \item Software (SaaS) - rent software and run in the cloud
+\end{itemize}
+
+It's good because it has a lower management overhead. You also don't need
+to buy or maintain your own hardware and security updates are managed for
+you. \textbf{Performance and reliability} mean that the data centres are
+less likely to fail than the cables to your own buildings. It's also
+really \textbf{scalable}, and most startups wouldn't be able to exist
+without this.
+
 
 
 \end{document}
