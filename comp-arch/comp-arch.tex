@@ -2639,6 +2639,162 @@ very similar to what we discussed above. Somewhere in memory space, we
 want to create a situation where the user cannot corrupt the memory. We
 have some system that protects the program from overwriting the kernel (so
 that we have something left if a program crashes). The kernel also does
-some scheduling (like the OS does). 
+some scheduling (like the OS does).
+
+\subsubsection{Entering the Kernel}%
+\label{ssub:entering-kernel}
+
+
+One of the earliest protection protocols to protect the kernel was to just
+split the memory in half and then the programs can only access the bits in
+memory that won't corrupt the whole operating system. If we are operating
+in the kernel, then the `inK' flag is set, otherwise we need to set the
+region of memory that programs are able to access. These limits need to be
+stored within the kernel so that the program is unable to edit the limit
+themselves and therefore access the kernel. There will be some code that
+kinda looks like:
+
+\begin{lstlisting}[language=[Visual]Basic]
+if inK then
+    mem[oreg] <- areg
+else
+    if oreg < as then
+         mem[ab + oreg]
+            <- areg
+    else error 'Outside the region (inside the kernel) and therefore error
+\end{lstlisting}
+
+If the program was to fail in some way (such as dividing by 0), then we
+might have some entry into the kernel, and the kernel will probably have
+some idea of why the kernel is being entered. The error reasons might also
+be encoded in such a way that we know what the error is. In the same way
+that the interrupt request uses a vector, we get this in the same way.
+
+In addition to device drivers, a kernel normally allocates memory and
+I/O devices to application programs. It also shares the processor#s time
+between several programs. This is known as scheduling.
+
+\subsubsection{Types of scheduling}%
+\label{ssub:types}
+
+Some of the interrupts that might occur are:
+\begin{itemize}
+    \item \textbf{Timer} - When this occurs, we update the current time,
+        and see if there's any consequence because of this (does a program
+        overrun its timeslice etc). Also, some programs request to be
+        woken up at a certain time.
+    \item \textbf{Input interrupt} - This means that a program might want
+        to store some data, so it puts the data in the buffer, and this is
+        what this is for.
+    \item \textbf{Kernel case input} This means that if the buffer is not
+        empty, it will hand over the data to the program, or if it's
+        empty, it will deschedule the program, and reschedule the next
+        one.
+    \item \textbf{Output Interrupt} - This will try to take something out
+        of the buffer.
+    \item \textbf{Kernel case output} - Almost the same as above.
+    \item \textbf{Page Fault} - We have pages as the unit of transfer
+        between the memory, and if the program tries to reach a page of
+        memory that doesn't belong to it, then we get a page fault.
+    \item \textbf{Kernel calls} - Loads of these
+    \item \textbf{Errors} - Divide by 0, other such issues.
+\end{itemize}
+
+Due to the inK flag, one of these interrupts cannot happen at the same
+time as the in kernel processing. Because we have interrupts, it doesn't
+hold up the program for long and it can continue to be processing other
+things
+
+\section{Memory systems}%
+\label{sec:Memory systems}
+In our simple machine, pretty much all of the instructions executed at the
+same time, but as the transistors get smaller, they get faster, but
+unfortunately, the wires do not hold this same trait. Therefore, we need
+to try to mitigate this effect. Accessing memory is all about
+communicating data.
+
+A \textit{memory array} is a large collection of cells that are connected
+to a buffer. If you did nothing to combat the latency, then the
+instruction execution time would be 30\% waiting for the data transfer.
+There are a few methods to combat this, and one of them is minimisation
+hiding. This means that when the computer is waiting for something to
+happen, then it enables other things to happen in the background.
+
+\subsection{Latency hiding}%
+\label{sub:Latency hiding}
+
+\textbf{Latency hiding} is achieved by a hierarchy of memories. When we
+look at the CPU, we have some registers (that can be accessed very fast).
+We also have a cache, which can hold a moderate amount of data. This data
+can be accessed within a cycle or two, and it's organised so that it can
+take data from memory when asked, and write it back when it's done. It's
+also pretty close to the memory. This is the level one cache. After this,
+there's a level 2 cache, and there might be some more caches. A level 3
+cache is shared by all of the CPUs, whereas the level 1 and 2 are
+individual to the CPUs. After this, we leave the chip, and then we have
+the larger memory, but we won't worry about this.
+
+When the data is fetched into the respective caches, it has to get passed
+down through the caches. It may turn out that the caches fill up, and
+there's a method to migrate data from the high latency memory to the lower
+level caches. Ideally, we want the majority of these to be doing the read
+and write to be using stuff from the L1 cache.
+
+\subsubsection{Direct map}%
+\label{ssub:Direct map}
+What happens is that we have some lines in the cache, and lots of lines in
+the memory. We have $2^m$ lines in memory, and there are $2^c$ lines in
+cache. The cache line has words of data (maybe 4) corresponding to the
+memory address, a tag (which is used to determine which line it's
+currently holding), one bit called \textit{valid} (which sees if anything
+is in the line) and one called \textit{dirty} (which means something has
+been written to it and therefore it needs to be written back into main
+memory). This method is known as a direct map cache. The issues we have is
+that it's possible that the cache can just be continually overwritten.
+Programs also access a lot of different locations. It might turn out that
+the way the memory is distributed, the data is really far apart so then we
+suffer performance drops. This scheme is pretty cheap and cheerful, but
+it's rarely used.
+
+\subsubsection{Associative}%
+\label{ssub:Associative}
+Here, we are allowed to put any line of the memory in any line in the
+cache. Now, the tag part has to be bigger. The disadvantage of this is
+that we don't know what to get rid of when we want to get a new line into
+the cache. We can use the `least recently used line' to get rid of that,
+but it's really hard to know which one is used last because it's so low
+level (it's really expensive). The strategy normally used is that there's
+a random line deleted. Again, this isn't really used.
+
+\subsubsection{Set associative}%
+\label{ssub:Set associative}
+This is the most common technique used. There is a set of lines in the
+cache, each has a number of lines and then we have a mapping scheme. It's
+like a direct map cache, because by looking at the line, we know what set
+it's going to go into. The issue of deleting is the same as the direct
+map, but we delete a whole set. Because of the 4 or 8 lines, we lose the
+risk of having a collision.
+
+\subsection{Paging}%
+\label{sub:Paging}
+A page has a header that is split into two halves, the Page address and the
+Offset. There is also a page table, and the page address corresponds to a
+place in the page table. The page table gives a mapping into physical
+memory and then the offset corresponds to a word. It's possible that we
+address something that doesn't have an address because it looks as though
+the memory is contiguous (but it isn't), and then there could be no
+physical address. When this happens, we get a page fault (which causes an
+entry to the kernel). What the kernel then does is that it finds where the
+page actually is, allocate it as a new page, update the translation, and
+then return control.
+
+This is used so that programs that are too big to fit in memory can still
+be run. This can possibly slow everything down. The page table is pretty
+big you know. Also, there's two accesses to memory which therefore slows
+it down. Because of this, we implement a new buffer for the page table
+under the assumption that when we access something, we'll probably want
+the surrounding data too.
+
+This was discussed above 
 
 \end{document}
