@@ -2654,7 +2654,7 @@ stored within the kernel so that the program is unable to edit the limit
 themselves and therefore access the kernel. There will be some code that
 kinda looks like:
 
-\begin{lstlisting}[language=[Visual]Basic]
+\begin{lstlisting}
 if inK then
     mem[oreg] <- areg
 else
@@ -2671,7 +2671,7 @@ be encoded in such a way that we know what the error is. In the same way
 that the interrupt request uses a vector, we get this in the same way.
 
 In addition to device drivers, a kernel normally allocates memory and
-I/O devices to application programs. It also shares the processor#s time
+I/O devices to application programs. It also shares the processors time
 between several programs. This is known as scheduling.
 
 \subsubsection{Types of scheduling}%
@@ -2795,6 +2795,6 @@ it down. Because of this, we implement a new buffer for the page table
 under the assumption that when we access something, we'll probably want
 the surrounding data too.
 
-This was discussed above 
+This was discussed above in locality (\ref{sub:Locality})
 
 \end{document}
