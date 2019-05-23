@@ -1510,6 +1510,7 @@ those. We can also apply the technique of Karnaugh maps.
 
 And that's it for the Dan Page bit of the course!
 
+\newpage
 \part{Digital Logic and Computer Processors}
 \label{part2}
 
@@ -2017,8 +2018,9 @@ might limit the length of immediates. The major advantage is that it has
 a simplified decode stage. It also tends to be a winner in most modern
 designs.
 
+\newpage
 \part{8-bit computer and Software Applications}
-\section{Compilers}%
+\section{The simple computer}%
 \label{sec:Compilers}
 We're going to be looking at an 8 bit machine and how we'd go about
 building a machine. Anytime you start with producing a computer or
@@ -2379,7 +2381,7 @@ don't know how many lines of code we need to process before placing the
 fixes up the offset. The offset might be longer than the 4 bits that we
 get for the buffer, so we might also need a prefix. Jesus, who does this?
 
-\section{Changing instruction sets}%
+\section{Bootstrapping}%
 \label{sec:changing-sets}
 \textbf{Bootstrapping} is where you write a language in its own language.
 It originated in something like 1960. When we move a language from one
@@ -2793,8 +2795,130 @@ be run. This can possibly slow everything down. The page table is pretty
 big you know. Also, there's two accesses to memory which therefore slows
 it down. Because of this, we implement a new buffer for the page table
 under the assumption that when we access something, we'll probably want
-the surrounding data too.
+the surrounding data too. This buffer is called the \textbf{translation
+location buffer}. This was discussed above in locality
+(\ref{sub:Locality}).
 
-This was discussed above in locality (\ref{sub:Locality})
+\section{Parallelism}%
+\label{sec:parallelism}
+Parallelism is the answer to the slowing down of sequential machines. We
+are reaching a limit of the performance of the machines that work
+sequentially, and we are discovering new techniques for parallelism.
+
+\textbf{Pipeline} is another technique that is possible. If we have a
+process that is able to be broken up into steps, we take data into one
+end, and then process them at each operation; passing the result onto each
+subsequent process. Pipelines turn up in a number of places. If pipelining
+isn't enough, we can do something like parallel pipelining, or stream
+processing.
+
+In movie rendering (or any graphics rendering) we can use large clusters
+with a main node in the middle, so that it can distribute the tasks to one
+of the nodes in the cluster, and then they return as and when they finish
+their task, only to be handed another one later.
+
+When we are trying to model something physical, we can normally break it
+up into a load of pieces. Let's take the example of graphics processing.
+We can break up all of the processes, and make each processor (if there
+are multiple) do a little bit each. This is known as \textbf{domain
+decomposition}. Of course, you can use any of these ideas in combination.
+
+It is important to note that each of the parallel techniques will then be
+running sequentially. The most straightforward method to speed this up is
+to pipeline, because each instruction happens one after the other (the
+fetch execute cycle), and so we reuse each result into the next
+instruction. It could be that the instructions are not sequential, and
+therefore there is no need for a sequential model, and we can parallelise
+this. 
+
+\subsection{Super scalar processing}%
+\label{sub:Super scalar processing}
+
+
+Normally, there are four stages, \textit{fetch, decode, execute}, and
+\textit{write back}. You can do these one at a time, or we can use a
+pipelining method to do a lot at once. If we look at the processing of 4
+instructions (where each space is a timeslice):
+
+\begin{lstlisting}
+1: F D E W
+2:   F D E W
+3:     F D E W
+4:       F D E W
+\end{lstlisting}
+
+This sounds nice, but there are some snags. If we have the simple
+pipeline, then the operand of the first instruction would not be able to
+be accessed by the second instruction because it hasn't been written yet,
+so the pipeline is just waiting for a while so it's a waste of time. A
+technique to avoid this is called \textbf{forwarding}, where it becomes
+possible to feed the results forward into the next instruction.
+
+Branches are the issues we face because if we start executing instructions
+before we know whether they will be executed is stupid. Unconditional
+branches are easy to deal with because we know that they'll We also have
+things called \textbf{branch predictors}. If we have a branch if true
+branch, then it's probably a loop, and it almost always loops back, so the
+branch predictor predicts the branch to go back up to the top of the loop.
+There are some quite complicated branching predictors nowadays.
+
+Another method of parallelism is that we fetch four instructions at the
+same time. Each of these instructions is then decoded and sent to
+execution units (stored in reservation stations before hand). Somewhere,
+the register file is accessed to learn what operands are needed. The
+instruction is checked to see whether the operand exists yet, and if it
+does, then it continues on to the execution unit. They may come out in a
+completely different order, so we need something called a \textbf{reorder
+buffer}, so that they are sent back to the registers in the right order.
+Sometimes, the reservation stations might be incomplete, because one of
+the sources haven't been computed yet. What happens is that once the items
+come out of the bottom, we see if any of the destinations match any of the
+waiting operands, and if they are, they are fed in there straight away.
+
+\subsection{Concurrency}%
+\label{sub:concurrency}
+
+A common arrangement of the caches are that they have a shared L3 cache
+(while each processor has their own L1 and L2 cache), so that we can share
+all of the updates among all of the processors (known as concurrency).
+
+\subsection{Single instruction, multiple data}%
+\label{sub:simd}
+
+\textbf{Single instruction, multiple data} is a technique where we have a
+collection of execution units, and they all have some memory they can
+access, but they have a single piece of control logic that distributes the
+instruction through all of them, so they all perform the same action.
+The same kind of idea can appear in other forms. In the 1990s, they built
+this into the heart of the processor. If you have a 64-bit word, you can
+split this up into 4 16-bit words. Now, we just need some instructions to
+do some operations on the 16-bit words that would yield the same result as
+if we were to do it on a single 64-bit word.
+
+If we are building a cluster, we can just have a big switch that sends
+stuff to the different parts, but it can be slow and not good when
+used in the context of high performance computers. The switch or network
+connects a bunch of processors (e.g. eight). This will produce $n \times
+(n-1)$ connections. If $n$ is really big, it means that there becomes a
+huge amount of wires. This means that we really can't fully connect it
+(even though that would be really nice). Instead, we put some form of
+network. The network would be a collection of switches (some of the
+switches actually do connect the processors) and then some \textit{edge}
+switches. It kinda looks like a CNN. It's pretty good cause it has $\log
+n$ efficiency.
+
+\subsection{Hyper cube}%
+\label{sub:Hyper cube}
+A hyper cube consists of the following:
+
+\begin{itemize}
+    \item First order hyper cube is a dot
+    \item Second order is a line
+    \item Third order is a square
+    \item Fourth order is one with eight nodes
+    \item Fifth order is one with 16
+\end{itemize}
+
+And so on. Clearly 
 
 \end{document}
