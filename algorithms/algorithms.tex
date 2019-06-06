@@ -231,9 +231,9 @@ the Heap Property. The steps are really simple:
         \textbf{Heapify()} 
 \end{enumerate}
 
-\paragraph{Heapify()}%
-\label{par:Heapify()}
-Leg $p$ be the key of a node and let $c_1, c_2$ be the values of its
+\subsubsection{Heapify()}%
+\label{ssub:Heapify()}
+Let $p$ be the key of a node and let $c_1, c_2$ be the values of its
 children.
 \begin{itemize}
     \item Let $c = \max\{c_1,c2\}$
@@ -569,7 +569,273 @@ this.
 
 \subsubsection{When substitution gets weird}%
 \label{ssub:When substitution gets weird}
-Let's look at an example where substitution gives us a weird output.
+Let's look at an example where substitution gives us a weird output. Let's
+give an upper bound on the following recurrence:
+
+\begin{align*}
+    T(1) &= 1 \\
+    T(n) &= T(\lceil n/2 \rceil) + T(\lfloor n/2 \rfloor) + 1
+\end{align*}
+
+Now we need to guess the correct solution. The order of this recurrence is
+$T(n) \le f(n) := Cn$.
+
+Onto the verification:
+
+\begin{align*}
+    T(n) &\le C\lceil n/2 \rceil + C \lfloor n/2 \rfloor + 1 = Cn + 1
+\end{align*}
+
+This is a problem because $Cn+1 \not \le Cn$. Let's try to correct our
+guess. Maybe if we tweak the guess, it would work. Maybe, if our guess was
+$Cn + 1$, then we'd get it working. Another guess we can use is $Cn - 1$.
+Weirdly, $Cn + 1$ doesn't work, but $Cn - 1$ does. Let's see why.
+
+\begin{align*}
+    T(n) \le C \lceil n/2 \rceil + 1 + C \lceil n/2 \rceil + 1 + 1 = Cn +
+    3 = Cn + 3
+\end{align*}
+
+Again, it doesn't work. But, if we use $Cn - 1$, we get
+
+\begin{align*}
+    T(n) \le C \lceil n/2 \rceil -1 + c\lceil n/2 \rceil -1 + 1 = Cn -1
+\end{align*}
+
+This nicely proves our result.
+
+Now we need to verify the base case. We already have $T(1) = 1$ and
+$f_2(1) = C - 1 \ge T(1)$ for $C \ge 2$. Therefore we set the constant $C$
+in $f_2$ to $C = 2$. After, $f_2 = 2n - 1 \ge T(n)$ for every $n \ge 1$.
+This implies that $T(n) \in O(n)$.
+
+Guessing right is pretty hard, but the recursion tree method is a good
+method for getting guesses.
+
+\subsection{The Recursion Tree Method}%
+\label{sub:The Recursion Tree Method}
+The recursion tree is as follows:
+
+\begin{itemize}
+    \item Each node represents the cost of a single sub problem
+    \item The recursive invocations become the children of a node
+\end{itemize}
+
+For example,
+\begin{align*}
+    T(1) = 1, \quad T(n) = 2T(\lfloor n/4 \rfloor) + n/2
+\end{align*}
+
+\begin{align*}
+    T(64) &= 2T(16) + 42 = 2(2T(4)+8)+32 \\
+    &= 2(2(2T(1)+2)+8) + 32 \\
+    &= 2(2(2\cdot 1 + 2) + 8) + 32 = 64
+\end{align*}
+
+The cost of this sub problem is $n/2$. When we draw the recursion tree,
+the cost is shown in the node.
+
+Now, we can draw the recursion tree for a general $n$. Therefore, the top
+node would be $n/2$, its children would be $n/8$, and so on. All the
+leaves on the last level will be 1. If we sum up all of the nodes in level
+$i$, we get $\frac{n}{2^i}$ (other than the last level).
+
+We now need to bound the sum in a clever way. Firstly, we need to know how
+many levels we have in the tree. Let's say that the number of levels is
+$I$, we have $\frac{n}{4^{I-1}} \simeq 1$.
+
+The cost on the last level will be $\simeq 2^{\log _4 (n)} = 2^{\frac{\log
+n}{\log 4}} = 2^{\log(n)/2} = n^{\frac{1}{2}} = \sqrt{n}$
+
+Our guess therefore is ends up being $O(n)$. We can then use substitution
+method to prove that this is correct.
+
+Substituting into the recurrence, we get:
+
+\begin{align*}
+    T(n) = 2T(\lfloor n/4 \rfloor) + n/2 \le 2c \lfloor
+    \frac{n}{4} \rfloor+\frac{n}{2} \le n \frac{c+1}{2} \le c \cdot n
+\end{align*}
+
+For every $c \ge 1$. We proved that $T(n) \le n$ for every $n \ge 1$
+therefore $T(n) \in O(n)$
+
+\section{The Fibonacci Numbers}%
+\label{sec:The Fibonacci Numbers}
+The Fibonacci numbers can be described as follows:
+
+\begin{align*}
+    F_0 &= 0 \\
+    F_1 &= 1 \\
+    F_n &= F_{n-1} + F{n-2} \text{ for } n \ge 2
+\end{align*}
+
+They're useful because they're used in:
+
+\begin{itemize}
+    \item Fibonacci heaps (a data structure)
+    \item Pseudo-random number generators
+    \item Appear in analysis of algorithms (like Euclid's algorithm)
+    \item It's also a pretty interesting computational problem
+\end{itemize}
+
+\subsection{Naive algorithm}%
+\label{sub:Naive algorithm}
+The simplest algorithm to compute the Fibonacci numbers is:
+
+\begin{lstlisting}
+private int Fib(int n)
+    if n <= 1 then
+        return n
+    else
+        return Fib(n-1) + Fib(n-2)
+    end if
+end sub
+\end{lstlisting}
+
+The runtime without recursive calls is $O(1)$. Therefore, the runtime is
+$O$(`Number of recursive calls').
+
+\subsection{Runtime analysis}%
+\label{sub:Runtime analysis}
+$T(n)$ is the number of recursive calls to Fib when it's called with
+parameter $n$.
+
+\begin{align*}
+    T(0) = T(1) = 1 \\
+    T(n) = 1 + T(n-1) + T(n-2), \text{ for } n \ge 2
+\end{align*}
+
+To solve this recurrence, we'll use the recursion tree technique to obtain
+a guess for the upper bound.
+
+We will also verify the guess with the substitution method.
+
+The recursion tree looks something like:
+
+\begin{lstlisting}
+                  T(n)
+                /      \
+            T(n-1)     T(n-2)
+            /   \       /   \
+        T(n-2) T(n-3) T(n-3) T(n-4)
+\end{lstlisting}
+
+
+Each node contributes 1, therefore $T(n)$ is the number of nodes. The
+number of levels in the recursion tree is $n$. Therefore, our guess would
+be $T(n) \le c^n$.
+
+Let's verify this with the substitution method. Remember that:
+
+\begin{align*}
+    T(0) &= T(1) = 1 \\
+    T(n) &= 1 + T(n-1) + T(n-2), \text{ for } n \ge 2 \\
+    \text{Our guess: } T(n) &\le c^n
+\end{align*}
+
+When we substitute the guess into the recurrence, we get:
+
+\begin{align*}
+    T(n) = 1 + T(n-1) + T(n-2) \le 1 + c^{n-1} + c^{n-2}
+\end{align*}
+
+It's required that $1 + c^{n-1} + c^{n-2} \le c^n$, but the additional 1
+stops us from getting a similar form as $c^n$. Therefore, let's try $T(n)
+\le c^n -1$.
+
+This leaves us with:
+
+\begin{align*}
+    T(n) &= 1 + T(n-1) + T(n-2) \\
+    &\le 1 + (c^{n-1} - 1) + (c^{n-2} - 1) = c^{n-1} + c^{n-2} - 1
+\end{align*}
+
+The smallest possible $c$ then becomes:
+
+\begin{align*}
+    c^{n-1} + c^{n-2} &= c^n \\
+    0 &= c^2 - c - 1 \\
+    c &= \frac{1+\sqrt 5}{2} \simeq 1.618033989 \text{ Golden ratio }
+\end{align*}
+
+Now let's have a look at the base case:
+
+\begin{align*}
+    T(0) = T(1) = 1 \\
+    c^0 - 1 = 0, \quad c^1 -1 \simeq 0.61
+\end{align*}
+
+This isn't consistent. Let's try another guess. This time, $T(n) \le k
+\cdot c^n - 1$. 
+
+\begin{align*}
+    T(n) &= 1 + T(n - 1) + T(n - 2) \\
+    &\le 1 + (k\cdot c^{n-1} - 1) + (k \cdot c^{n-2} - 1) \\
+    &= k(c^{n-1} + c^{n-2}) - 1
+\end{align*}
+
+The smallest possible $c$ remains the golden ratio. Now let's do the base
+case again:
+
+\begin{align*}
+    T(0) = T(1) = 1 \\
+    k \cdot c^0 = 1 = k - 1 \text{ and } k \cdot c^1 - 1 > k - 1
+\end{align*}
+
+Therefore, we can select $k=2$. Finally, we've proved that $T(n) \le
+2\cdot (\frac{1+\sqrt5}{2})^n-1$, hence $T(n) \in O \big (
+(\frac{1+\sqrt5}{2})^n-1 \big )$.
+
+Why the hell is this algorithm so damn slow? Well, if we return to look at
+the recursion tree, we can see that there are a lot of problems that are
+repeatedly solved. We can actually avoid this by using something called
+\textbf{dynamic programming}.
+
+\subsection{Dynamic Programming Solution}%
+\label{sub:Dynamic Programming Solution}
+Dynamic programming, which is something that we'll discuss in depth later)
+is a method where we store solutions to subproblems in a table and compute
+the table bottom up:
+
+\begin{lstlisting}
+if n <= then
+    return n
+else
+    A <- array of size n
+    A[0] <- 1
+    A[1] <- 1
+    for i <- 2 ... n do
+        A[i] <- A[i-2] + A[i-1]
+    next
+    return A[n]
+\end{lstlisting}
+
+This solution runs in time $O(n)$. It also uses space $\Theta(n)$ since it
+uses an array of size $n$. Can we possibly reduce the space to $O(1)$?
+
+If we look, we'll see that when $T(i)$ is computed, the values $T(1),
+T(2), \dots, T(i-3)$ are no longer needed. Therefore, we only store the
+last two values of T. Here's a better algorithm
+
+\begin{lstlisting}
+if n <= 1
+    return n
+else
+    a <- 0
+    b <- 1
+    for i <- 2 ... n
+        c <- a + b
+        a <- b
+        b <- c
+    next
+    return c
+\end{lstlisting}
+
+This here is the ultimate fib algorithm.
+
+
+
 
 
 
