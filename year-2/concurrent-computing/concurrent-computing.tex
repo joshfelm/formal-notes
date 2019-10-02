@@ -1,0 +1,111 @@
+%%=====================================================================================
+%%
+%%       Filename:  concurrent-computing.tex
+%%
+%%    Description:  Formal notes of concurrent computing
+%%
+%%        Version:  1.0
+%%        Created:  02/10/19
+%%       Revision:  none
+%%
+%%         Author:  Josh Felmeden (), nk18044@bristol.ac.uk
+%%   Organization:  
+%%      Copyright:  Copyright (c) 2019, Josh Felmeden
+%%
+%%          Notes:  
+%%
+%%=====================================================================================
+
+% Preamble {{{
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+\usepackage{hhline} 
+\usepackage{mathtools} 
+\usepackage[T1]{fontenc}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Concurrent Computing: The guide}
+\rhead{Josh Felmeden}
+\usepackage{hyperref} 
+% }}}
+
+% Listings {{{
+\usepackage[]{listings}
+\usepackage[]{xcolor} 
+\definecolor{RoyalBlue}{cmyk}{1, 0.50, 0, 0}
+\lstset{language=[Visual]Basic,
+    keywordstyle=\color{RoyalBlue},
+    basicstyle=\small\ttfamily,
+    commentstyle=\ttfamily\itshape\color{gray},
+    stringstyle=\ttfamily,
+    showstringspaces=false,
+    breaklines=true,
+    frameround=ffff,
+    frame=single,
+    rulecolor=\color{black}
+}
+% }}}
+
+% Listings {{{
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=[Visual]Basic,
+    backgroundcolor=\color{lstgrey},
+    frame=single,
+    xleftmargin=0.7cm,
+    frame=tlbr, framesep=0.2cm, framerule=0pt,
+    basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+    captionpos=b,
+    tabsize=2,
+    keywordstyle=\color{Magenta}\bfseries,
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Yellow},
+    commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+% }}}
+
+
+% Other packages {{{
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet} 
+\usepackage{amsmath} 
+\usepackage{booktabs} 
+\usepackage{tcolorbox} 
+\usepackage[symbol]{footmisc} 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+% }}}
+
+% Title {{{
+\title{Concurrent Computing: The guide}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\newpage
+\section{Sequential Processes}%
+\label{sec:sequential-processes}
+
+\end{document}
