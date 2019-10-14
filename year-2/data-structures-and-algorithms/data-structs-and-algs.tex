@@ -172,5 +172,107 @@ append a pair $s_i,f_i$ to $A$ then $s \ge $ \lstinline|lastf| $\ge F_j$
 for all $f \le t$. This means that $(s_i,f_i)$ is compatible with $A$.
 
 
+\begin{tcolorbox} [space to upper,
+        collower=white,
+        title={Greedy algorithm definition},
+        nobeforeafter,
+        halign lower=flush right, ]
+Greedy algorithms are actually an informal term and people have different
+definitions. The definition that we're going to use is:
+\begin{itemize}
+    \item They start with a sub-optimal solution.
+    \item They look over all the possible improvements and pick the one
+        that looks the best at the time.
+    \item They never backtrack in `quality'.
+\end{itemize}
+\end{tcolorbox}
+
+Greedy algorithms might fail; it's not enough to just do the obvious thing
+at each stage. While the algorithms might fail initially, we can use the
+knowledge that we gained from the results of the algorithm to design a
+more correct one.
+
+\section{Graphs}%
+\label{sec:Graphs}
+
+\begin{tcolorbox} [space to upper,
+        collower=white,
+        title={Graph definition},
+        nobeforeafter,
+        halign lower=flush right, ]
+        A \textbf{graph} is a pair $G = (V,E)$ where $V=V(G)$ is a set of
+        \textbf{vertices} $E = E(G)$ is a set of \textbf{edges} contained
+        in $\{\{u,v\} : u,v \in V, u \not = \}$
+\end{tcolorbox}
+
+\begin{tcolorbox} [space to upper,
+        collower=white,
+        title={Walk definition},
+        nobeforeafter,
+        halign lower=flush right, ]
+        A \textbf{walk} in a graph $G = (V, E)$ is a sequence of vertices
+        such that $\{v_i, v_{i+1} \in E for all i\le k-1$
+
+        We say that the walk is from $v_0$ to $v_k$ and call $k$ the
+        length of the walk.
+\end{tcolorbox}
+
+
+\subsection{Euler walks}%
+\label{sub:Euler walks}
+An \textbf{Euler walk} is one that contains every edge in $G$
+exactly once.
+
+Two graphs might be \textbf{equal}. This is the case when two graphs $G_1
+= (V_1, E_1)$ and $G_2 = (V_2, E_2)$ are equal and written $G_1 = G_2$ if
+$V_1 = V_2$ and $E_1 = E_2$. This does present some issues, however,
+because sometimes graphs look like they should be equal, when they're not
+because the edges are labelled differently.
+
+This is where \textbf{isomorphism} comes in. $G_1$ and $G_2$ are
+\textbf{isomorphic} if there's a bijection $f: V_1 \rightarrow V_2$ such
+that $\{f(u),f(v) \} \in E_2$ if and only if $\{u,v\} \in E_1$.
+
+Intuitively, this means that $G_1 \xrightarrow{\sim} G_2$ if they are the
+same graph but the vertices are relabelled.
+
+In a graph $G = (V,E)$, the \textbf{neighbourhood} of a vertex $v$ is the
+set of vertices joined to $v$ by an edge. Formally, 
+$N_G(v) = \{w \in V : \{v,w\} \in E$. Also, for all sets of vertices
+$X \subseteq V = \cup_{v\in X} N_G(v)$
+
+The \textbf{degree} of a vertex $v$ is the \textbf{number} of vertices
+joined to $v$. Formally: $d_G(v) = |N_G(v)|$
+
+\textbf{Theorem}: If $G$ has an Euler walk, then either:
+\begin{itemize}
+    \item Every vertex of $G$ has even degree or
+    \item All but two vertices $v_0$ and $v_k$ have even degree, and any
+        Euler walk must have $v_0$ and $v_k$ as endpoints.
+\end{itemize}
+
+Does every single graph that satisfies both of these conditions have an
+Euler walk? No, because the graphs need to be \textbf{connected}.
+
+Within a graph, we also have subgraphs and induced subgraphs. A
+\textbf{subgraph} $H = (V_H, E_H)$ of $G$ is a graph with $V_H \subseteq$
+and $E_H \subseteq E$. $H$ is an \textbf{induced subgraph} if $V_H
+\subseteq V$ and $E_H = \{ e \in E : e \subseteq V_H\}$.
+
+For all vertex sets $X \subseteq V$, the graph is \textbf{induced} by $X$
+is:
+
+\begin{center}
+    \begin{align*}
+        G[X] = (X, \{e \in E: e \subseteq X \})
+    \end{align*}
+\end{center}
+
+A \textbf{component} $H$ of $G$ is the maximal connected induced subgraph
+of $G$, so $H = G[V_H]$ is connected, but $G[V_H \cup \{v\}]$ is
+disconnected for all $v \in V \backslash V_H$.
+
+
+
 
 \end{document}
