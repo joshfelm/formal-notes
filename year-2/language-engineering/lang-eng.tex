@@ -108,4 +108,76 @@ appears that he could be talking about the gun, or to kill him. The same
 kind of thing can happen in computing when we are unsure of the references
 of certain objects. 
 
+Here are some examples learned from natural languages:
+\begin{itemize}
+    \item Syntactic complexity
+        \begin{itemize}
+            \item Jack built the house the malt the rat the cat killed ate
+                lay in
+        \end{itemize}
+    \item Syntactic ambiguity
+        \begin{itemize}
+            \item Let him have it, Chris!
+        \end{itemize}
+        \item Semantic Complexity
+            \begin{itemize}
+                \item It depends on what the meaning of the word `is' is!
+            \end{itemize}
+        \item Semantic ambiguity
+            \begin{itemize}
+                \item I haven't slept for ten days
+            \end{itemize}
+            \item Semantic undefinedness
+            \begin{itemize}
+                \item Colourless green ideas sleep furiously
+            \end{itemize}
+            \item Interaction of syntax and semantics
+                \begin{itemize}
+                    \item Time flies like an arrow, fruit flies like a
+                        banana.
+                \end{itemize}
+\end{itemize}
+
+We can apply these things to computing terms, too.
+\begin{itemize}
+    \item Syntactic complexity
+            \begin{lstlisting}
+x-=y = (x=x+y) - y      //switches variables x and y
+            \end{lstlisting}
+    \item Syntactic ambiguity
+\begin{lstlisting}
+if (...) if (...) ..; else ..       //dangling else
+\end{lstlisting}
+        \item Semantic Complexity
+\begin{lstlisting}
+y = x++ + x++       //sequence points
+\end{lstlisting}
+        \item Semantic ambiguity
+\begin{lstlisting}
+(x%2=1) ? "odd" : "even"        //unspecified in C89 if x<0
+\end{lstlisting}
+            \item Semantic undefinedness
+\begin{lstlisting}
+while(x/x)      //division error or infinite loop
+\end{lstlisting}
+            \item Interaction of syntax and semantics
+\begin{lstlisting}
+A * B       //lever hack
+\end{lstlisting}
+
+\end{itemize}
+
+To put this another way:
+\begin{itemize}
+    \item \textbf{Syntax}: concerned with the form of expressions and
+        whether or not the program actually \textit{compiles}
+    \item \textbf{Semantics}: concerned with the meaning of expressions
+        and what the program does when it \textit{runs}
+    \item \textbf{Pragmatics}: concerned with issues like design patterns,
+        program style, industry standards, etc.
+\end{itemize}
+
+
+
+
 \end{document}
