@@ -88,6 +88,23 @@
 \renewcommand{\familydefault}{\sfdefault}
 % }}}
 
+% tcolorbox {{{
+\newtcolorbox{blue}[3][] {
+    colframe = #2!25,
+    colback = #2!10,
+    #1,
+}
+
+\newtcolorbox{titlebox}[3][] {
+    colframe = #2!25,
+    colback = #2!10,
+    coltitle = #2!20!black,
+    title = {#3},
+    fonttitle=\bfseries
+    #1,
+}
+% }}}
+
 % Title {{{
 \title{Data Structures and Algorithms: The formal notes}
 \author{Josh Felmeden}
@@ -172,11 +189,7 @@ append a pair $s_i,f_i$ to $A$ then $s \ge $ \lstinline|lastf| $\ge F_j$
 for all $f \le t$. This means that $(s_i,f_i)$ is compatible with $A$.
 
 
-\begin{tcolorbox} [space to upper,
-        collower=white,
-        title={Greedy algorithm definition},
-        nobeforeafter,
-        halign lower=flush right, ]
+\begin{titlebox}{blue}{Greedy algorithms definition}
 Greedy algorithms are actually an informal term and people have different
 definitions. The definition that we're going to use is:
 \begin{itemize}
@@ -185,7 +198,7 @@ definitions. The definition that we're going to use is:
         that looks the best at the time.
     \item They never backtrack in `quality'.
 \end{itemize}
-\end{tcolorbox}
+\end{titlebox}
 
 Greedy algorithms might fail; it's not enough to just do the obvious thing
 at each stage. While the algorithms might fail initially, we can use the
@@ -195,27 +208,19 @@ more correct one.
 \section{Graphs}%
 \label{sec:Graphs}
 
-\begin{tcolorbox} [space to upper,
-        collower=white,
-        title={Graph definition},
-        nobeforeafter,
-        halign lower=flush right, ]
+\begin{titlebox}{blue}{Graph Definition}
         A \textbf{graph} is a pair $G = (V,E)$ where $V=V(G)$ is a set of
         \textbf{vertices} $E = E(G)$ is a set of \textbf{edges} contained
         in $\{\{u,v\} : u,v \in V, u \not = \}$
-\end{tcolorbox}
+\end{titlebox}
 
-\begin{tcolorbox} [space to upper,
-        collower=white,
-        title={Walk definition},
-        nobeforeafter,
-        halign lower=flush right, ]
+\begin{titlebox}{blue}{Walk Definition}
         A \textbf{walk} in a graph $G = (V, E)$ is a sequence of vertices
-        such that $\{v_i, v_{i+1} \in E for all i\le k-1$
+        such that $\{v_i, v_{i+1} \in E \text{ for all } i\le k-1$
 
         We say that the walk is from $v_0$ to $v_k$ and call $k$ the
         length of the walk.
-\end{tcolorbox}
+\end{titlebox}
 
 
 \subsection{Euler walks}%
@@ -272,6 +277,16 @@ A \textbf{component} $H$ of $G$ is the maximal connected induced subgraph
 of $G$, so $H = G[V_H]$ is connected, but $G[V_H \cup \{v\}]$ is
 disconnected for all $v \in V \backslash V_H$.
 
+\begin{blue}{blue}
+    \textbf{Theorem}: Let $G = (V,E)$ be a \textbf{connected} graph, and
+    let $u,v \in V$. Then, $G$ has an Euler walk from $u$ to $v$ if and
+    only if either:
+    \begin{enumerate}
+        \item $u = v$ and every vertex of $G$ has even degree, or
+        \item $u \not = v$ and every vertex of $G$ has even degree except
+            $u$ and $v$.
+    \end{enumerate}
+\end{blue}
 
 
 
