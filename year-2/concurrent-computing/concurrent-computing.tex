@@ -108,4 +108,53 @@
 \section{Sequential Processes}%
 \label{sec:sequential-processes}
 
+\section{Fast Fourier Transform}%
+\label{sec:fft}
+
+\subsection{Polynomials}%
+\label{sub:Polynomials}
+A \textbf{degree} $n-1$ polynomial in $x$ can be seen as a function:
+
+\begin{align*}
+    A(x) = \sum^{n-1}_{i=0}a_i \cdot x^i
+\end{align*}
+
+Any integer that's bigger than the degree of a polynomial is a
+\textit{degree bound} of said polynomial. The polynomial $A$ is:
+
+\begin{align*}
+    a_0 \cdot x^0 + a_1 \cdot x^1 + a_2 \cdot x^2 \cdots + a_{n-1}x^{n-1}
+\end{align*}
+
+The values $a_i$ are the \textit{coefficients}, the degree is $n-1$ and
+$n$ is a degree bound. We're able to express any integer as some kind of
+polynomial by setting $x$ to some base, say for decimal numbers:
+
+\begin{align*}
+    A = \sum^{n-1}_{i=0} a_i \cdot 10^i
+\end{align*}
+
+The variable $x$ just allows us to evaluate the polynomial at a point. A
+really fast way to evaluate the polynomial is to use \textbf{Horner's
+Rule}.
+
+\begin{tcolorbox} [space to upper,
+        collower=white,
+        title={Horner's Rule},
+        nobeforeafter,
+        halign lower=flush right, ]
+Instead of computing all the terms individually, we do:
+
+\begin{align*}
+    A(3) = a_0 + 3 \cdot (a_1 + 3\cdot (a_2 + \cdots + 3\cdot (a_{n-1})))
+\end{align*}
+
+This method requires $O(n)$ operations
+
+\end{tcolorbox}
+
+
+
+
+
 \end{document}

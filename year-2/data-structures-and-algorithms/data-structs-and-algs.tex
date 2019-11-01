@@ -288,6 +288,193 @@ disconnected for all $v \in V \backslash V_H$.
     \end{enumerate}
 \end{blue}
 
+\section{Sequential Processes}%
+\label{sec:sequential-processes}
+
+\section{Fast Fourier Transform}%
+\label{sec:fft}
+
+\subsection{Polynomials}%
+\label{sub:Polynomials}
+A \textbf{degree} $n-1$ polynomial in $x$ can be seen as a function:
+
+\begin{align*}
+    A(x) = \sum^{n-1}_{i=0}a_i \cdot x^i
+\end{align*}
+
+Any integer that's bigger than the degree of a polynomial is a
+\textit{degree bound} of said polynomial. The polynomial $A$ is:
+
+\begin{align*}
+    a_0 \cdot x^0 + a_1 \cdot x^1 + a_2 \cdot x^2 \cdots + a_{n-1}x^{n-1}
+\end{align*}
+
+The values $a_i$ are the \textit{coefficients}, the degree is $n-1$ and
+$n$ is a degree bound. We're able to express any integer as some kind of
+polynomial by setting $x$ to some base, say for decimal numbers:
+
+\begin{align*}
+    A = \sum^{n-1}_{i=0} a_i \cdot 10^i
+\end{align*}
+
+The variable $x$ just allows us to evaluate the polynomial at a point. A
+really fast way to evaluate the polynomial is to use \textbf{Horner's
+Rule}.
+
+\begin{titlebox}{blue}{Horner's Rule}
+Instead of computing all the terms individually, we do:
+\begin{align*}
+    A(3) = a_0 + 3 \cdot (a_1 + 3\cdot (a_2 + \cdots + 3\cdot (a_{n-1})))
+\end{align*}
+
+This method requires $O(n)$ operations. For example, if we consider $A(x) = 2 + 3x + 1.x^2$, we can evaluate this
+as:
+\begin{align*}
+    A(x) = 2 + x(3 + 1.x)
+\end{align*}
+
+\end{titlebox}
+
+Once we have our polynomial representations, we might be doing some
+arithmetic with them. We're allowed to write polynomials in a
+\textit{coefficient representation}. Here, the addition of $C = A + B$
+constructs $C$ as the vector:
+
+\begin{align*}
+    (a_0 + b_0, a_1 + b_1, a_2 + b_2, \dots, a_{n-1} + b_{n-1})
+\end{align*}
+
+$A$ and $B$ should really have the same length, but we're allowed to just
+pad the coefficients with zero to make this the case.
+
+\subsubsection{Point value Representation}%
+\label{ssub:point-value}
+We know that if we're given a polynomial, we can graph it. We can use this
+fact to represent a polynomial as a list of its points. For point value
+representation, the addition $C = A + B$ constructs $C$ as:
+
+\begin{align*}
+    \{x_0, y_0 + z_0),(x_1,y_1 + z_1),(x_2,y_2 + z_2), \dots,
+        (x_{n-1},y_{n-1} + z_{n-1})
+\end{align*}
+
+where $x_i$ is a point, $y_i = A(x_i) and z_i = B(x_i)$.
+
+It's important to note that the two value representations \textbf{must}
+use the same evaluation points. Both of the operations are $O(n)$ in
+terms of how long they take.
+
+\subsubsection{Polynomial multiplication}%
+\label{ssub:convolution}
+Computing a polynomial multiplication (also called \textbf{convolution})
+is a little harder than addition. It does, however, become much easier
+when we use point value representation:
+
+\begin{align*}
+    \{x_0, y_0 \cdot z_0),(x_1,y_1 \cdot z_1),(x_2,y_2 \cdot z_2), \dots,
+        (x_{n-1},y_{n-1} \cdot z_{n-1})
+\end{align*}
+
+where $x_i$ is a point, $y_i = A(x_i) and z_i = B(x_i)$.
+
+The normal method of calculating multiplication is $O(n^2)$, while using
+point value representation only takes $O(n)$. So, is there an easy way to
+convert to point value representation? Actually, yes. What we need to do
+is to evaluate the polynomial to a point-value representation, multiply
+and finally interpolate (the opposite of evaluating) back again.
+
+Long story short, we need to develop two fast algorithms that construct
+the coefficients for the point value representation and then
+interpolate. So the main steps to multiply the two polynomials $A$ and $B$
+(of degree $n$) are:
+
+\begin{enumerate}
+    \item \textit{Double degree bound}: Create coefficient representations
+        of $A(x)$ and $B(x)$ as degree bound $2n$ polynomials by adding
+        $n$ high-order zero coefficients to each.
+    \item \textit{Evaluate}: Compute point-value representations of $A(x)$
+        and $B(x)$ of length $2n$ through two applications of FFT of order
+        $2n$
+    \item \textit{Pointwise multiply}: compute a point-value
+        representation of $cC(x) = A(x)B(x)$ by multiplying the values
+        Pointwise
+    \item \textit{Interpolate}: Create a coefficient representation of
+        $C(x)$ through a single application of the \textit{inverse} FFT.
+\end{enumerate}
+
+The first and third steps are really easy to perform in $O(n)$ time. The
+claim is that if we evaluate at the complex roots of unity then we can
+perform steps 2 and 4 in $O(n \log n)$ time.
+
+\subsection{Evaluation at roots of unity}%
+\label{sub:roots-unity}
+First, we need to look at evaluation. We need to evaluate a polynomial of
+degree $n$ at $n$ different points. It appears that the complexity of our
+method is just going to be $O(n^2)$, but there is a faster way of doing it
+than just using Horner's rule. This is when we evaluate the points at
+\textit{special} points (namely the \textbf{N-th complex roots of unity}).
+
+\begin{titlebox}{blue}{N-th complex roots of unity}
+    \begin{itemize}
+        \item The roots of unity are the values $\omega_N = e^{2\pi i j /
+            N}$ for $j = 0,1,\dots,N-1$
+        \item Say we are evaluating at $N$ pints, we take the N-th complex
+            roots of unity $\omega_N$
+        \item This means we evaluate the polynomial at the points:
+            \begin{align*}
+                \omega_N^0,\omega_N^1,\omega_N^2,\dots,\omega_N^{n-1}
+            \end{align*}
+    \end{itemize}
+\end{titlebox}
+
+We want to evaluate a polynomial A at the $n$ roots of unity. Therefore,
+we evaluate:
+\begin{align*}
+    A(x) = \sum_{j=0}^{n-1}a_j \omega_n^{kj}
+\end{align*}
+
+for every $k = 0,1,\dots, n-1$
+
+We define the vector of results of these evaluations as:
+
+\begin{align*}
+    y_k = A(\omega^k_n)
+\end{align*}
+
+This vector $y = (y_0, \dots, y_{n-1})$ is the \textbf{discrete Fourier
+Transform} (DFT) of the coefficient vector $a = (a_0, a_1, \dots, a_{n-1})$
+
+\begin{titlebox}{blue}{The Cancellation Lemma}
+\begin{align*}
+    \omega^{dk}_{dN} = \omega^{k}_{N}
+\end{align*}
+\end{titlebox}
+
+\begin{titlebox}{blue}{The Halving Lemma}
+    If $N > 0$ is even then the squares of the $N$ complex N-th roots of
+    unity are the $N/2$ complex $N/2$-th roots of unity
+
+    The proof of this is that we have $(\omega^k_n) ^2 = \omega^k_{n/2}$
+    for any nonnegative integer $k$ because of the cancellation lemma.
+\end{titlebox}
+
+\subsection{Fast Fourier Transform}%
+\label{sub:fft}
+The really basic idea of the Fast Fourier transform is that we define two
+new polynomials;
+
+\begin{align*}
+    A^{[0]}(x) = a_0 + a_2x + \cdots + a_{N-2}x^{N/2 - 1} \\
+    A^{[1]}(x) = a_1 + a_3x + \cdots + a_{N-1}x^{N/2 - 1}
+\end{align*}
+
+
+
+
+
+
+
+
 
 
 \end{document}
