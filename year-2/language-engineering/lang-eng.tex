@@ -77,7 +77,7 @@
 \usepackage{tcolorbox}
 \usepackage{soul}
 \usepackage{babel,dejavu,helvet} 
-\usepackage{amsmath} 
+\usepackage{amsmath,amsfonts} 
 \usepackage{booktabs} 
 \usepackage{tcolorbox} 
 \usepackage[symbol]{footmisc} 
@@ -178,6 +178,7 @@ To put this another way:
         program style, industry standards, etc.
 \end{itemize}
 
+% 21/10/19
 \section{Structural Operational Semantics}%
 \label{sec:struct-op-semantics}
 We're going to look at doing some compilation (of the \textit{while})
@@ -250,11 +251,169 @@ semantic function as follows:
 \begin{itemize}
     \item $S_{sos} [[.]] \text{ Stm} \rightarrow (\text{State} \pfun
         \text{State})$
+    \item $S_{sos} [[S]] \sigma = \sigma'$ if $\langle S, \sigma \rangle
+        \Rightarrow^* \sigma'$ and \textbf{undefined} otherwise
+    \item Note that the semantic function is only guaranteed to return a
+        partial function between states due to the existence of statements
+        whose execution loops in one or more states
+    \item $S_{sos} [[\text{ while true do skip }]] = \{\}$
+    \begin{itemize}
+        \item If we apply this on any state, we get undefined back BUT it
+            is not in and of itself undefined. It is simply the empty set.
+        \item What could we do if the semantics is not deterministic?
+        \begin{itemize}
+            \item The problem is that depending on what choice we made, we
+                might get a different answer. But the definition says that we
+                only return one function. So therefore, we need to be able to
+                collect them up into a list.
+            \item One way of doing it is: $S'_{sos} [[.]] : \text{ Stm} \pfun
+                (\text{State} \pfun \text{ State})$ to ignore the ambiguous
+                cases
+            \item Another way is to allow a set of final states: $S''_{sos}
+                [[.]]: \text{ Stm} \rightarrow (\text{State} \rightarrow
+                \mathcal{P} \text{ State})$. This is bad because we get a
+                set of states.
+            \item $S'''_{sos}[[.]]: \text{ Stm} \rightarrow
+                (\mathcal{P}(\text{State}) \rightarrow
+                \mathcal{P}(\text{State}))$ now facilitates function
+                composition. Basically, we pass a load of states, and the
+                function returns a list of all functions that can be
+                reached from any of those functions.
+        \end{itemize}
+    \end{itemize}
 \end{itemize}
 
+\newpage
+\textbf{Theorem.} For all statements $S$ of \textbf{While}, it holds that
+$S_{ns}[[S]] = S_{sos}[[S]]$. Basically, for all statements, then:
+\begin{align*}
+    \{(\sigma, \sigma') \in \text{ State}^2 \ | \ \langle S, \sigma \rangle
+        \rightarrow \sigma' \} = \{(\sigma, \sigma') \in \text{ State}^2 \
+        | \
+    \langle S, \sigma \rangle \Rightarrow ^* \sigma'\}
+\end{align*}
 
+This mess can be decomposed into two different facts:
+\begin{align*}
+    \langle S, \sigma \rangle \Rightarrow ^* \sigma' \text{ implies }
+    \langle S, \sigma \rangle \rightarrow \sigma'
+\end{align*}
 
-% TODO finish this lecture from 21/10/19
+And
+\begin{align*}
+    \langle S, \sigma \rangle \rightarrow \sigma' \text{ implies }
+    \langle S, \sigma \rangle \Rightarrow^* \sigma'
+\end{align*}
+
+Very subtle, right? This can also be decomposed further into some cool
+stuff but I don't think it's helpful. See lemma 2.28 in the book for the
+derivation sequence.
+
+\subsection{Provably correct implementation}%
+\label{sub:Provably correct implementation}
+We're now going to look at the correctness of a compiler from
+\textbf{While} to an abstract machine \textbf{AM}. Initially, we will
+consider a simple \textbf{stack} machine with a set of abstract
+instructions. Later on, we'll refine it to use memory addresses. Let's
+formalise some aspects of the abstract machine.
+
+The configurations in the machine are going to be a triple: $\langle c, e,
+s \rangle$:
+\begin{itemize}
+    \item $c$ is the code to be executed $c \in$ Code $= \text{ inst}^*$
+    \item $e$ is the evaluation stack (of expressions) $e \in$ Stack $= (Z
+        \cup T)^*$
+    \item $s$ is the storage (for variables) $s \in$ State $= \text{ Var }
+        \rightarrow Z$
+\end{itemize}
+
+The instructions will be:
+
+\begin{lstlisting}
+inst ::= push-n | add | mult | sub
+        | true | false | eq | le | and | neg
+        | fetch-x | store-x | noop | branch(c,c) | loop(c,c)
+
+c ::= empty | inst:c
+\end{lstlisting}
+
+\lstinline|noop| is basically a skip. Also, we'll be passing around code
+in this example, but later on we'll replace the `code' by memory addresses
+where the code is stored.
+
+\subsubsection{Arithmetic code}%
+\label{ssub:code-1}
+At this point, we might have the following code:
+\begin{align*}
+    &\langle \text{PUSH-n:}c, e, s \rangle &  &\triangleright & &\langle c,
+    \mathcal{N}[[n]] \text{:}e, s \rangle \\
+    &\langle \text{ADD:}c, z_1 \text{:} z_2 \text{:}e, s \rangle & &\triangleright & &\langle c,
+    (z_1 * z_2) \text{:}e, s \rangle & &\text{ if } z_1, z_2 \in \mathbb{Z} \\
+     &\langle \text{TRUE:}c, e, s \rangle & &\triangleright & &\langle c,
+     \textbf{tt}\text{:}e, s \rangle \\
+     &\langle \text{EQ:}c, z_1 \text{:} z_2 \text{:}e, s \rangle & &\triangleright &
+     &\langle c, (z_1 = z_2) \text{:}e, s \rangle & &\text{ if } z_1,z_2 \in
+     \mathbb{Z}
+\end{align*}
+Here, the `:' is much like the `cons' function from Haskell, in that if we
+take ADD for example; ADD:$c$ means that we have the statement ADD, and
+then more code following it. In the same way, with the arguments of ADD,
+we need two integers $z_1, z_2$ on the stack, represented by $z_1 : z_2 :
+e$.
+
+Obviously, there are more keywords, but they follow the same format as
+these existing ones.
+
+\subsubsection{State changing code}%
+\label{ssub:code-2}
+Now, let's look at some of the state rules:
+\begin{align*}
+    &\langle \text{FETCH-x:}c, e, s \rangle & &\triangleright & &\langle c,
+    s(s x)\text{:}e, s \rangle \\
+    &\langle \text{STORE-x:}c, z\text{:}e, s \rangle & &\triangleright &
+    &\langle c, e, s[x \mapsto z] \rangle & &\text{if } z \in \mathbb{Z} \\
+    &\langle \text{NOOP:}c, e, s \rangle & &\triangleright & &\langle c,
+    e, s \rangle \\
+    &\langle \text{BRANCH}(c_1, c_2)\text{:}c, t\text{:}e, s
+    & &\triangleright &\bigg \{ \
+    \begin{split}
+    &\langle c_1 \text{:} c, e, s \rangle 
+    \\
+    & \langle c_2 \text{:} c, e, s \rangle 
+    \end{split}
+    &\begin{split}
+        &\text{if } t = \textbf{ tt} \\
+        &\text{if } t = \textbf{ ff}
+    \end{split} \\
+    &\langle \text{LOOP}(c_2, c_2) \text{:}c, e, s \rangle &
+    &\triangleright & &\langle c_1
+\text{:BRANCH}(c_2\text{:LOOP}(c_1,c_2), \text{NOOP})\text{:}c, e, s\rangle
+\end{align*}
+
+\subsubsection{Computation sequences}%
+\label{ssub:Computation sequences}
+\begin{itemize}
+    \item A configuration $\gamma$ can have one of two forms. It can either be
+        \textbf{incomplete} or \textbf{terminal}.
+    \item An incomplete configuration be either \textbf{stuck} if there is
+        no $\gamma'$ such that $\gamma
+        \triangleright \gamma'$, OR it is \textbf{unstuck} if the opposite is
+        true.
+    \item A computation sequence from $\langle c, \epsilon, \sigma$ is
+        either a \textbf{finite sequence} such that all $\gamma$ is a
+        terminal or stuck configuration, or it is \textbf{infinite}, such
+        that $\gamma_0 = \langle c, \epsilon, \sigma \rangle$ and
+        $\gamma_i \triangleright \gamma_{i+1}$ for all $0 \le i$.
+    \item \textbf{Note!} $\gamma \triangleright ^k \gamma'$ means that
+        $\gamma'$ can be obtained from $\gamma$ in exactly $k$ steps of
+        $\triangleright$.
+    \item \textbf{Note!} $\gamma \triangleright ^* \gamma'$ means that
+        $\gamma'$ can be obtained from $\gamma$ in a \textit{finite}
+        number of steps.
+\end{itemize}
+
+Termination and looping is pretty basic and expected, so I won't cover
+that here.
 
 % This is the lecture from 4/11/19 and 8/11/19, so please catch up daddio x
 \section{Chain-Complete Partial Orders}%
