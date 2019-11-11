@@ -468,12 +468,180 @@ new polynomials;
     A^{[1]}(x) = a_1 + a_3x + \cdots + a_{N-1}x^{N/2 - 1}
 \end{align*}
 
+%08/11/19
+\section{Dynamic Programming}%
+\label{sec:dynamic-programming}
+We use \textit{dynamic programming} for finding efficient algorithms for
+problems that can be broken down into simpler, overlapping subproblems.
+Basically,
+\begin{enumerate}
+    \item Find a recursive formula for the problem (in terms of answers to
+        the subproblems)
+    \item Write down a naive recursive algorithm
+    \item Speed it up by storing the solutions to the subproblems (\textbf{memoization})
+    \item Derive an iterative algorithm by solving the subproblems in good
+        order.
+\end{enumerate}
 
+\subsection{Weighted interval scheduling}%
+\label{sub:weighted-scheduling}
+We've seen the scheduling problem before on the course, but this is
+different (and as it turns out, harder).
 
+A \textbf{schedule} is a set of compatible intervals. The \textit{weight}
+of a schedule is the sum of the weight of the intervals it contains.
 
+We could use a greedy algorithm, but it is really slow and not what we're
+looking for. It's not even going to cut it full stop.
 
+\subsubsection*{How is the input provided?}
+The intervals are given in an array $A$ of length $n$.
 
+$A[i]$ stores a triple $(s_i, f_i, w_i)$ which defines the $i$th interval.
 
+The intervals are sorted by finish time i.e. $f_i \le f_{i+1}$.=, or the
+interval $i$ finishes before the interval $i+1$ finishes.
+
+\subsubsection*{Compatible Intervals}
+For all $i$, we let $p(i)$ to be the rightmost interval (in order of
+finish time) which finishes before the $i$th interval but doesn't overlap
+it.
+
+In the below example, if we take $i = 7$, $p(7) = 3$ because it's the
+first interval that doesn't overlap with it (and 3 is the position of the
+interval in the array).
+
+\begin{center}
+    \includegraphics[scale=.5]{weighted-int.png}
+\end{center}
+
+$p(4) = 2$, and $p(2) = 0$ because there is no interval that exists.
+\textbf{Note} that we index from 1 because otherwise 0 would not make
+sense.
+
+\textbf{Claim.} We can precompute all $p(i)$ in $O(n \log n)$ time. For
+now, we can assume that this is true, but I will revisit this and prove
+why. If you did it naively, it would be $O(n^2)$ time. Obviously it's
+something to do with dynamic programming (because that's what this section
+is about).
+
+\subsubsection{Finding a solution}%
+\label{ssub:solution-dynamic}
+Consider some optimal schedule $\mathcal{O}$ for intervals $\{1, 2, 3,
+\dots, n\}$ with weight $OPT$. Now, either the $n$th interval is in
+schedule $\mathcal{O}$ or it isn't.
+
+Let's look at the case where it is not in $\mathcal{O}$. Schedule
+$\mathcal{O}$ is also an optimal schedule for the problem with the input
+consisting of the intervals $\{1, 2, 3, \dots, n-1\}$ because $n$ is not in
+it. Therefore, in this case, we have $OPT = OPT(n-1)$. (By the way,
+$OPT(i)$ is the weight of an optimal schedule for the intervals $\{1,
+2, 3, \dots, i\}$).
+
+Now, let's consider the case that it \textbf{is} in $\mathcal{O}$. The
+only other intervals that could be in $\mathcal{O}$ are $\{1, \dots,
+p(n)\}$. We know that everything larger than $p(n)$ is incompatible with
+the $n$th schedule.
+
+\begin{center}
+    \includegraphics[scale=.5]{weight-n-sched.png}
+\end{center}
+
+Schedule $\mathcal{O}$ with interval $n$ removed gives an optimal schedule
+for the intervals $\{1, 2, \dots, p(n) \}$ so we now have that $OPT =
+OPT(p(n)) + w_n$.
+
+To summarise:
+\begin{itemize}
+    \item \textbf{Case 1}: The $n$th interval is not in $\mathcal{O}$,
+        then $OPT = OPT(n-1)$
+    \item \textbf{Case 2}: The $n$th interval is in $\mathcal{O}$, then
+        $OPT = OPT(p(n)) + w_n$
+\end{itemize}
+
+So, which one do we choose? We choose the bigger one:
+
+\begin{align*}
+    OPT = \max (OPT(n-1),OPT(p(n)) + w_n)
+\end{align*}
+
+We just now replace all $n$ with $i$ to give us our final recursive
+algorithm
+
+\begin{align*}
+    OPT = \max (OPT(i-1),OPT(p(i)) + w_i)
+\end{align*}
+
+There's no easy way to find these solutions, you just have to kind of look
+at the problem for a while and then it will come to you.
+
+\subsubsection{Writing down the recursive algorithm}%
+\label{ssub:recursive-written}
+Now we have the formula, we get the recursive algorithm:
+
+\begin{lstlisting}
+WIS(i)
+    If (i=0)
+        Return 0
+    Return max(WIS(i-1),WIS(p(i)) + wi)
+\end{lstlisting}
+
+This algorithm is pretty much exponential given the wrong input. If $T(n)$
+is the run time of WIS($n$) using overlapping intervals, then $T(n) >
+2T(n-1)$. This is $O(2^{n/2})$.
+
+\subsubsection{Memoization}%
+\label{ssub:Memoization}
+To solve this, we need to store the solutions to the subproblems.
+
+\begin{lstlisting}
+MEMWIS(i)
+    If (i=0)
+        Return 0
+    If WIS[i] undefined
+        WIS[i] = max(MEMWIS(i-1),MEMWIS(p(i)) + wi)
+    Return WIS[i]
+\end{lstlisting}
+
+In this algorithm, we store the solutions to the previously computed
+subproblems in an $n$ length array called WIS. The time complexity of
+computing MEMWIS($n$) is now $O(n)$. Unfortunately, linear recursion is
+still kind of bad.
+
+To compute a value in the array WIS[$i$], we need both WIS[$i-1$] and
+WIS[$p[i]$]. Both of these are to the left of WIS[$i$]. Therefore, we
+should go through this array from left to right. This is because every
+time we compute something, we already have all of the things we need. This
+gives us a new algorithm:
+
+\begin{lstlisting}
+ITWIS(n)
+    If (i=0)
+        Return 0
+    For i=1 to n
+        WIS[i] = max(WIS[i-1], WIS[p(i)] + wi)
+\end{lstlisting}
+
+This is an iterative dynamic programming algorithm that runs in $O(n)$
+time. The iterative method is better because if we use recursion in $O(n)$
+time, we'll probably overload the stack, so this makes the memory
+footprint of the algorithm now much smaller. It \textbf{does} however mean
+that we need to precompute the $p(i)$ values.
+
+\subsubsection{Computing the p(i) function}%
+\label{ssub:Computing the p(i) function}
+\textbf{Revised claim.} We can precompute any $p(i)$ in $O(\log n)$ time.
+Remember that $s_i$ is the start of interval $i$ and $f_i$ is the finish
+time of interval $i$. We want to find the unique value $j = p(i)$ such
+that:
+
+\begin{align*}
+    f_j < s_i < f_{j+1}
+\end{align*}
+
+Because the input is sorted by finish times, we can find $j$ just by using
+binary search in $O(\log n)$ time. We can now precompute all $p(i)$ in
+$O(\log n)$ time.
 
 
 

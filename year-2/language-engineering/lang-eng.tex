@@ -83,6 +83,7 @@
 \usepackage[symbol]{footmisc} 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \renewcommand{\familydefault}{\sfdefault}
+\newcommand\pfun{\mathrel{\ooalign{\hfil$\mapstochar\mkern5mu$\hfil\cr$\to$\cr}}}
 % }}}
 
 % Title {{{
@@ -177,6 +178,129 @@ To put this another way:
         program style, industry standards, etc.
 \end{itemize}
 
+\section{Structural Operational Semantics}%
+\label{sec:struct-op-semantics}
+We're going to look at doing some compilation (of the \textit{while})
+language.
+
+\subsection{Termination and looping}%
+\label{sub:term-loop}
+
+The execution of the statement $S$ in state $\sigma$ terminates iff there
+exists a finite derivation sequence from $\langle S, \sigma \rangle$. The
+derivation sequence looks like:
+\begin{align*}
+    \langle S, \theta\rangle \Rightarrow \gamma_1 \Rightarrow \dots
+    \Rightarrow \gamma_n \text{ where } \gamma_n \text{ is terminal }
+    \sigma' \text{ or stuck } \langle S', \sigma'\rangle
+\end{align*}
+
+The while language never gets stuck, but some language might if we try to
+divide by zero because we don't know how to process this.
+
+The execution of the statement $S$ in a state $\theta$ loops iff there
+exists an infinite derivation sequence from $\langle S, \sigma \rangle$
+\begin{align*}
+    \langle S, \sigma \rangle \Rightarrow \gamma_1 \Rightarrow \gamma_2
+    \Rightarrow \dots
+\end{align*}
+
+$S$ always terminates iff its execution terminates in all states $\sigma$.
+
+$S$ always loops if the execution loops in all states $\sigma$.
+
+The execution of statement $S$ in state $\sigma$ terminates successfully
+iff it ends with a terminal configuration.
+
+\textbf{Note} while has no stuck configurations, so termination implies
+successful termination!
+
+\subsection{Determinism and Equivalence}%
+\label{sub:determinism}
+The structural operation semantics is (strongly) \textbf{deterministic}
+iff $\langle S, \sigma \rangle \Rightarrow \gamma$ and $\langle S, \sigma
+\rangle \Rightarrow \gamma'$ imply that $\gamma = \gamma'$ for all $S,
+\sigma, \gamma, \gamma'$
+
+It is \textbf{weakly deterministic} iff $\langle S, \sigma \rangle
+\Rightarrow^* \sigma'$ and $\langle S, \sigma \rangle \Rightarrow^*
+\sigma''$ imply that $\sigma' = \sigma''$ for all $S, \sigma, \sigma',
+\sigma''$. This is different from the strong determinism above because it
+says that for every successfully terminating branch, (it doesn't matter
+how we get there) we get to the same final state.
+
+Two statements are \textbf{semantically equivalent} whenever it holds that
+for \textit{all states} $\sigma$
+\begin{align*}
+    \langle S_1, \sigma \rangle \Rightarrow^* \gamma \text{ iff } \langle
+    S_2, \sigma \rangle
+    \Rightarrow^* \gamma \text{ whenever } \gamma \text{ is terminal or
+stuck} 
+\end{align*}
+
+This means that there is an infinite derivation sequence from $\langle S_1,
+\sigma \rangle$ iff there is an infinite derivation from $\langle S_2,
+\sigma \rangle$.
+
+\textbf{Note!} The length of these could be different (because of the *
+again.)
+
+For a deterministic structural operational semantics, we can define a
+semantic function as follows:
+\begin{itemize}
+    \item $S_{sos} [[.]] \text{ Stm} \rightarrow (\text{State} \pfun
+        \text{State})$
+\end{itemize}
+
+% TODO finish this lecture
+
+
+% This is the lecture from 4/11/19 and 8/11/19, so please catch up daddio x
+\section{Chain-Complete Partial Orders}%
+\label{sec:ccpo}
+% TODO this lecture
+
+Sets can have upper and lower bounds depending on where they come in the
+order of chains. For example, those at the top of the set are the upper
+bound of every element since they are unable to have an upper bound
+themselves, while the ones at the bottom are the lower bound, since they
+have no lower bound themselves.
+
+\subsection{Definitions of PO-Set (partially ordered set)}%
+\label{sub:Definitions of PO-Set}
+A PO-Set (D, $\sqsubseteq$) is called a \textit{chain-complete} partially
+ordered set (ccpo) whenever the least upper bound $\sqcup y$ exists for
+all \underline{chains} $Y \subseteq D$.
+\begin{itemize}
+    \item To be a CCPO, each chain must have an upper bound
+\end{itemize}
+
+Furthermore, a PO-Set (D, $\sqsubseteq$) is called a \textit{complete
+lattice} whenever the least upper bound $\sqcup Y$ exists for all
+\underline{subsets} $Y\subseteq D$.
+\begin{itemize}
+    \item To be a lattice, each chain must have a ** %TODO
+\end{itemize}
+
+Note that every CCPO (D, $\sqsubseteq$) has a (necessarily unique) element
+denoted $\bot = \sqcup \ \emptyset$. This means that it is given by the
+lease upper bound of the empty chain. First observe $\emptyset$ is a
+chain, since we know that $\emptyset \subseteq D$ by the basic set
+properties and $d \sqsubseteq e$ vacuously holds for all $d,e \in
+\emptyset$ (of which there are none). So, the least upper bound $\bot$ **
+%TODO
+
+The question is: is our relation a chain-complete partial order (from the
+slides)? The answer, simply, is no.
+\begin{itemize}
+    \item This is because we have a whole bunch of items at the end. There
+        is no least element of the ordering, so it cannot be a CCPO (this
+        is an important part of the CCPO).
+\end{itemize}
+
+What we can do is the \textbf{lifted} relation, which we obtain by adding
+a least element $\bot$. But, does this now make it a CCPO? Yeah, it does.
+Nice. HOWEVER, it does not make it a \textbf{complete lattice}.
 
 
 
