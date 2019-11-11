@@ -73,6 +73,8 @@
 
 
 % Other packages {{{
+\usepackage{tikz-qtree}
+\usepackage{tikz}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \graphicspath{ {./pics/} }
@@ -643,6 +645,138 @@ Because the input is sorted by finish times, we can find $j$ just by using
 binary search in $O(\log n)$ time. We can now precompute all $p(i)$ in
 $O(\log n)$ time.
 
+% 11/11/19
+\section{Dynamic search structures}%
+\label{sec:dynamic-search}
+A dynamic search structure stores a set of elements. Each element $x$ must
+have a unique key: \lstinline|x.key|. The following operations are
+supported:
 
+\begin{itemize}
+    \item \lstinline|insert(x,k)|: inserts \lstinline|x|  with key \lstinline|k = x.key| 
+\end{itemize}
+% TODO this
+
+\subsection{Binary search trees}%
+\label{sub:bin-search-tree}
+Remember that in a binary search tree:
+\begin{itemize}
+    \item All the nodes in the left subtree have smaller keys
+    \item All the nodes in the right subtree have larger keys
+\end{itemize}
+
+We perform a \lstinline|find| operation by following a path from the root.
+
+%\begin{tikzpicture}
+%    \Tree
+%    [.27
+%    [.21]]
+%\end{tikzpicture}
+%% TODO draw a tree
+
+\subsection{2-3-4 Trees}%
+\label{sub:2-3-4 Trees}
+The idea of this tree is that the nodes can have anywhere between 2 and 4
+children (\textit{hence the name}).
+
+\textbf{Perfect balance} means that every path from the root to a leaf has
+the same length. Always. Forever.
+
+\begin{itemize}
+    \item \textbf{2-node}: 2 children and 1 key
+    \item \textbf{3-node}: 3 children and 2 keys
+    \item \textbf{4-node}: 4 children and 3 keys
+\end{itemize}
+
+Like in a binary search tree, the keys held at a node determine the
+contents of its subtrees.
+
+Just like in a binary tree, we have a \lstinline|find| operation. We
+perform the operation by following a path from the root. Decisions are
+made by inspecting the keys at the current node and following the
+appropriate edge.
+
+The time complexity of the \lstinline|find| operation is $O(h)$ again.
+
+\subsubsection{The insert operation}%
+\label{ssub:insert}
+To perform \lstinline|insert(x,k)|, we need to:
+\begin{enumerate}
+    \item Search for the key \lstinline|k|  as if we were performing
+        \lstinline|find(k)|.
+    \item If the leaf is a 2-node, then we insert \lstinline|(x,k)| and
+        convert it into a 3-node.
+    \item If the leaf is a 3-node, then we insert \lstinline|(x,k)| and
+        convert it into a 4-node.
+    \item If the leaf is a 4-node, we just make sure it never happens.
+\end{enumerate}
+
+\subsubsection{Splitting 4-nodes}%
+\label{ssub:split-4-nodes}
+We can \lstinline|split| any 4-node into two 2-nodes \textit{if} its
+parent isn't a 4-node. For example:
+
+%TODO draw this operation (tikzpicture) Also learn how to use tikz picture
+%it seems really useful
+
+We push the extra key up to the parent (which wouldn't work if the parent
+is a 4-node). The subtrees haven't changed size, so the path lengths have
+not changed due to this \lstinline|split| operation. Therefore, if it was
+\textbf{perfectly balanced} before, then it's perfectly balanced after.
+
+\lstinline|splitting| the root increases the height of the tree and
+increases the length of all the root-leaf paths by one so it maintains the
+\textbf{perfect balance} property. This is the only way that
+\lstinline|insert| can affect the lengths of the paths.
+
+Each \lstinline|split| takes $O(1)$ time, so overall \lstinline|insert|
+takes $O(\log n)$ time.
+
+\subsubsection{Other operations}%
+\label{ssub:other-ops}
+
+\lstinline|Fuse| is an operation that combines two 2-nodes (with the same
+parent) into a 4-node (provided the parent isn't a 2-node).
+
+\lstinline|Transferring| keys is possible. If there is a 2-node and a
+3-node, we can perform a \lstinline|Transfer| (even if the parent is the
+root). No path lengths change from this operation and the time taken is
+$O(1)$ time.
+
+\subsubsection{Deleting a node}%
+\label{ssub:delete}
+To perform \lstinline|Delete(k)| on a \textbf{leaf}, we:
+\begin{enumerate}
+    \item Search for the key \lstinline|k| using \lstinline|find(k)|. We
+        use \lstinline|fuse| and \lstinline|transfer| to convert the
+        2-nodes as we go down.
+    \item If the leaf is a 3-node, we delete \lstinline|(x,k)|
+        %TODO finish this
+\end{enumerate}
+
+If we \lstinline|fuse| the root, then the height can decrease by 1. This
+is the only time the tree can decrease in height.
+
+If we want to \lstinline|delete| something other than a leaf, we need to:
+\begin{enumerate}
+    \item Find the \textbf{predecessor} of \lstinline|k| (this is the same
+        as \lstinline|find|). This is the element with the largest key
+        $k'$ such that $k' < k$
+    \item Call \lstinline|delete(k')|. Fortunately, \lstinline|k'| is
+        always a leaf
+    \item Overwrite \lstinline|k| with another copy of \lstinline|k'|.
+\end{enumerate}
+
+\subsection{Summary}%
+\label{sub:Summary}
+A 2-3-4 tree is a data tructure that's based on a tree structure. they are
+a little awkward to implement because all nodes don't have the same number
+of children. So in practice, we use something called a
+\textbf{red-black} tree. It is similar to a binary tree and supports
+\lstinline|insert|, \lstinline|find|, \lstinline|delete| functions.
+
+Why do we bother learning these 2-3-4 trees then? Well, they're a little
+bit nicer and less complicated to think about and they're basically the
+same structure.
 
 \end{document}
