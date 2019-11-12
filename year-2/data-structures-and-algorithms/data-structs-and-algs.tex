@@ -779,4 +779,18 @@ Why do we bother learning these 2-3-4 trees then? Well, they're a little
 bit nicer and less complicated to think about and they're basically the
 same structure.
 
+%12/11/19
+\subsection{Making shortcuts}%
+\label{sub:shortcuts}
+What happesn if we add some shortcuts to a set of nodes. Because in the
+real world it's possible to take shortcuts in terms of a train line or
+something similar.
+
+We might attach a second linked list containing only some of the keys. How
+do we now perform \lstinline|find(k)| in this linked list?
+
+To perform \lstinline|find| we start in the top list and go right until
+we.  come ot a key $k' > k$. Then, we move down to the bottom list and go
+right until we find $k$. 
+
 \end{document}
