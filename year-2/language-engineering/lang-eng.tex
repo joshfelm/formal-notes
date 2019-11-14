@@ -415,6 +415,215 @@ Now, let's look at some of the state rules:
 Termination and looping is pretty basic and expected, so I won't cover
 that here.
 
+%Lecture: 25/10/19
+\subsection{The execution function}%
+\label{sub:exec-func}
+We can define an execution function for our abstract machine (AM) as
+follows:
+\begin{itemize}
+    \item $\mathcal{M}[\![.]\!]$: Code $\rightarrow (\text{State} \pfun
+        \text{State})$
+    \item $\mathcal{M}[\![c]\!] \sigma = $
+        \begin{align*}
+            \Bigg \{ 
+                \begin{split}
+                    \sigma' \quad &\text{if } \langle c, \epsilon, \sigma' \rangle
+                    \triangleright^* \langle \epsilon, e, \sigma' \rangle \\
+                    (\text{Undefined} \quad &\text{otherwise})
+                \end{split}
+        \end{align*}
+\end{itemize}
+
+\subsection{Code Translation of Expressions}%
+\label{sub:code-translation}
+Now, we're looking at a function that can translate from \textbf{while}
+into this AM code. So, $\mathcal{CA} [\![.]\!]$: Aexp $\rightarrow$ Code.
+
+\begin{alignat*}{2}
+   &\mathcal{CA} [\![n]\!] &&= \text{PUSH-n } \\
+   &\mathcal{CA} [\![x]\!] &&= \text{FETCH-n } \\
+   &\mathcal{CA} [\![a_1 + a_2]\!] &&= \mathcal{CA}[\![a_2]\!] :
+   \mathcal{CA}[\![a_1]\!]:\text{ADD} \\
+   &\mathcal{CA} [\![a_1 * a_2]\!] &&= \mathcal{CA}[\![a_2]\!] :
+   \mathcal{CA}[\![a_1]\!]:\text{MULT} \\
+   &\mathcal{CA} [\![a_1 - a_2]\!] &&= \mathcal{CA}[\![a_2]\!] :
+   \mathcal{CA}[\![a_1]\!]:\text{SUB} \\
+\end{alignat*}
+
+For the arithmetic ones, we need to take care because with subtraction,
+the order matters, hence $a_2$ being pushed onto the stack before $a_1$
+
+Now, we can look at $\mathcal{CB} [\![.]\!]$: Bexp $\rightarrow$ Code (the
+binary ones).
+\begin{alignat*}{2}
+   &\mathcal{CB} [\![\text{true}]\!] &&= \text{TRUE} \\
+   &\mathcal{CB} [\![\text{false}]\!] &&= \text{FALSE} \\
+   &\mathcal{CB} [\![a_1 = a_2]\!] &&=
+   \mathcal{CA}[\![a_2]\!]:\mathcal{CA}[\![a_1]\!]:\text{EQ} \\
+   &\mathcal{CB} [\![a_1 \le a_2]\!] &&=
+   \mathcal{CA}[\![a_2]\!]:\mathcal{CA}[\![a_1]\!]:\text{LE}\\
+   &\mathcal{CB}[\![\neg b]\!] &&= \mathcal{CB}[\![b]\!]:\text{NEG} \\
+   &\mathcal{CB} [\![b_1 \wedge b_2]\!] &&=
+   \mathcal{CB}[\![b_2]\!]:\mathcal{CB}[\![b_1]\!]:\text{AND}
+\end{alignat*}
+
+We have to use the \textbf{stack} rather than work directly with the
+results.
+
+Finally, we need to translate statements: $\mathcal{CS} [\![.]\!]$: Stm
+$\rightarrow$ Code.
+
+\begin{alignat*}{2}
+    &\mathcal{CS}[\![x:=a]\!] &&= \mathcal{CA}[\![a]\!]:\text{STORE-x} \\
+    &\mathcal{CS}[\![\text{skip}]\!] &&= \text{NOOP} \\
+    &\mathcal{CS}[\![S_1;S_2]\!] &&= \mathcal{CS}[\![S_1]]:\mathcal{CS}[\![S_2]] \\
+    &\mathcal{CS}[\![\text{if } b \text{ then } S_1 \text{ else } S_2]\!] &&= \mathcal{CB}[\![b]\!]:\text{BRANCH}(\mathcal{CS}[\![S_1]\!],\mathcal{CS}[\![S_2]\!]) \\
+    &\mathcal{CS}[\![\text{while } b \text{ do } S]\!] &&= \text{LOOP}(\mathcal{CB}[\![b]\!],\mathcal{CS}[\![S]\!])
+\end{alignat*}
+
+\subsection{Semantic function}%
+\label{sub:Semantic-function}
+We can now define a semantic function for \textbf{While} (by translating
+and executing the program on our AM), and it will be called $S_{am}$.
+\begin{align*}
+    &\mathcal{S}_{am} [\![.]\!]: \rightarrow (\text{State}\pfun\text{State}) \\
+    &\mathcal{S}_{am} [\![.]\!] = \sigma' \text{ if }
+    \mathcal{M}[\![\mathcal{CS}[\![]\!]\!] \sigma = \sigma', \text{
+    Undefined otherwise } \\
+    &\mathcal{S}_{am} [\![S]\!] \sigma = (\mathcal{M} ^o
+    \mathcal{CS})[\![S]\!] \sigma \\
+    &\mathcal{S}_{am} [\![S]\!] = (\mathcal{M} ^o
+    \mathcal{CS})[\![S]\!] \\
+\end{align*}
+
+Here's an example using factorials:
+\begin{align*}
+    &\mathcal{CS} [\![\text{y:=1, while } \neg (x=1) \text{ do } (y:=y * x;
+    x:=x-1)]\!] \\
+    = \ &\mathcal{CS}[\![y:=1]\!]: \\
+      &\mathcal{ CS}[\![\text{while } \neg (x=1) \text{ do }
+      (y:=y*x;x:=x-1)]\!] \\
+    = \ &\mathcal{CA}[\![1]\!]: \text{ store-y }: \\
+      &\text{loop}(\mathcal{CB}[\![y:=y * x; x:= x-1]\!]) \\
+    = \ &\text{push-1}: \text{store-y}: \\
+      &\text{loop}(\mathcal{CB}[\![x=1]\!]: \text{neg}, \\
+      &\quad \quad \mathcal{CS}[\![y:=y * x]\!] : \mathcal{CS}[\![x:=x-1]\!])\\
+    &\dots \\
+    = \ &\text{push-1}:\text{store-y}: \\
+    &\text{loop}(\text{push-1 : fetch-x : eq : neg,} \\
+    &\quad \quad \text{fetch-x : fetch-y : mult : store-y :} \\
+    &\quad  \quad\text{push-1 : fetch-x : sub : store-x})
+\end{align*}
+
+Because we have specified the functions, they are allowed to be undefined
+(such as when they do infinite loops). 
+
+\subsubsection{Correctness of translation}%
+\label{ssub:correctness-translation}
+We can say that for any arithmetic expression, all intermediate
+configurations have a non-empty stack. 
+
+Similarly, for all boolean expressions $b$, all intermediate
+configurations have a non-empty stack.
+
+\textbf{Note!} We don't have to always change state because we defined the
+program. In fact, if we wanted to allow $\mathcal{A}[\![.]\!]$ to allow
+state changes, we'd have to change the definition of $\mathcal{A}$. That
+is to say, if we want to allow `side-effects', we'd need to change the
+definition to allow it to return both an integer and a state $S$.
+
+%Lecture from 28/10/19
+\section{Denotational Semantics}%
+\label{sec:denotational-semantics}
+A denotational semantics defines the meaning of a program by a partial
+function called a \textbf{state-transformer} from (initial) states to
+(final) states. We're gonna be operating at a level that takes functions
+as arguments, and gives arguments.
+
+A denotational semantics must be \textbf{compositional}. This means we
+must define the meaning of expressions in terms of their
+\textit{sub-expressions}.
+
+There are two flavours of denotational semantics: \textbf{direct-style}
+and \textbf{continuation-style}. We'll mostly look at the first flavour.
+
+We need two more notions to formalise the meaning of if-then-else, and
+while statements. For this, we'll use \textbf{conditional functions} and
+\textbf{fixpoint operators}.
+
+The denotational semantics of \textbf{While} statements is specified in a
+similar way to the functions for arithmetic and boolean operations.
+
+So, we define the direct-style semantic function to be:
+\begin{align*}
+    S_{ds} \quad : \quad: \text{Stm } \rightarrow ( \text{State } \pfun
+    \text{ State})
+\end{align*}
+
+Here is what the semantics looks like:
+\begin{align*}
+    &\mathcal{S}_{ds} [\![x:=a]\!] s = s[x \mapsto \mathcal{A}[\![a]\!]s]
+    \\
+    &\mathcal{S}_{ds}[\![\text{skip}]\!] = id \\
+    &\mathcal{S}_{ds}[\![S_1;S_2]\!] =
+    \mathcal{S}_{ds}[\![S_2]\!]^o\mathcal{S}_{ds}[\![S_1]\!] \\
+    &\mathcal{S}_{ds}[\![\text{if } b \text{ then } S_1 \text{ else }
+    S_2]\!] =
+    \text{cond}(\mathcal{B}[\![b]\!],\mathcal{S}_{ds}[\![S_1]\!],\mathcal{S}_{ds}[\![S_2]\!]) \\
+    &\mathcal{S}_{ds}[\![\text{while } b \text{ do } S]\!] = \text{FIX F
+    where} F g =
+    \text{cond}(\mathcal{B}[\![b]\!],g^o\mathcal{S}_{ds}[\![S]\!],id)
+\end{align*}
+
+`FIX F' is the (least) fixpoint of the \textbf{functional} F, which is the
+functional of the loop. The g is an implicit argument of the functional F.
+We'll look at this a bit more, cause it's quite rough.
+
+\subsection{Conditional functions}%
+\label{sub:conditional-func}
+The idea of a \textbf{conditional function} is closely related to the
+denotational semantics of conditionals.
+
+We want to use one of two functions $c$ or $d$ to map some inputs $x$ to
+some outputs $y$; and we have a boolean test $b$ for, that will determine
+which function to apply in each case $x$.
+
+\begin{center}
+cond : $(X \rightarrow T) \times (X \pfun Y) \times (X \pfun Y)
+\rightarrow (X \pfun Y)$
+\end{center}
+
+We give in three functions, and we get out a function that takes $X$ to
+$Y$. We can rewrite this as:
+
+\begin{align*}
+    \text{cond}(b,c,d)x = \Bigg \{
+        \begin{split}
+            c(x) \quad &\text{if } b(x) = tt \\
+            d(x) \quad &\text{otherwise}
+        \end{split}
+\end{align*}
+
+Where $b, c, d$ correspond to the functions we supply. We will be
+interested when $X$ and $Y$ are both states. So:
+
+\begin{align*}
+    \text{cond} : (\text{State } \rightarrow T) \times (\text{State }
+    \pfun \text{ State}) \times (\text{State }
+    \pfun \text{ State})\times (\text{State }
+    \pfun \text{ State})
+\end{align*}
+
+\subsection{Least fixpoint}%
+\label{sub:least-fixpoint}
+The idea of the \textbf{least fixpoint} of a function is actually quite
+heavily studied in maths (particularly in lambda calculus).
+
+There are also a lot of heavy duty theorems, but we'll be using this one:
+\textbf{Definition:} For any unary operator $f : X \rightarrow X$ on some
+domain $X$ with a partial order $\le:$
+% TODO resume from 21:52
+
 % This is the lecture from 4/11/19 and 8/11/19, so please catch up daddio x
 \section{Chain-Complete Partial Orders}%
 \label{sec:ccpo}
