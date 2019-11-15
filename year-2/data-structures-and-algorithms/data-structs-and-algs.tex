@@ -780,8 +780,8 @@ bit nicer and less complicated to think about and they're basically the
 same structure.
 
 %12/11/19
-\subsection{Making shortcuts}%
-\label{sub:shortcuts}
+\section{Making shortcuts}%
+\label{sec:shortcuts}
 What happesn if we add some shortcuts to a set of nodes. Because in the
 real world it's possible to take shortcuts in terms of a train line or
 something similar.
@@ -791,6 +791,34 @@ do we now perform \lstinline|find(k)| in this linked list?
 
 To perform \lstinline|find| we start in the top list and go right until
 we.  come ot a key $k' > k$. Then, we move down to the bottom list and go
-right until we find $k$. 
+right until we find $k$. Imagine that we decide to place $m$ keys in the
+top list, and the bottom list contains $n$ keys (this will always be true
+since the bottom list has all of the keys). Where should we put the $m$
+keys to minimise the the \textit{worst} case (for a find operation)?
+
+If we spread out the $m$ keys evenlt, we get the biggest overall
+improvement. If we do an uneven spread, some of the keys will be found
+really fast, but there will be some poor cases, and since we're trying to
+minimise the worst case, we want to make sure all cases are catered for.
+Now, the worst case time for a \lstinline|find| operation becomes $O(m +
+n/m)$.
+
+By setting $m = \sqrt{n}$, we get the \textbf{worst case} time for a
+\lstinline|find|  operation to be $O(\sqrt{n})$.
+
+\subsection{More levels}%
+\label{sub:levels}
+We've looked at having 2 lists, but what if we have more than that? The
+more levels we interoduce, the better it gets. Each \textit{level} will
+contain \textbf{half} of the keys (called rounding up) from the level
+below. They are chosen to be spread as evenlt as possible.
+
+The bottom level still contains every key, and every level contains the
+leftmost and rightmost keys.
+
+since each level has half of the keys from hte below level, there are
+$O(\log n)$ levels (kinda like a tree). 
+
+% Write hte notes from this lecture my laptop died TODO
 
 \end{document}
