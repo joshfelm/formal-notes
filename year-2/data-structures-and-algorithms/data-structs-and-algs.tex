@@ -821,4 +821,111 @@ $O(\log n)$ levels (kinda like a tree).
 
 % Write hte notes from this lecture my laptop died TODO
 
+% lecture from 15/11/19
+\section{Line segments}%
+\label{sec:line-segments}
+Consider $n$ line segments. Find all of the intersections. How do we go
+about this?
+
+The simplest algorithm is to test every pair of line segments.
+
+Let $s_i$ denote the $i$-th line intersection:
+\begin{lstlisting}
+for i = 1,2, ..., n
+    for j = 1,2, ...,n
+        if (s[i] intersects s[j]) and (i != j)
+            output (i,j)
+\end{lstlisting}
+
+Given two line segments $s_i$ and $s_j$, described by their end point
+coordinates, we can decide whether (and also where) they intersect in
+$O(1)$ time. This can be proved because any computation on two objects
+with $O(1)$ (constant) space descriptions take $O(1)$ time. It doesn't
+tell you how to do it, but just know that this is true.
+
+The algorithm above, however, runs in $O(n^2)$ time (because checking each
+pair of lines takes $O(1)$ time).
+
+If there are $n$ line segments we could have a maximum of $(n/2)^2$
+intersections. If we want to output all of the intersections, then we
+can't expect to do better than $O(n^2)$ in the worst case simply because
+the time complexity of printing the output.
+
+\subsection{Output sensitive algorithms}%
+\label{sub:ouput-sensitive}
+Up to this point in the course, we've only looked at how the actual
+input affects the runtime. With this algorithm, however, we also need
+to consider the size of the output.
+
+Eventually, we'll work up to an algorithm with runtime $O(n \log n + k
+\log n)$. When $K$ is really big, then this algorithm is actually worse
+than the naive algorithm with $O(n^2 \log n)$. But, when $k$ is small, the
+algorithm is much better with $O(n \log n)$.  
+
+\newpage
+\subsection{Simplifying restrictions}%
+\label{sub:simplifying-restriction}
+To make things a bit easier, we are not allowing:
+\begin{itemize}
+    \item Horizontal line segments
+    \item Two end points with the same %y% coordinates
+    \item Three or more line segments that intersect at the same point
+    \item Overlapping line segments
+\end{itemize}
+
+\subsection{First observation}%
+\label{sub:first-ob}
+The \textbf{$y$-span} of $s_i$ is the range of the $y$ axis that $s_i$
+takes. From this definition, if $s_i$ and $s_j$ don't have overlapping
+$y$-spans, they don't intersect. This method suggests an overall approach
+called \textit{line sweeping}. We sweep a horizontal line through the
+plane from top to bottom and find intersections as we go.
+
+When we see that there are two lines in the same $y$-span that are also
+next to each other, we say that the two lines are \textit{adjacent}
+\textbf{at this $y$-coordinate}. Some pair of lines that are adjacent at
+some $y$ coordinate may not be adjacent at another because another line
+might come between them.
+
+\textbf{Note!} Two line segments that are \textit{never} adjacent
+\textbf{cannot intersect}. Intuitively, if they are never actually next to
+each other, they cannot cross.
+
+\subsubsection{Event points}%
+\label{ssub:event-points}
+The \textbf{event points} are the `interesting positions' of a line, which
+we define as the end points of the line and the intersection points. We
+have to detect the intersection points on the fly \textbf{before} we get
+to them.
+
+The total number of event points is $O(n + k)$ where $n$ is the number of
+endpoints and $k$ is the number of intersections.
+
+\subsubsection{Status of the sweep line}%
+\label{ssub:status-sweep-line}
+The status of the sweep line is the set of line segments that currently
+intersect the sweep line. We order this from \textit{left to right} by
+where they intersect.
+
+The status of the sweep line can only change at event points.
+
+We will store the status of the sweep line in a data structure. This allows
+efficient updates.
+
+\subsubsection{Updating the sweep line}%
+\label{ssub:update-sweep-line}
+Every time the sweep line moves to the next event point, we update the
+status data structure. If the event point is the \textit{top of a line
+segment}, we insert it into the status data structure at the appropriate
+place (using the insert function).
+
+Then, we check whether the segment will intersect either of the adjacent
+segments.
+
+If the event point is the \textit{bottom of a line segment} then we delete
+it from the status data structure.
+
+Finally, if the event point is an \textit{intersection point}, we
+\textbf{swap} the two line segments in the data structure.
+
 \end{document}
