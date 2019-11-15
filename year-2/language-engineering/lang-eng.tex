@@ -83,7 +83,7 @@
 \usepackage[symbol]{footmisc} 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \renewcommand{\familydefault}{\sfdefault}
-\newcommand\pfun{\mathrel{\ooalign{\hfil$\mapstochar\mkern5mu$\hfil\cr$\to$\cr}}}
+\newcommand\pfun{\hookrightarrow}
 % }}}
 
 % Title {{{
@@ -670,5 +670,81 @@ slides)? The answer, simply, is no.
 What we can do is the \textbf{lifted} relation, which we obtain by adding
 a least element $\bot$. But, does this now make it a CCPO? Yeah, it does.
 Nice. HOWEVER, it does not make it a \textbf{complete lattice}.
+
+% lecture from 15/11/19
+\section{The language Exc}%
+\label{sec:exc-language}
+Exc is an extension of the \textbf{while} language whose statements are
+defined like as follows. Exc stands for extension:
+
+\begin{align*}
+    S ::= x := a | \text{ skip } | \text{ if }b\text{ then } S_1 \text{
+    else } S_2 | \text{ while } b \text{ do } S | \text{ begin } S_1
+    \text{ handle } e : S_2 \text{ end } | \text{ raise } e
+\end{align*}
+
+The idea is that whenever a {\color{green} \textit{raise}} exception
+instruction is encountered, then the execution of the current
+(encapsulating blocks of) code (such as {\color{blue} $S_1$}) is aborted
+and control is passed to the (most recently defined) handler (such as
+{\color{blue} $S_2$}) for the exception ({\color{blue} $e$}).
+
+Consider the following \textbf{Exc} statement.
+\begin{lstlisting}
+begin
+    while true do
+        if x <= 0
+        then raise exit
+        else x := x-1
+    hand exit:
+        y:=7
+end
+\end{lstlisting}
+
+If this program is run when $x$ is negative then it will terminate after
+setting $y$ to 7 (leaving $x$ unchanged).
+
+The meaning of an exception needs to caputer the rsult of executing hte
+relevant handler and following by any remaining code after the definition
+of that handler.
+
+But this requires a more complicated semantic definition which allows, for
+example, for the fact that (differently from the \textit{while} language)
+we don't necesarily have to continue running $S_3$ in the following
+program after running either $S_1$ or $S_2$ (if either of them raises an
+exception) ** %TODO
+
+\subsection{Continuation-style denotational semantics}%
+\label{sub:continuation-style}
+We can define the set {\color{red}\textbf{Cont}} of continuations as the
+set of all partial functions between states so that
+{\color{red}\textbf{Cont}} = {\color{red}State} $\pfun$ {\color{red}State}
+
+Intuitively, a continuation is simply a state transformer that describes
+the input-output behaviour of a (part of) program.
+
+This concept allows us to define the behaviour o a statement  by the
+effect that it has ($c'$) on a continuation defining the behaviour of the
+code following that statement ($c$).
+
+Recall the \textbf{direct style denotational semantics}
+(\ref{sec:denotational-semantics}). Continuation style denotational
+semantics are as follows:
+\begin{alignat*}{2}
+    &S'_{cs} : {\color{green}\textbf{ Stm }} \rightarrow (
+    {\color{red}\textbf{Cont }} &&\rightarrow {\color{red}\textbf{ Cont}}) \\
+    &S'_{cs} [\![x:=a]\!]c s &&= c s [x \mapsto \mathcal{A}[\![a]\!]s] \\
+    &S'_{cs} [\![ {\color{blue}\textbf{skip}}]\!] &&=
+    {\color{blue}\textbf{id}} \\
+    &S'_{cs}[\![ {\color{green}S_1}; {\color{green}S_2} ]] &&= S'_{cs}[\![
+    {\color{green}S_1} ]\!] ^ {\color{blue}o} S'_{cs} [\![
+    {\color{green}S_2} ]\!] \\
+    % if then else
+    % while do
+    % TODO
+\end{alignat*}
+
+
+
 
 \end{document}
