@@ -73,6 +73,7 @@
 
 
 % Other packages {{{
+\usepackage{tikz}
 \usepackage{needspace}
 \usepackage{tcolorbox}
 \usepackage{soul}
@@ -622,7 +623,326 @@ heavily studied in maths (particularly in lambda calculus).
 There are also a lot of heavy duty theorems, but we'll be using this one:
 \textbf{Definition:} For any unary operator $f : X \rightarrow X$ on some
 domain $X$ with a partial order $\le:$
-% TODO resume from 21:52
+\begin{itemize}
+    \item A {\color{red}fixpoint} of f is any element $x \in X$ such that
+        $f(x) = x$ {\color{green}fix(f)} denotes the set of all such
+        fixpoints.
+    \item A {\color{red}least} fixpoint of f that is least with respect
+        to the $\le$ order {\color{green}lfp(f)} denotes the least
+        fixpoint (which is unique if it exists).
+\end{itemize}
+
+We are interested in  fixpoints of functions between state transformers,
+and these functions are called functionals.
+
+We also use the notation {\color{red}FIX} to denote the least fixpoint of
+a functional with a respect to $\subseteq$.
+
+The semantics of loops can use the least fix point, and here is an
+example:
+\begin{align*}
+    \mathcal{S}_{ds}[\![ {\color{blue}\textbf{while }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{do }} {\color{green} \textbf{S}}
+    ]\!] =
+    {\color{blue} \textbf{FIX F}} \text{ where } {\color{blue}F g} =
+    {\color{blue} \textbf{cond }} (\mathcal{B} [\![ {\color{green}
+    \textbf{b}} ]\!], {\color{blue} g ^o \mathcal{S}_{ds}} [\![
+    {\color{green} \textbf{S}} ]\!], {\color{blue} \textbf{id}})
+\end{align*}
+
+as
+\begin{align*}
+    \mathcal{S}_{ds}[\![ {\color{blue}\textbf{while }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{do }} {\color{green} \textbf{S}}
+    ]\!] =\mathcal{S}_{ds}[\![ {\color{blue} \textbf{if }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{then }} ( {\color{green} \textbf{S
+}} {\color{blue} \textbf{; while }} {\color{green} \textbf{b }}
+{\color{blue} \textbf{do }} {\color{green} \textbf{S}}) {\color{blue}
+\textbf{ else skip}} ]\!]
+\end{align*}
+
+The reason we are talking about the fixpoint is going to be explained. We
+know that whatever the semantics of the while loop is, can be explained by
+the second statement above. This statement simply unfolds the loop by one
+step. We know that this is true.
+
+We're trying to defined the semantics of the while loop, because the
+elements of the while loop is simply a conditional:
+\begin{align*}
+    \mathcal{S}_{ds}[\![ {\color{blue}\textbf{while }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{do }} {\color{green} \textbf{S}}
+    ]\!]&=\mathcal{S}_{ds}[\![ {\color{blue} \textbf{if }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{then }} ( {\color{green} \textbf{S
+}} {\color{blue} \textbf{; while }} {\color{green} \textbf{b }}
+{\color{blue} \textbf{do }} {\color{green} \textbf{S}}) {\color{blue}
+\textbf{ else skip}} ]\!] \\
+&= {\color{blue} \textbf{cond }}( \mathcal{B}[\![ {\color{green}
+\textbf{b}} ]\!] , \mathcal{S}_{ds}[\![ {\color{green} \textbf{S }}
+{\color{blue} \textbf{; while }} {\color{green} \textbf{b }} {\color{blue}
+\textbf{do }} {\color{green} \textbf{S}} ]\!],
+\mathcal{S}_{ds}[\![{\color{blue} \textbf{skip}} ]\!])
+\end{align*}
+
+The semantics of the \lstinline|if then else| statement is just the
+{\color{blue}\textbf{cond}} function.
+
+Now, we've already defined program composition, and we know that loops are
+composed with the components of the second and first halves of the
+program.
+\begin{align*}
+\mathcal{S}_{ds}[\![ {\color{blue}\textbf{while }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{do }} {\color{green} \textbf{S}}
+    ]\!] &= {\color{blue} \textbf{cond }}( \mathcal{B}[\![ {\color{green}
+\textbf{b}} ]\!] , \mathcal{S}_{ds}[\![ {\color{green} \textbf{S }}
+{\color{blue} \textbf{; while }} {\color{green} \textbf{b }} {\color{blue}
+\textbf{do }} {\color{green} \textbf{S}} ]\!],
+\mathcal{S}_{ds}[\![{\color{blue} \textbf{skip}} ]\!]) \\
+&= {\color{blue} \textbf{cond }}( \mathcal{B}[\![ {\color{green}
+\textbf{b}} ]\!] , \mathcal{S}_{ds}[\![ {\color{green} \textbf{S }}
+{\color{blue} \textbf{; while }} {\color{green} \textbf{b }} {\color{blue}
+\textbf{do }} {\color{green} \textbf{S}} ]\!],
+{\color{blue} \textbf{id}}) \\
+&\in {\color{blue} \textbf{fix }} ( \lambda {\color{blue} \textbf{g . cond
+}} ( \mathcal{B} [\![ {\color{green} \textbf{b}} ]\!], {\color{blue}
+\textbf{g }} ^o \mathcal{S}_{ds}[\![ {\color{green} \textbf{S}} ]\!],
+{\color{blue} \textbf{id}}))
+\end{align*}
+
+The $\mathcal{S}_{ds}$ means that we have some semantics and we're trying
+to apply it to some other thing. This last line imagines the input (in our
+case the ${\color{blue}\textbf{while }} {\color{green} \textbf{b }}
+{\color{blue} \textbf{do }} {\color{green} \textbf{S}}$) as $g$. Now, if
+we can find a fixpoint of the $\lambda$ function (this means that if we
+give it an input, we get the same value back). That is to say, if we say
+$g$ is the semantics of the while loop, and we pass this into the
+function, we should get $g$ back. This means that if we define the lambda
+function, the semantics of the while loop must be a fixpoint of the lambda
+function. Finally, we end up with:
+\begin{align*}
+\mathcal{S}_{ds}[\![ {\color{blue}\textbf{while }} {\color{green}
+    \textbf{b }} {\color{blue} \textbf{do }} {\color{green} \textbf{S}}
+    ]\!] &\in {\color{blue} \textbf{fix }} ( \lambda {\color{blue} \textbf{g . cond }} ( \mathcal{B} [\![ {\color{green} \textbf{b}} ]\!], {\color{blue}
+\textbf{g }} ^o \mathcal{S}_{ds}[\![ {\color{green} \textbf{S}} ]\!],
+{\color{blue} \textbf{id}})) \\
+         &= {\color{blue} \textbf{FIX }} ( \lambda {\color{blue}
+         \textbf{g. cond}} ( \mathcal{B} [\![ {\color{green} \textbf{b}}]\!],
+         {\color{blue} \textbf{g }} ^o \mathcal{S}_{ds}[\![
+         {\color{green} \textbf{S}} ]\!], {\color{blue} \textbf{id}} ))
+\end{align*}
+
+This final step is shown using math, and we'll look at this now.
+
+\textbf{Note!} the semantics of the while loop can be undefined if the
+fixpoint is undefined.
+
+\subsubsection{The functional of a loop}%
+\label{ssub:The functional of a loop}
+The functional $F = \lambda g . \text{cond}( \mathcal{B} [\![ \textbf{b}
+]\!], g ^o \mathcal{S}_{ds}[\![ \textbf{S} ]\!], \textbf{id} )$ is
+referred to as the functional of the loop.
+
+The functional can be seen as a means of finding better and better
+approximations to the semantics of the loop.
+
+it can be shown that FIX gives the correct semantics for all possible $n$.
+Basically, if we could do it infinite times, we'd have a perfect semantics
+of the particular loop in a particular state, because the loop must
+terminate in finite steps.
+
+Note that $F^n(\empty)$ is a correct semantics for all states from which
+the loop ends in fewer than $n$ iterations (but it is a pretty awful
+approximation).
+
+A \textbf{direct characterisation} of F is any equivalent mathematical
+expression that does not contain any semantic functions.
+
+\newpage
+\textbf{Note!} the functions have the following types:
+\begin{itemize}
+    \item FIX : $(( \textbf{State } \pfun \textbf{ State} ) \rightarrow (
+        \textbf{State } \pfun \textbf{ State} ))\rightarrow (
+        \textbf{State } \pfun \textbf{ State} )$
+    \item F : $(\textbf{State } \pfun \textbf{ State} ) \rightarrow (
+        \textbf{State } \pfun \textbf{ State} )$
+    \item g : $ \textbf{State } \pfun \textbf{ State}$
+\end{itemize}
+
+% Lecture from 01/11/19
+\subsection{More on partial orders}%
+\label{sub:partial-order-2}
+\begin{itemize}
+    \item A (\textbf{weak}) partial order is:
+        \begin{itemize}
+            \item Reflexive ($a \le a \forall a$)
+            \item Transitive ($a \le b$ and $b \le c$ implies $a \le c$
+                for all $a,b,c$)
+            \item Antisymmetric ($a \le b$ and $b \le a$ implies $a = b$
+                for all $a,b$)
+        \end{itemize}
+    \item  A \textbf{strong} partial order is:
+        \begin{itemize}
+            \item Irreflexive $a \le a$ for no $a$.
+            \item Transitive
+            \item Antisymmetric (because assume $a \le b$ and $b \le a$,
+                this contradicts the rules of transitivity, so $a = b$)
+        \end{itemize}
+    \item A \textbf{total} partial order (or \textbf{chain}) is:
+        \begin{itemize}
+            \item Connex ($a \le b$ or $b \le a$ for all $a, b$)
+            \item Reflexive (because setting $a = b$ gives $a \le a$ or $b
+                \le a$ for all a.)
+            \item Transitive
+            \item Antisymmetric
+        \end{itemize}
+\end{itemize}
+
+As an example, we can use getting dressed. When we get dressed, we know
+that we put our \textit{left sock} strictly before our \textit{left shoe}.
+This is a strict order because we couldn't do it the other way around or
+at the same time. However, it doesn't matter which way around which sock
+we put on. Similarly, our boxers go on before our trousers, and it is also
+better to put on trousers before your shoes.
+\begin{center}
+\begin{tikzpicture}
+    \node (top) at (0,2) {{\color{red}left\_sock}};
+    \node (top2) at (2,2) {{\color{red}right\_sock} };
+    \node (top3) at (4,2) { {\color{red}pants} };
+    \node (top4) at (6,2) { {\color{red}shirt} };
+    \node (lshoe) at (0,0) { {\color{red}left\_shoe} };
+    \node (rshoe) at (2,0){ {\color{red}right\_shoe} };
+    \node (trousers) at (4,1) { {\color{red}trousers} };
+    \node (tie) at (6,1) { {\color{red}tie} };
+    \node (jacket) at (6,0) { {\color{red}jacket} };
+    \draw [black, thick] (top) -- (lshoe);
+    \draw [black, thick] (top2) -- (rshoe);
+    \draw [black, thick] (top3) -- (trousers);
+    \draw [black, thick] (top4) -- (tie);
+    \draw [black, thick] (trousers) -- (lshoe);
+    \draw [black, thick] (trousers) -- (rshoe);
+    \draw [black, thick] (trousers) -- (jacket);
+    \draw [black, thick] (tie) -- (jacket);
+\end{tikzpicture}
+\end{center}
+
+So, this is an example of a \textbf{weak} partial order because it is
+\textbf{reflexive}. It's not a chain because it's not a straight line.
+It's not a reflexive 
+
+Here's another example:
+\begin{center}
+    \begin{tikzpicture}
+        \node (top) at (1,2) {\color{green}$\{a,b\}$};
+        \node (left) at (0,1) {\color{green}$\{a\}$};
+        \node (right) at (2,1) {\color{green}$\{b\}$};
+        \node (bottom) at (1,0) {\color{green}$\{\}$};
+        \draw [black, thick] (top) -- (left);
+        \draw [black, thick] (top) -- (right);
+        \draw [black, thick] (left) -- (bottom);
+        \draw [black, thick] (right) -- (bottom);
+    \end{tikzpicture}
+\end{center}
+
+Here, this is another weak partial order (it actually represents to
+$\subseteq$ relation). Finally, here's a chain.
+\begin{center}
+    \begin{tikzpicture}
+        \node (top) at (0,4) {$\dots$};
+        \node (3) at (0,3) {$3$};
+        \node (2) at (0,2) {$2$};
+        \node (1) at (0,1) {$1$};
+        \node (bottom) at (0,0) {$\dots$};
+        \draw [black] (top) -- (3);
+        \draw [black] (3) -- (2);
+        \draw [black] (2) -- (1);
+        \draw [black] (1) -- (bottom);
+    \end{tikzpicture}
+\end{center}
+
+This is the $\le$ relation, and it is a \textbf{total} order, shown with the
+implicit transitive and reflexive links omitted.
+
+\subsection{Fixpoints of real functions}%
+\label{sub:real-fixpoints}
+Let's look at some real functions, and their respective fixpoints:
+\begin{alignat*}{5}
+    &\textbf{square } &&= \lambda x . x*x &&\text{fix(square) } = \{0,1\}
+    &&= 0\\
+    &\textbf{double } &&= \lambda x . x+2 &&\text{fix(double) } = \{0\} &&= 0\\
+    &\textbf{increment } &&= \lambda x.x+1 &&\text{fix(increment) } = \{\} &&=
+    \text{ undefined }\\
+    &\textbf{identity } &&= \lambda x . 1 &&\text{fix(identity) } =
+    \mathbb{R} &&= \text{ undefined }\\
+               &\textbf{one } &&= \lambda x . 1 &&\text{fix(one) } =
+    \{1\} &&= 1\\
+               &\textbf{magnitude } &&= \lambda x . \text{if } x \le 0 \text{ then } x
+    \text{ else } -x \quad &&\text{fix(magnitude) } = \mathbb{R}^+ &&= 0\\
+\end{alignat*}
+
+The lowest fixed point for each function are on the right.
+
+\subsection{Divergence and strictness}%
+\label{sub:divergence-strictness}
+A \textbf{divergent} definition means a definition with
+\textit{non-termination} or \textit{undefined} cases. Haskell deals with
+this by assigning expressions a \textbf{bottom} value ($\bot$). Every data
+type in Haskell has a $\bot$ (one for each type).
+
+A Haskell function is said to be \textbf{strict} if the function is
+divergent whenever it is applied to a divergent argument. For example,
+$*2$ is as strict as $(*2) \bot = \bot * 2 = \bot$. Therefore, $\bot$ is
+technically the least fixpoint of any strict Haskell function, but that is
+a little stupid so we ignore it a little bit.
+
+To compute the least fixpoints of functions, we can use the following
+definition:
+
+\begin{itemize}
+    \item \lstinline|fix f = f (fix f)| 
+\end{itemize}
+
+For example:
+\begin{itemize}
+    \item \lstinline|fix (*2) = (*2)(fix (*2)) = (*2)(*2)(fix (*2)) = ...  = (bot)|
+    \item \lstinline|fix (const 2) = (const 2)(fix (const2)) = 2| 
+\end{itemize}
+
+We can use fixpoints to redefine recursive functions (such as factorials).
+Look at this example:
+\begin{itemize}
+    \item \lstinline|fac = fix (\f n -> if n==0 then 1 else n*f (n-1))| 
+\end{itemize}
+
+Similarly (by making the anonymous functions explicit):
+\begin{itemize}
+    \item \lstinline|fac = fix fg| 
+    \item \lstinline|fg f = g where g n = (if n==0 then 1 else n*f (n-1))| 
+\end{itemize}
+
+We can verify this by:
+\begin{itemize}
+    \item \lstinline|fac 0 = (fix fg) 0 = fg (fix fg) 0 = 1| 
+    \item \lstinline|fac 1 = fg (fix fg) 1 = 1 * (fix fg) 0 = 1| 
+    \item \lstinline|fac 2 = fg (fix fg) 2 = 2 * (fix fg) 1 = 2| 
+    \item \lstinline|fac 3 = fg (fix fg) 3 = 3 * (fix fg) 2 = 6| 
+\end{itemize}
+
+Any fixpoint \lstinline|f| of \lstinline|fg| must clearly compute
+factorials as this would imply that:
+\begin{itemize}
+    \item \lstinline|f = fg f|
+    \item \lstinline|f n = fg f n| 
+    \item \lstinline|f n = (if n == 0 then 1 else n * f (n-1))|
+\end{itemize}
+
+Now, we can see \lstinline|fg| as a function that takes an approximation
+to the factorial function and returns a better approximation (sound
+familiar??) For example, we could take \lstinline|id| as an initial
+approximation. It will get at least two outputs right ($1! = 1, 2! = 2$).
+But, \lstinline|(fg id)|  is a better approximation as now it gets three
+right. Continuing on like this gets $n+2$ values correct (shown by the
+Kleene fixpoint theorem which we don't really need to know).
+
+
 
 % This is the lecture from 4/11/19 and 8/11/19, so please catch up daddio x
 \section{Chain-Complete Partial Orders}%
@@ -704,13 +1024,13 @@ end
 If this program is run when $x$ is negative then it will terminate after
 setting $y$ to 7 (leaving $x$ unchanged).
 
-The meaning of an exception needs to caputer the rsult of executing hte
+The meaning of an exception needs to capture the result of executing the
 relevant handler and following by any remaining code after the definition
 of that handler.
 
 But this requires a more complicated semantic definition which allows, for
 example, for the fact that (differently from the \textit{while} language)
-we don't necesarily have to continue running $S_3$ in the following
+we don't necessarily have to continue running $S_3$ in the following
 program after running either $S_1$ or $S_2$ (if either of them raises an
 exception) ** %TODO
 
