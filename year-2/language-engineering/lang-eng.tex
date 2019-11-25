@@ -1064,4 +1064,97 @@ semantics are as follows:
     % TODO
 \end{alignat*}
 
+% Lecture from 25/11/19
+\newpage
+\section{Axiomatic Semantics}%
+\label{sec:axiomatic-sem}
+We are usually more interested in some properties of a program. For
+example, given the program \lstinline|while not(x=1) do (y:=y*x; x:=x-1)|.
+An important property might be that if \lstinline|y| is initially 1 and
+\lstinline|x|  is a strictly positive integer \lstinline|n| then
+\lstinline|y|  will become \lstinline|n!|.
+
+Typically, we are interested in one of two common classes of properties:
+\begin{itemize}
+    \item \textbf{Partial correctness properties} -- This states that
+        \textit{if} a program terminates, then a certain relationship will
+        hold between the initial and final variable values.
+    \item \textbf{Total correctness properties} -- This states that a
+        program will terminate and a certain relationship will hold
+        between the initial and final variable values.
+\end{itemize}
+
+The axiomatic semantics allows us to formalise the interesting properties
+of a program using \textbf{preconditions} (which are true in the state
+prior to executing the program) and \textbf{postconditions} (which are
+true in any state right afterwards).
+
+Such properties are denoted by \textit{assertions} in the form of triples
+known as \textit{Hoare triples}. They are written:
+\begin{align*}
+    {\color{blue} \textbf{Precondition}} \quad {\color{green}
+    \textbf{Program}} \quad {\color{blue} \textbf{Postcondition}}
+\end{align*}
+
+The axiomatic semantics is a calculus for deriving correct triples. There
+are two types: \textit{partial} and \textit{total} correctness.
+
+Given the program \lstinline|while not(x=1) do (y:=y*x; x:=x-1)|, we can
+state whether the following assertions are intuitively true or false:
+
+% TODO write in the assertions.
+
+When we write postconditions, it is important to make it very good.
+
+We have both \textbf{program} variables and \textbf{logical} variables,
+the logical ones enable us to `remember' the value of \lstinline|x| that
+we had before the start of the program.
+
+We write the \textit{partial} correctness assertions with curly brackets
+\{\}, and \textit{total} correctness assertions with square brackets [].
+
+An axiomatic semantics consists of a set of \textit{axioms} and a set of
+\textit{rules} that provide a method for finding all true assertions. An
+axiom is a rule with no premises (which means that the conclusion can be
+assumed at any time). The individual axioms and rules are specified by
+\textbf{schemata} which contain meta variables.
+
+We're defining the behaviour of a program by saying what it does to the
+properties of the program. For example:
+
+\begin{center}
+    {\color{blue}\textbf{\{P\}}} {\color{green}\textbf{skip}}
+    {\color{blue}\textbf{\{P\}}}
+\end{center}
+
+Here, {\color{blue}\textbf{\{P\}}} is the same before and afterwards,
+showing that the properties have not changed.
+
+In the assignment example, we write:
+
+\begin{center}
+    {\color{blue}\textbf{P(a)}} {\color{green}\textbf{x:=a}}
+    {\color{blue}\textbf{P(x)}}
+\end{center}
+
+Note how we use {\color{blue}\textbf{P(a)}} \textbf{before} and not after.
+I don't really understand why so go and look at this.
+
+Basically, we say that if a statement {\color{blue}\textbf{P(a)}} (that
+might involve the program variable \textbf{x}) is true after assigning
+\textbf{x} to \textbf{a}, then the statement {\color{blue}\textbf{P(a)}}
+(where all occurrences of \textbf{x} are replaced by \textbf{a}) must have
+been true before.
+
+\textbf{P} is any expression in the assertion language, while \textbf{x}
+is any program variable, and \textbf{a} is any arithmetic expression in
+\textbf{While}.
+
+To prove an assertion about a composition of two program statements, it
+suffices to find an intermediate property (sometimes called a
+\textbf{midcondition}). This is a post-condition of the former and a
+pre-condition of the latter.
+
+%TODO: finish this lecture
+
 \end{document}
