@@ -928,4 +928,96 @@ it from the status data structure.
 Finally, if the event point is an \textit{intersection point}, we
 \textbf{swap} the two line segments in the data structure.
 
+% Lecture from 25/11/19
+\section{Shortest Path Revisited}%
+\label{sec:shortest-path-revisited}
+We've already looked at the shortest path thing, but now, we're going to
+do it with negative weights. Bellman-Ford's algorithm solves the
+\textbf{single source shortest paths} problem (in a weighted directed
+graph).
+
+It finds the shortest path from a given \textit{source} vertex to every
+other vertex. The weights are allowed to be both positive and negative,
+and the graph is stored as an \textbf{adjacency list}.
+
+\subsection{Negative weight cycles}%
+\label{sub:negative-cycles}
+If some of the edges in the graph have negative weights, the idea of a
+shortest path might not make sense:
+
+%TODO draw a negative cycle using tikz
+
+A negative weight cycle is a path from a vertex $v$ back to $v$ such that
+the sum of the edge weights is negative. If there is a path from $s$ to
+$t$, which includes a negative weight cycle, there is no shortest path
+from $s$ to $t$.
+
+Firstly, we are going to discuss a simpler version of the Bellman-Ford
+algorithm, that assumes there are \textbf{no such cycles}.
+
+The algorithm repeatedly asks, for every edge $(u,v)$ ``can I find a
+shorter route to $v$ if I go via $u$?". Here is the algorithm:
+
+\begin{lstlisting}
+sub MostOfBellman-Ford
+    for all v, set dist(v) = infinity
+    set dist(s) = 0
+    for i = 1 to |V|
+        for each edge (u,v) in E
+            if dist(v) > dist(u) + weight(u,v) then
+                dist(v) = dist(u) + weight(u,v)
+            end if
+        next
+    next
+end sub 
+\end{lstlisting}
+
+This algorithm runs $|V|$ iterations. In each iteration, we relax
+\textbf{every} edge $(u,v)$.
+
+Now, consider the algorithm where in each algorithm you relax every edge
+(instead of only one). After enough iterations, we get all edges to be the
+shortest path. But, how many iterations is enough? Well, we need to do one
+iteration for each node in the path we want to find the shortest path of.
+
+Due to the fact that we have no negative weight cycles, deleting a cycle
+from a path \textbf{cannot} increase its length. Therefore, there is a
+shortest path between two nodes containing no cycles.  Therefore, we have
+proved that `enough' cycles is $|V|$.
+
+Of course, if there is no path between the two nodes, then at termination,
+\lstinline|dist(v) = infinity|. If there is a shortest path between two
+nodes, then it contains at most $|V|$ edges (assuming there are no
+negative weight cycles).
+
+So, what's the rest of the algorithm?
+
+\subsection{The rest of the algorithm}%
+\label{sub:rest-of-alg}
+
+\begin{lstlisting}
+sub bellman-ford
+    for all v, set dist(v) = infinity
+    set dist(s) = 0
+    for i = 1 to |V|
+        for each edge (u,v) in E
+            if dist(v) > dist(u) + weight(u,v) then
+                dist(v) = dist(u) + weight(u,v)
+            end if
+        next
+    next
+
+    for each edge (u,v) in E
+        if dist(v) > dist(u) + weight(u,v)
+            print("negative weight cycle found")
+        end if
+    next
+end sub
+\end{lstlisting}
+
+The final check outputs a message if there is a negative weight cycle, and
+it does this by checking if there is a path that is shorter than the
+shortest path (that is a contradiction) and therefore there must be a
+negative weight cycle.
+
 \end{document}
