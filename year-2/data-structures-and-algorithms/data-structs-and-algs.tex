@@ -75,6 +75,7 @@
 % Other packages {{{
 \usepackage{tikz-qtree}
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \graphicspath{ {./pics/} }
@@ -769,7 +770,7 @@ If we want to \lstinline|delete| something other than a leaf, we need to:
 
 \subsection{Summary}%
 \label{sub:Summary}
-A 2-3-4 tree is a data tructure that's based on a tree structure. they are
+A 2-3-4 tree is a data structure that's based on a tree structure. They are
 a little awkward to implement because all nodes don't have the same number
 of children. So in practice, we use something called a
 \textbf{red-black} tree. It is similar to a binary tree and supports
@@ -782,7 +783,7 @@ same structure.
 %12/11/19
 \section{Making shortcuts}%
 \label{sec:shortcuts}
-What happesn if we add some shortcuts to a set of nodes. Because in the
+What happens if we add some shortcuts to a set of nodes. Because in the
 real world it's possible to take shortcuts in terms of a train line or
 something similar.
 
@@ -790,13 +791,13 @@ We might attach a second linked list containing only some of the keys. How
 do we now perform \lstinline|find(k)| in this linked list?
 
 To perform \lstinline|find| we start in the top list and go right until
-we.  come ot a key $k' > k$. Then, we move down to the bottom list and go
+we come to a key $k' > k$. Then, we move down to the bottom list and go
 right until we find $k$. Imagine that we decide to place $m$ keys in the
 top list, and the bottom list contains $n$ keys (this will always be true
 since the bottom list has all of the keys). Where should we put the $m$
-keys to minimise the the \textit{worst} case (for a find operation)?
+keys to minimise the \textit{worst} case (for a find operation)?
 
-If we spread out the $m$ keys evenlt, we get the biggest overall
+If we spread out the $m$ keys evenly, we get the biggest overall
 improvement. If we do an uneven spread, some of the keys will be found
 really fast, but there will be some poor cases, and since we're trying to
 minimise the worst case, we want to make sure all cases are catered for.
@@ -809,17 +810,17 @@ By setting $m = \sqrt{n}$, we get the \textbf{worst case} time for a
 \subsection{More levels}%
 \label{sub:levels}
 We've looked at having 2 lists, but what if we have more than that? The
-more levels we interoduce, the better it gets. Each \textit{level} will
+more levels we introduce, the better it gets. Each \textit{level} will
 contain \textbf{half} of the keys (called rounding up) from the level
-below. They are chosen to be spread as evenlt as possible.
+below. They are chosen to be spread as evenly as possible.
 
 The bottom level still contains every key, and every level contains the
 leftmost and rightmost keys.
 
-since each level has half of the keys from hte below level, there are
+since each level has half of the keys from the below level, there are
 $O(\log n)$ levels (kinda like a tree). 
 
-% Write hte notes from this lecture my laptop died TODO
+% Write the notes from this lecture my laptop died TODO
 
 % lecture from 15/11/19
 \section{Line segments}%
@@ -1019,5 +1020,121 @@ The final check outputs a message if there is a negative weight cycle, and
 it does this by checking if there is a path that is shorter than the
 shortest path (that is a contradiction) and therefore there must be a
 negative weight cycle.
+
+\newpage
+% Lecture 26/11/19 (last raphael clifford lecture :( )
+\subsection{All-pairs Shortest Paths}%
+\label{sub:all-pairs-shortest}
+In previous lectures, we have focused on the single source graphs, But,
+what if we want to find the shortest paths from every vertex to every other
+vertex?
+
+\begin{itemize}
+    \item If the graph has \textbf{non-negative edge weights}, then we can
+        just run Dijkstra's algorithm $|V|$ times. ($O(|V||E|\log|V|)$
+        time).
+    \item If the graph has both \textbf{positive and negative edge
+        weights}, we can repeatedly run Bellman-Ford's algorithm.
+        ($O(|V|^2|E|)$ time)
+\end{itemize}
+
+The output contains the length of the shortest path between every pair of
+vertices, so there are $|V| \cdot (|V|-1)$, therefore we can't expect to
+do better than $O(|V|^2)$, based on pairs alone.
+
+Now, imagine that $|E| \approx \frac{|V|^2}{4}$ (basically ,each vertex
+has an edge to about half of the other vertices). This is quite a dense
+graph. If $V$ was 10000, then this becomes just too big.
+
+If the graph is really sparse ($|E| \approx 5|V|$), (basically each vertex
+has an edge to about 5 other vertices). 
+
+\subsubsection{Johnson's algorithm}%
+\label{ssub:johnson's-algorithm}
+We've already seen one algorithm for all-pairs shortest paths that takes
+$O(|V||E|\log|V|)$ time.If the graph had non-negative weights, we can just
+repeatedly apply Dijkstra's algorithm. However, we are interested in graphs
+that have both positive and negative edge weights. The approach employed
+by Johnson's algorithm is to reweight the edges so that the resulting
+graph has non-negative edge weights, and \textit{then} repeatedly runs
+Dijkstra's algorithm. For example;
+
+%GRAPH EXAMPLE (ALSO TODO)
+\begin{center}
+\begin{tikzpicture}
+    \begin{scope}[every node/.style={circle,thick,draw}]
+        \node (A) at (0,2) {A};
+        \node (B) at (2,0) {B};
+        \node (C) at (4,2) {C};
+        \node (D) at (2,4) {D};
+    \end{scope}
+
+    \begin{scope}[>={Stealth[black]},
+        every node/.style={fill=white,circle},
+        every edge/.style={draw=black,very thick}]
+        \path [->] (A) edge node {$0$} (B);
+        \path [->] (C) edge node {$-2$} (A);
+    \end{scope}
+\end{tikzpicture}
+\end{center}
+
+%TODO some bits here (I was messing around with some graph shit)
+
+\subsection{Reweighted paths}%
+\label{sub:reweighted-path}
+Let the function $h$ give a value $h(v)$ for each vertex $v \in V$ change
+the weight of every edge $(u,v)$ to be:
+\begin{align*}
+    \text{weight}'(u,v) = \text{ weight}(u,v) + h(u) - h(v)
+\end{align*}
+
+\textbf{Lemma}: Any path is a shortest path in the original graph if and
+only if it is a shortest path in the reweighted graph. 
+
+In summary, to reweight the graph, we let the function $h$ give a value
+$h(v)$ for each vertex $v\in V$. Then, we change the weight of every edge
+$(u,v)$ to be $\text{weight}'(u,v) = \text{ weight}(u,v) + h(u) - h(v)$.
+
+\textbf{Lemma}: Any path is a shortest path in the original graph if and
+only if it is a shortest path in the reweighted graph.
+
+\textbf{Fact}: If $\ell$ is the length of a path from $u$ to $v$ %** TODO
+
+\subsection{Choosing h}%
+\label{sub:Choosing-h}
+We first add one additional vertex called $s$ to the original graph. We
+also add an edge $(s,v)$ from $s$ to each other vertex $v \in V$ (each of
+the edges has weight 0). For each $v$, let $\delta(s,v)$ denote the length
+of the shortest path from $s$ to $v$. We then define $h(v)$ to equal
+$\delta(s,v)$.
+
+Consider any edge $(u,v) \in E$. The key observation is that $\delta(s,v)
+\le \delta(s,u) + \text{ weight}(u,v)$. Rearranging this, we end up with
+$\text{weight}'(u,v) = \text{ weight} (u,v) + h(u) - h(v)$.
+
+\subsection{Johnson's actual algorithm}%
+\label{sub:real-johnson}
+We can now piece together Johnson's algorithm which operates as follows:
+\begin{enumerate}
+    \item Add one additional vertex called $s$ to the original graph
+    \item For each vertex, add an edge $(s,v)$ with weight 0
+    \item Run the Bellman-Ford algorithm with source $s$. (This calculates
+        the shortest path lengths $\delta(s,v)$) for all $v$.
+    \item Reweight each edge $(u,v) \in E$ so that 
+        \begin{align*}
+            \text{weight}'(u,v) = \text{ weight}(u,v) + h(u) - h(v)
+        \end{align*}
+    \item For each vertex $u$, run Dijkstra's algorithm with source $s =
+        u$.
+    \item For each pair of vertices $u,v$ compute
+        \begin{align*}
+            \delta(u,v) = \delta'(u,v) + h(v) - h(u)
+        \end{align*}
+\end{enumerate}
+
+Therefore, the overall time complexity is $O(|V||E|\log|V|)$, which is
+actually the same time period as Dijkstra's algorithm.
+
+
 
 \end{document}
