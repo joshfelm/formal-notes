@@ -190,5 +190,84 @@ If we have a message that's not all 0, we are evaluating at $n$ different
 values. Also, over a field, at most $k-1$ values are zeroes. Therefore, at
 least $n-(k-1)$ points in a non zero code word are nonzero.
 
+% Lecture from 26/11/19
+\section{Information Theory}%
+\label{sec:information-theory}
+Firstly, let's lay some ground rules, shall we?
+
+\begin{itemize}
+    \item $\Sigma$ = Alphabet (finite, non empty set)
+    \item $X =$ Alphabet (with only 0s and 1s)
+    \item $\Sigma^+ =$ Non empty words over $\Sigma$
+    \item $\Sigma^* =$ Words over $\Sigma$ including $\epsilon$ (empty)
+\end{itemize}
+
+We want to be able to send some message $\underline m \in \Sigma^+$ to some
+channel with some noise.
+
+Here are some more definitions:
+\begin{itemize}
+    \item $f : X \rightarrow y$ is injective if $x \not = x' \rightarrow
+        f(x) \not = f(x)$ and $f(x) = f(x) \rightarrow x = x'$.
+    \item $f : X \rightarrow y$ is surjective if every $y \le y$ has some
+        $x \in X$ such that $f(x) = y$.
+    \item If both are true, then it is bijective.
+\end{itemize}
+
+Finally, $\text{Image}(f) = \{y \in Y | y = f(x) \text{ for some } x \in
+X\}$.
+
+Now, let's look at an example:
+\begin{center}
+    \begin{tabular}{c|c c c c}
+        $\sigma$ & A & B & C & D \\ \hline
+        $f(\sigma)$ & $0$ & $1$ & $00$ & $01$
+    \end{tabular}
+\end{center}
+
+This is a problem because does $00 =$ c or AA? Instead, we could do
+something like:
+
+\begin{center}
+    \begin{tabular}{c|c c c}
+        $\sigma$ & A & B & C \\ \hline
+        $f_1(\sigma)$ & 1 & 10 & 100
+    \end{tabular}
+    \quad or \quad
+    \begin{tabular}{c|c c c}
+        $\sigma$ & A & B & C \\ \hline
+        $f_2(\sigma)$ & 1 & 01 & 001
+    \end{tabular}
+\end{center}
+
+Now, $f_2$ is actually better because we know when something ends by the
+$1$. The first one leaves us waiting for additional $0$s. We call the
+second function \textbf{prefix-free}.
+
+\begin{titlebox}{blue}{Prefix free}
+An encoding $E$ is prefix free if for all $\underline m, \underline m'$,
+$E(\underline m)$ is not a prefix of $E(\underline m')$
+\end{titlebox}
+
+\textbf{Theorem}: If $E$ is injective and prefix-free, then $E^+$ is
+injective.
+
+Let's now assume that $\underline m \not = \underline m'$ but
+$E^+(\underline m) = E^+(\underline m')$. We can now work backwards and
+prove that this is a contradiction:
+\begin{itemize}
+    \item Assume $|\underline m| \le |\underline m'| (w\log)$
+    \item If $\underline m$ is prefix of $\underline m'$, then $\exists
+        \underline s : \underline m' - \underline{ms}$
+    \item $E(\underline m') = E^+(\underline m)E^+(\underline s) =
+        E^+(\underline m) \rightarrow E^+(\underline s) = \epsilon$
+        \begin{itemize}
+            \item This is a contradiction, because we said that they
+                should evaluate to the same thing before but now one is
+                empty.
+        \end{itemize}
+\end{itemize}
+
+
 
 \end{document}
