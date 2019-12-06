@@ -37,8 +37,8 @@
 % Headers setup {{{
 \usepackage{fancyhdr}
 \pagestyle{fancy}
-\lhead{Data Structures and Algorithms: The formal notes}
-\rhead{Josh Felmeden}
+\lhead{\rightmark}
+\rhead{Data Structures and Algorithms}
 \usepackage{hyperref} 
 % }}}
 
@@ -73,9 +73,10 @@
 
 
 % Other packages {{{
+\usepackage{tkz-graph}
 \usepackage{tikz-qtree}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta}
+\usetikzlibrary{arrows.meta, calc}
 \usepackage{amssymb}
 \usepackage{graphicx}
 \graphicspath{ {./pics/} }
@@ -1134,6 +1135,503 @@ We can now piece together Johnson's algorithm which operates as follows:
 
 Therefore, the overall time complexity is $O(|V||E|\log|V|)$, which is
 actually the same time period as Dijkstra's algorithm.
+
+\section{Linear Programming}%
+\label{sec:linear-programming}
+Linear programming is one of the most useful techniques for solving
+optimisation problems. It's used in loads of things, so let's look at an
+example.
+
+Say (God forbid) we decided we liked Warhammer. Now, let $N$ be the number
+of `noise marines' Games Workshop produces in a day and $D$ be the number
+of `Doomwheels'. The numbers are as follows:
+
+\begin{itemize}
+    \item Games Workshop makes a profit of £$4$ per noise marine and
+        £$10$ per doomwheel. They therefore want to \textbf{maximise} $4N
+        + 10D$. 
+    \item Their plastic plant can turn out 5kg of finished parts every
+        day. One noise marine has 5g plastic, and a doomwheel contains
+        100g. Therefore, $5N + 100D \le 5000$
+    \item Similarly, their metal plant is able to turn out 4kg of finished
+        parts every day. One noise marine has 60g of metal, while a
+        doomwheel has 10g, so they also require that $60N + 10D \le 4000$.
+    \item They believe that they can sell up to 100 noise marines and 50
+        doomwheels per day, but no more so they require that $N \le 100$
+        and $D \le 50$.
+    \item Games workshop obviously can't produce a negative amount of
+        either figure, so $N, D \ge 0$
+\end{itemize}
+
+To formalise, the problem we're looking at is:
+\begin{align*}
+    4N + 10D &\rightarrow \max, \text{ subject to } \\
+    5N + 100D &\le 5000;\\
+    50N + 10D &\le 4000;\\
+    N &\le 100;\\
+    D &\le 50;\\
+    N, d &\ge 0
+\end{align*}
+
+We can actually convert this into a matrix:
+\begin{align*}
+    4N + 10D &\rightarrow \max, \text{ subject to } \\
+\begin{pmatrix}
+    5 & 100 \\
+    60 & 10 \\
+    1 & 0 \\
+    0 & 1
+\end{pmatrix}
+\begin{pmatrix}
+    N \\
+    D
+\end{pmatrix}
+&\le
+\begin{pmatrix}
+    5000 \\
+    4000 \\
+    100 \\
+    50
+\end{pmatrix}
+\\
+N, D &\ge 0
+\end{align*}
+
+We say that $\vec x \le \vec y$ iff $\vec x_i \le \vec y_i$ for all $i$,
+and the same for $\vec x \ge \vec y$.
+
+For example, $(2,0,1) \ge (0,0,0)$ but $(2,0,1) \not \ge (0,1,0)$. Despite
+this, we also have $(2,0,1) \not \le (0,1,0)$ because they are
+incomparable.
+
+What if we were to have a linear \textbf{objective function}
+$f:\mathbb{R}^n \rightarrow \mathbb{R}$, an  $m \times n$ matrix $A$ and
+an $m$-dimensional vector $\vec b \in \mathbb{R}^m$? The desired output is
+a vector $\vec x \in \mathbb{R}^n$ maximising $f(\vec x)$ subject to $A
+\vec x \le \vec b$ and $\vec x \ge \vec 0$.
+
+We say that a $\vec x in \mathbb{R}^n$ is a \textbf{feasible} solution to
+a linear program if $\vec x \ge 0$ and $A \vec x \le b$, and it's an
+\textbf{optimal} solution if $f(\vec y) \le f(\vec x)$ for all feasible $y
+\in \mathbb{R}^n$.
+
+Sometimes, there are no optimal solutions, and this could be for two
+reasons:
+
+\begin{enumerate}
+    \item Sometimes, the constraints are really tight, so they rule out
+        \textit{any} feasible solutions at all. This means that $x
+        \rightarrow \max$ subject up to $x \le -1$ and $x \ge 0$.
+    \item Sometimes, the constraints are so loose that there are feasible
+        solutions with $f(\vec x)$ that is arbitrarily large. This means
+        $x \rightarrow \max$ subject to $x \ge 0$.
+\end{enumerate}
+
+These are the only two things that can go wrong. All you need to know is
+that any bounded linear program that has at least a single feasible
+solution has an optimal solution.
+
+The statements that we've made seem a little restrictive. What if we look
+into minimisation problems, or equality constraints or allowing variables
+to be negative? Well, we can implement these in the framework we've
+defined, in something known as \textbf{standard form}.
+
+I don't mean that classic scientific standard form. Let's take an example
+and turn this linear program (LP) into standard form.
+\begin{align*}
+    4x - 5y + z &\rightarrow \min \text{ subject to } \\
+    x + y + z &= 5; \\
+    x + 2y &\ge 2; \\
+    x, z &\ge 0
+\end{align*}
+
+In the example of the \textbf{minimisation problem}, we want $f(\vec x)$
+to be as small as possible if and only if $-f(\vec x)$ is as large as
+possible. Therefore, $4x-5y+z \rightarrow \min$ is equivalent to $-4x+5y-z
+\rightarrow \max$.
+
+Let's apply these changes:
+\begin{align*}
+    {\color{blue} \mathbf{-4x+5y-z}} &{\color{blue}\rightarrow \max \text{ subject to }} \\
+    x + y + z &= 5; \\
+    x + 2y &\ge 2; \\
+    x, z &\ge 0
+\end{align*}
+
+Now we look at the constraints. $\Sigma_i a_i x_i = b_i$ if and only if
+$\Sigma_i a_i x_i \ge b_i$ \textbf{and} $\Sigma_i a_i x_i \le b_i$.
+Knowing this, $x + y + z = 5$ is equivalent to $x + y + z \le 5$
+\textbf{and} $x + y + z \ge 5$.
+
+ 
+Similarly, $\Sigma_i a_i x_i \ge b_i$ if and only if
+$-\Sigma_i a_i x_i \le b_i$ \textbf{and} $\Sigma_i a_i x_i \le b_i$.
+So, $x + 2y \ge 2$ is the same as $- x - 2y \le -2$ and also $x + y + z
+\ge 5$ (from the previous constraint) is the same as $-x -y -z \le -5$
+
+This leaves us with
+\begin{align*}
+    -4x+5y-z &\rightarrow \max \text{ subject to } \\
+    {\color{blue}x + y + z} &{\color{blue}\le 5;} \\
+    {\color{blue}x - y - z} &{\color{blue}\le -5;} \\
+    {\color{blue}x - 2y} &{\color{blue}\le -5;} \\
+    x, z &\ge 0
+\end{align*}
+
+Now, we can remove the non-negativity. This means that if $y$ doesn't have
+to be non-negative, we can replace it with $y_1 - y_2$ where $y_1, y_2 \ge
+0$. We think of $y_1$ as the positive part and $y_2$ as the negative part.
+There will be a feasible solution with both $y_1, y_2 > 0$, but this
+doesn't actually matter. Any optimal solution of the old problem is an
+optimal solution of the new one and vice versa.
+
+Now we get:
+\begin{align*}
+    -4x+5{\color{blue}(y_1 - y_2)}-z &\rightarrow \max \text{ subject to } \\
+    {\color{blue}x + {\color{blue}(y_1 - y_2)} + z} &{\color{blue}\le 5;} \\
+    {\color{blue}- x - {\color{blue}(y_1 - y_2)} - z} &{\color{blue}\le -5;} \\
+    {\color{blue} -x - 2{\color{blue}(y_1 - y_2)}} &{\color{blue}\le -2;} \\
+    x,{\color{blue}(y_1, y_2)},z &\ge 0
+\end{align*}
+
+And finally, we get the matrix:
+\begin{align*}
+    \begin{pmatrix}
+        -4 & 5 & -5 & -1 \\
+        1 & 1 & -1 & 1 \\
+        -1 & -1 & 1 & -1 \\
+        -1 & -2 & 2 & 0
+    \end{pmatrix}
+    \begin{pmatrix}
+        x \\
+        y_1 \\
+        y_2 \\
+        z
+    \end{pmatrix}
+    &\le
+    \begin{pmatrix}
+        5 \\
+        -5 \\
+        -2
+    \end{pmatrix} \\
+    x,y_1,y_2,z &\ge 0
+\end{align*}
+
+The problem is now in standard form and the techniques are completely
+general. What we've done is reduced the problem of having to solve a
+linear program which might have any sort of things to that of solving a
+linear program in standard form. This makes it so much easier to find an
+algorithm.
+
+We are also able to plot the linear program geometrically by plotting all
+of the $\le$s as a graph and then taking the areas under them. Because we
+can do this, we also must note that there will be an optimal solution at a
+corner.
+
+\subsection{Simplex algorithm}%
+\label{sub:simplex-alg}
+The $n$-variable constraints of an LP describe a feasible polytope in
+$\mathbb{R}^n$. If the linear program does have an optimal solution (so
+it's bounded and the feasible polytope is non-empty), then it will have
+one at the vertex of the polytope (the polytope being the shape made when
+we pot the graphs).
+
+The simplex algorithm can be boiled down to a \textbf{greedy search} for a
+vertex of the feasible polytope that maximises the objective function.
+
+If we start at an arbitrary vertex, we look at all the neighbouring
+vertices and move the whichever one makes the objective function largest.
+If none of the vertices match this, then we just return the current
+vertex. The problem is that there are often $\Omega(2^n)$ vertices such as
+with a hypercube.
+
+\subsubsection{Runtime of the Simplex Algorithm}%
+\label{ssub:runtime-simplex}
+Intuitively, it feels like there should always be a short path from any
+vertex to an optimal solution, but unfortunately the simplex algorithm
+doesn't have to find the shortest path. There exists a shape where the
+greedy algorithm needed to visit every single vertex.
+
+In practice, it only needs $\Theta(n)$ steps. To prove this is actually an
+open problem in theoretical computer science. There are also
+\textit{interior point algorithms} which have a polynomial worst-case
+run-time, but they work less well in practice.
+
+\subsection{Approximation Algorithms}%
+\label{sub:aprox-algorithms}
+A vertex cover in a graph $G=(V,E)$ is a set $X \subseteq V$ such that
+every edge in $E$ has at least a single vertex in $X$. =
+
+For example:
+
+\begin{figure}[htpb]
+\begin{center}
+    \begin{tikzpicture}[%
+    cloud/.style={
+      draw=red,
+      thick,
+      ellipse,
+      fill=red!20,
+      minimum height=1em
+    }]
+    \GraphInit[vstyle=Classic]
+    \SetGraphUnit{1.5}
+    \tikzset{VertexStyle/.style = {shape = circle,fill = black,minimum size = 7,inner sep=0}}
+    \node[VertexStyle] at (1,3) (1) {};
+    \node[VertexStyle] at (2,3) (2) {};
+    \node[VertexStyle] at (0,2) (3) {};
+    \node[VertexStyle] at (3,2) (4) {};
+    \node[VertexStyle] at (0,1) (5) {};
+    \node[VertexStyle] at (3,1) (6) {};
+    \node[VertexStyle] at (1,0) (7) {};
+    \node[VertexStyle] at (2,0) (8) {};
+
+    \path[draw,thick]
+        (1) edge node {} (2)
+        (1) edge node {} (3)
+        (2) edge node {} (4)
+        (2) edge node {} (5)
+        (3) edge node {} (5)
+        (3) edge node {} (4)
+        (4) edge node {} (6)
+        (5) edge node {} (6)
+        (5) edge node {} (2)
+        (5) edge node {} (7)
+        (7) edge node {} (8)
+        (7) edge node {} (3)
+        (8) edge node {} (2)
+        ;
+
+    \draw[thick,red]     ($(2.north west)+(-0.1,0.1)$) rectangle
+        ($(2.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(3.north west)+(-0.1,0.1)$) rectangle
+        ($(3.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(6.north west)+(-0.1,0.1)$) rectangle
+        ($(6.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(7.north west)+(-0.1,0.1)$) rectangle
+        ($(7.south east)+(0.1,-0.1)$);
+\end{tikzpicture}
+\quad\quad\quad
+\begin{tikzpicture}[%
+    cloud/.style={
+      draw=red,
+      thick,
+      ellipse,
+      fill=red!20,
+      minimum height=1em
+    }]
+    \GraphInit[vstyle=Classic]
+    \SetGraphUnit{1.5}
+    \tikzset{VertexStyle/.style = {shape = circle,fill = black,minimum size = 7,inner sep=0}}
+    \node[VertexStyle] at (1,3) (1) {};
+    \node[VertexStyle] at (2,3) (2) {};
+    \node[VertexStyle] at (0,2) (3) {};
+    \node[VertexStyle] at (3,2) (4) {};
+    \node[VertexStyle] at (0,1) (5) {};
+    \node[VertexStyle] at (3,1) (6) {};
+    \node[VertexStyle] at (1,0) (7) {};
+    \node[VertexStyle] at (2,0) (8) {};
+
+    \path[draw,thick]
+        (1) edge node {} (2)
+        (1) edge node {} (3)
+        (2) edge node {} (4)
+        (2) edge node {} (5)
+        (3) edge node {} (5)
+        (3) edge node {} (4)
+        (4) edge node {} (6)
+        (5) edge node {} (6)
+        (5) edge node {} (2)
+        (5) edge node {} (7)
+        (7) edge node {} (8)
+        (8) edge node {} (2)
+        ;
+    \path[draw,thick,dashed,green]
+        (7) edge node {} (3)
+        ;
+
+    \draw[thick,red]     ($(1.north west)+(-0.1,0.1)$) rectangle
+        ($(1.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(4.north west)+(-0.1,0.1)$) rectangle
+        ($(4.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(5.north west)+(-0.1,0.1)$) rectangle
+        ($(5.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(8.north west)+(-0.1,0.1)$) rectangle
+        ($(8.south east)+(0.1,-0.1)$);
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+The left graph is an example of a valid vertex cover, while the right is
+\textbf{not} a valid vertex cover. We want to find the smallest possible
+vertex cover of $G$.
+
+We can express finding a minimum vertex cover as solving a linear program,
+where the solutions are integers. This is an \textbf{integer linear
+program}.
+
+Given some graph $G = (V,E)$, we assign a variable $x_v \in \{0,1\}$ to
+each vertex $v$. We interpret $x_v = 1$ as ``$x_v$  is in the cover'', and
+$x_v =0$ as ``$x_v$ is not in the cover". We can then formulate the
+problem as:
+
+\begin{alignat*}{2}
+    \Sigma_i x_i &\rightarrow \min \text{ subject to } &\text{Minimise }
+    |X| \text{ subject to} \\
+    x_u + x_v &\ge 1 \text{ for all } \{u,v\} \in E; \quad \quad \quad &u\in X \text{ or }
+    v\in X \text{ (or both)} \\
+              &\text{} &\text{for all } \{u,v\} \in E \\
+    x_v &\le 1 \text{ for all } v \in V; &\text{} \\
+    x_v &\ge 0 \text{ for all } v \in V; &[\text{Ensures } x_v \in \{0,1\}
+    \text{ for all } v] \\
+    x_v &\in \mathbb{N} \text{ for all } v \in V 
+\end{alignat*}
+
+In this example:
+\begin{center}
+    \begin{tikzpicture}
+        \tikzset{VertexStyle/.style = {shape = circle,fill = black,minimum size = 7,inner sep=0}}
+    \node[VertexStyle] [label={[label distance=0cm]90:1}] at (1,3) (1) {1};
+    \node[VertexStyle] [label={[label distance=0cm]90:8}] at (2,3) (2) {8};
+    \node[VertexStyle] [label={[label distance=0cm]180:2}] at (0,2) (3) {2};
+    \node[VertexStyle] [label={[label distance=0cm]0:7}] at (3,2) (4) {7};
+    \node[VertexStyle] [label={[label distance=0cm]180:3}] at (0,1) (5) {3};
+    \node[VertexStyle] [label={[label distance=0cm]0:6}] at (3,1) (6) {6};
+    \node[VertexStyle] [label={[label distance=0cm]-90:4}] at (1,0) (7) {4};
+    \node[VertexStyle] [label={[label distance=0cm]-90:5}] at (2,0) (8) {5};
+
+    \path[draw,thick]
+        (1) edge node {} (2)
+        (1) edge node {} (3)
+        (2) edge node {} (4)
+        (2) edge node {} (5)
+        (3) edge node {} (5)
+        (3) edge node {} (4)
+        (4) edge node {} (6)
+        (5) edge node {} (6)
+        (5) edge node {} (2)
+        (5) edge node {} (7)
+        (7) edge node {} (8)
+        (8) edge node {} (2)
+        ;
+    \path[draw,thick,dashed,green]
+        (7) edge node {} (3)
+        ;
+
+    \draw[thick,red]     ($(1.north west)+(-0.1,0.1)$) rectangle
+        ($(1.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(4.north west)+(-0.1,0.1)$) rectangle
+        ($(4.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(5.north west)+(-0.1,0.1)$) rectangle
+        ($(5.south east)+(0.1,-0.1)$);
+    \draw[thick,red]     ($(8.north west)+(-0.1,0.1)$) rectangle
+        ($(8.south east)+(0.1,-0.1)$);
+\end{tikzpicture}
+\end{center}
+
+$X = \{1,3,5,7\}$ is \textbf{not} a vertex cover. Here we have $x_1 = x_2
+= x+5 = x+7 = 1$ and $x_0 = x_2 = x_4 = x_6 = 0$. The uncovered edge
+$\{2,4\}$ corresponds to the constraint $x_2 + x_4 \ge 1$.
+
+So that's it, yeah? We can just solve the ILP? Nah, it's generally
+impossible to solve ILP's efficiently. It's also impossible to find a
+minimum vertex cover efficiently unfortunately.
+
+We \textit{can} solve LPs though. If we \textbf{relax} our ILP to allow
+non-integer solutions, therefore turning it into an LP, we might be able
+to solve it. That leaves us with:
+\begin{align*}
+    \Sigma_i x_i &\rightarrow \min \text{ subject to } \\
+    x_u + x_v &\ge 1 \text{ for all } \{u,v\} \in E; \quad \quad \quad \\
+    x_v &\le 1 \text{ for all } v \in V; \\
+    x_v &\ge 0 \text{ for all } v \in V; \\
+    x_v &\in \mathbb{N} \text{ for all } v \in V
+\end{align*}
+
+Then, we take our vertex cover $X$ to be $\{v \in V : x_v \ge 1/2\}$,
+basically rounding up to recover a feasible solution for the ILP. It's not
+that hard to show that if a minimum vertex cover has size $k$, then $X$ is
+indeed a vertex cover and $k \le |X| \le 2k$. This is an approximate
+solution to a really tough problem.
+
+\section{Flow Algorithms}%
+\label{sec:flow-algorithms}
+\subsection{Flow networks}%
+\label{sub:flow-networks}
+\textbf{Flow networks} are where something is travelling from place to
+place inside a graph. Examples might include stuff like water networks or
+power networks and so on.
+
+More generally, a flow network $(G,c,s,t)$ consists of a directed graph $G
+= (V,E)$. A capacity function $c : E \rightarrow \mathbb{N}$, a
+\textbf{source vertex} $s \in V$ with $N^- (s) = \empty$ and a
+\textbf{sink} vertex $t \in V$ with $N^+(t) = \empty$.
+
+A \textbf{flow} in $(G,c,s,t)$ is a function $f:E \rightarrow \mathbb{R}$
+with:
+\begin{itemize}
+    \item No edge has more flow than the capacity, for all $e \in E, - \le
+        f(e) \le c(e)$.
+    \item Flow is \textit{conserved} at vertices, for all $v \in V \
+        \{s,t\},$
+        \begin{align*}
+            \sum_{u\in N^-(v)} f(u,v) = \sum_{w\in N^+(v)} f(v,w)
+        \end{align*}
+\end{itemize}
+
+For conciseness sake, we'll write $f^- (v) = \Sigma_{u\in N^- (v)} f(u,v)$
+for the total flow into $v$ and also $f^+ (v) = \Sigma_{w\in N^+(v)}
+f(v,w)$
+
+We define the value of $f$ by $v(f) = f^+(s)$ rather than $f^-(t)$ because
+we get the same answer no matter what.
+
+\begin{figure}[htpb]
+\begin{center}
+    \begin{tikzpicture} [>=stealth',
+    shorten > = 1pt,
+node distance = 3cm and 4cm,
+    el/.style = {inner sep=2pt, align=left, sloped},
+    ]
+        \tikzset{VertexStyle/.style = {shape = circle,fill = black,minimum size = 7,inner sep=0}}
+        \tikzset{edge/.style = {->,> = latex'}}
+    \node[VertexStyle] [label={[label distance=0cm]180:s}] at (0,1) (s) {s};
+    \node[VertexStyle] at (2,2) (1) {};
+    \node[VertexStyle] at (4,2) (2) {};
+    \node[VertexStyle] at (2,0) (3) {};
+    \node[VertexStyle] at (4,0) (4) {};
+    \node[VertexStyle] [label={[label distance=0cm]0:t}] at (6,1) (t) {t};
+
+\path[->]
+    (s) edge node[el,above] {$5/5$} (1)
+    (1) edge node[el,above] {$5/6$} (2)
+    (s) edge node[el,below] {$6/6$} (3)
+    (3) edge node[el,below] {$7/10$} (4)
+    (4) edge node[el,below] {$7/7$} (t)
+    (2) edge node[el,above] {$4/4$} (t)
+    (2) edge node[el,below] {$1/8$} (3)
+    (1) edge [bend left] node[el,above] {$2/2$} (3)
+    (3) edge [bend left] node[el,above] {$2/3$} (1);
+
+    
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+
+We write $f^+(X) := \sigma_{e \text{ out of } x} f(e)$ and $f^-(X) :=
+\sigma_{e \text{ into X }} f(e)$. So for example if we take $X$ to be the
+first three nodes (in a triangle), then $f^+(X) = 5 + 7 = 12$ and $f^-(X)
+= 1$.
+
+\textbf{Lemma 1}: For all of the sets $X \subseteq V \backslash \{s,t\}$,
+we have $f^+(X) = f^-(X)$. (The flow is conserved in sets as well as at
+individual vertices)
+
+We can prove this by summing the conservation of flow over all $v \in X$.
+
+A \textbf{cut} is any pair of \textit{disjoint} sets $A,B \subseteq V$
+with $A \cup B = V, s \in A$ and $t \in B$. Since 
 
 
 
