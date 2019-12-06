@@ -1631,7 +1631,76 @@ individual vertices)
 We can prove this by summing the conservation of flow over all $v \in X$.
 
 A \textbf{cut} is any pair of \textit{disjoint} sets $A,B \subseteq V$
-with $A \cup B = V, s \in A$ and $t \in B$. Since 
+with $A \cup B = V, s \in A$ and $t \in B$. Since $A$ and $B$ are
+disjoint and $A \cup B = V$, the edges that come out of $A$ are the edges
+into $B$, so $f^+(A) = f^-(B)$ and vice versa.
+
+\subsection{Finding a max flow}%
+\label{sub:max-flow}
+Now that we've sorted all the definitions, how do we go about solving the
+problem? If we try a greedy approach and find paths from $s$ to $t$
+repeatedly with unused capacity and push more flow down then, then
+sometimes it works, but it does also fail sometimes.
+
+If we allow flow \textit{backwards}, then we might have more luck. We want
+to say that an augmenting path for a flow $f$ is an \textbf{undirected}
+path from $s$ to $t$ which we can push flow along. Therefore, forward
+edges $e$ have $f(e) < c(e)$ and backwards edges $e$ have $f(e) > 0$.
+Unfortunately, backwards edges are a little rougher.
+
+\subsubsection{Residual Graphs}%
+\label{ssub:residual-graphs}
+We define the \textbf{residual graph} $G_f$ of $(G,c,s,t)$ on $V(G)$ like
+this:
+\begin{itemize}
+    \item If $(u,v) \in E(G)$ with $f(e) < c(e)$, add $(u,v)$ to $E(G_f)$.
+        We call this a \textbf{forward edge.}
+    \item If $(u,v) \in E(G)$ with $f(e) > c(e)$, add $(u,v)$ to $E(G_f)$.
+        We call this a \textbf{backwards edge.} An edge can be both
+        forward \textit{and} backward.
+\end{itemize}
+
+An \textbf{augmenting path} $P$ is a directed path from $s$ to $t$ in
+$G_f$.
+
+The \textbf{residual capacity} of $(u,v)$ in $G_f$ is $\max\{c(u,v) -
+f(u,v),f(v,u)\}$. The \textbf{residual capacity} of $P$ is the minimum
+residual capacity of its edges. This means the amount of flow we are able
+to push through $P$.
+
+\texttt{Push}$(G,c,s,t,f,P)$ is defined as:
+\begin{itemize}
+    \item Let $C$ be the residual capacity of $P$.
+    \item For each edge $(u,v)$ of $P$: if $f(u,v) - c(u,v) \ge C$ then
+        add $C$ to $f(u,v)$. Otherwise, we have $f(v,u) \ge C$, so
+        subtract $C$ from $f(u,v)$.
+\end{itemize}
+
+This function returns a new flow $f'$ in $O(|V(G)|)$ time.
+
+\subsubsection{Ford-Fulkerson Algorithm}%
+\label{ssub:ford-fulkerson}
+The Ford-Fulkerson Algorithm is an algorithm that helps us to find the
+maximum flow. It looks like this:
+\begin{lstlisting}
+Input: A flow network (G,c,s,t)
+Output: A flow f with no augmenting paths
+
+Construct flow f with f(e) = 0 for all edges
+Construct residual graph Gf
+while (Gf contains a path P from s to t) do
+    Find P using a search (depth or breadth first)
+    Update f = Push(G,c,s,t,f,P)
+    Update Gf on the edges of P
+loop
+Return f
+\end{lstlisting}
+
+Each step takes $O(|E|)$ or $O(|V|)$ time, and since $G$ is weakly
+connected, we also know that $|V| = O(|E|)$, so the runtime is
+$O(v(f*)|E|)$.
+
+
 
 
 
