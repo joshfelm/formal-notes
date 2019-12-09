@@ -1700,7 +1700,97 @@ Each step takes $O(|E|)$ or $O(|V|)$ time, and since $G$ is weakly
 connected, we also know that $|V| = O(|E|)$, so the runtime is
 $O(v(f*)|E|)$.
 
+\textbf{Theorem} there is always a maximum flow with integer values.
 
+\subsection{Matchings in bipartite graphs}%
+\label{sub:matching-bipartite}
+Remember that a \textit{matching} in a graph is a collection of disjoint
+edges. We can turn graph $G$ with bipartition $(A,B)$ into a flow network
+by directing all edges from $G$ from $A$ to $B$. Next, we add a new vertex
+$s$ and add every possible edge $s \rightarrow A$. Also add new vertex $t$
+and add every possible edge $t \rightarrow B$. Finally, we then give every
+edge a capacity of $1$. Then integer valued maximum flows correspond to
+maximum matchings and maximum matchings correspond to integer-valued
+maximum flows. Happily, the Ford-Fulkerson algorithm corresponds to our
+maximum matching algorithm :).
+
+\subsubsection{Rational weights}%
+\label{ssub:rational-weights}
+
+In a real life flow network, the capacities are really unlikely to be
+integers, so how to we simulate rational weights? We let $(G,c,s,t)$ be a
+flow network where $c$ might take values in $\mathbb{Q}$ as well
+$\mathbb{N}$. Then for all $k > 0$, $f$ is a maximum flow in $(G,c,s,t)$
+if and only if $kf$ is a maximum flow in $(G,kc,s,t)$.
+
+We know this is true because $f$ is a flow in $(G,c,s,t)$ if and only if
+$kf$ is a flow in $(G,kc,s,t)$. Additionally, $kf$ is maximum in
+$(G,kc,s,t) \Leftrightarrow \forall$ flows $kg$ of $(G,kc,s,t): v(kf) \ge
+v(kg) \Leftrightarrow \forall$ flows $g$ of $(G,c,s,t): v(kf) \ge v((kg)$.
+
+We can simplify this to: $kf$ is maximum in $(G,kc,s,t) \Leftrightarrow
+\forall$ flows ${\color{blue}g}$ of $(G, {\color{blue}c},s,t): v(
+{\color{blue}f}) \ge v( {\color{blue}g}) \Leftrightarrow f$ is maximum in $(G,c,s,t)$.
+
+\subsection{A better algorithm: Edmonds-Karp}%
+\label{sub:edmonds-karp}
+Ford-Fulkerson's runtime depends on the value of a max flow, which could
+increase a lot. In fact, if we allow \textbf{irrational} edge capacities,
+it might never even terminate.
+
+\textbf{Solution}: If we always pick an augmenting path with as few edges
+as humanly possible, then we are \textit{guaranteed} to terminate in
+$O(|V||E|^2)$ time. It doesn't matter how big the max flow is.
+
+So basically like, we just have to use a breadth first search on the
+residual graph to find the augmenting paths, rather than the depth-first
+search. And this is the \textbf{Edmonds-Karp} algorithm.
+
+\subsection{Multiple sources and sinks}%
+\label{sub:sources/sinks-multiple}
+Sometimes we have more than one source or sink, such as a water network.
+Instead of maximising flow, we specify how much each source supplies and
+how much each sink consumes and then we try to satisfy these
+requirements.
+
+A \textbf{circulation network} $(G,c,d)$ is a directed graph $G = (V,E)$,
+a capacity function $c:E \rightarrow \mathbb{N}$ and a \textbf{demand}
+function $D:V \rightarrow \mathbb{N}$.
+
+A vertex $v$ with a demand $D(v) > 0$ is a \textbf{sink} while a vertex
+$v$ with a demand $D(v) < 0$ is a \textbf{source}. A \textbf{circulation}
+is a function $f: E \rightarrow \mathbb{R}$ with $0 \le g(e) \le c(e)$ for
+all $e \in E$ and $f^-(v) - f^+(v) = D(v)$ for all $v \in V$. Remember
+that flow is conserved except at sources and sinks.
+
+Does a circulation exist? It does here. Again, we are able to reduce this
+to finding a maximum flow in a flow network.
+
+Let's define $S = \{$sources$\}$ and $T + \{$sinks$\}$. We then transform
+our input circulation network into a flow network.
+
+Then, we transform our input circulation into a flow network:
+\begin{itemize}
+    \item Remove the demand functions
+    \item Add a new vertex $t$ and every possible edge$T \rightarrow t$.
+        Give each edge $(v,t)$ capacity $D(v)$.
+    \item Add a new vertex $s$ and add every possible edge $s \rightarrow
+        S$. Give each edge $s,v$ capacity $-D(v)$. 
+\end{itemize}
+
+We can claim that every circulation on the left corresponds to a flow with
+a value on the right, and vice versa.
+
+\begin{center}
+    Capacity constraints on the left $\Leftrightarrow$ corresponding
+    constraints on the right
+
+    Demand satisfied outside $S \cup T \Leftrightarrow$ Flow conserved
+    outside $S \cup T$.
+
+    Demand satisfied in $T \Leftrightarrow$ Flow conserved in $T$ and flow
+    value $\Sigma_{v \in T} D(v)$
+\end{center}
 
 
 
