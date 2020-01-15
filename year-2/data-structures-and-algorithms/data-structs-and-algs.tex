@@ -1790,7 +1790,110 @@ a value on the right, and vice versa.
 
     Demand satisfied in $T \Leftrightarrow$ Flow conserved in $T$ and flow
     value $\Sigma_{v \in T} D(v)$
+
+    Demand satisfied in $S \Leftrightarrow$ Flow conserved in $S$ and flow
+    value is $-\Sigma_{v \in S} D(v)$.
 \end{center}
+
+\section{Reductions}%
+\label{sec:Reductions}
+
+\subsection{Cook reductions}%
+\label{sub:cook-reductions}
+We've been using \textbf{reductions} to come up with new algorithms. It
+means reducing one problem into another problem that we already know how
+to solve.
+
+An \textbf{oracle} for $Y$ is a black box which, given an instance of
+problem $Y$ outputs a valid solution in $O(1)$ time. An oracle is a bit of
+a cheat because we don't really need to solve the problem $Y$. 
+
+A \textbf{cook reduction} from $X$ to $Y$ is an algorithm for problem $X$
+which, given some input of size $s$ makes poly(s) calls to an oracle for $Y$
+whose input instances are all of size poly(s). If $X \le_c Y$, then
+poly-time algorithm for $Y$ $Rightarrow$ poly-time algorithm for $X$.
+
+As the notation suggests, if $X \le_c Y$ and $Y \le_c Z$, then $X \le_c
+Z$.
+
+We introduced reductions saying that `If $X \le_c Y$ and we have a
+polynomial-time algorithm for $Y$, then we can get a polynomial-time
+algorithm for $X$'.
+
+But, this is the same as saying that `If $X \le_c Y$ and there is
+\textbf{no} polynomial-time algorithm for $X$ then there is \textbf{no}
+polynomial-time algorithm for $Y$'.
+
+\subsection{Decision problems}%
+\label{sub:decision-problems}
+We focus on \textbf{decision problems} where the answer we loo for is
+either yes or no. For example:
+\begin{itemize}
+    \item Does the input graph contain a matching of size at least $k$?
+    \item Does the input flow network contain a flow of value at least $k$
+    \item ...
+\end{itemize}
+
+We're focussing on the decision problems rather than the search ones
+because we are interested in proving the problems are hard, not easy.
+Decision problems are simpler because their theory is simpler. They also
+work exactly as well as search problems in what we're trying to do.
+
+\subsubsection{Class NP}%
+\label{ssub:class-np}
+Within decision problems we will focus on problems where we can easily
+verify a Yes answer (class NP)
+
+\textbf{NP} is the class of all decision problems $X$ with the following
+property: There is a polynomial-time algorithm \texttt{Verify} such that
+if $x$ is a \texttt{yes} instance of $X$ then there is some bit $w$ (called
+a \textbf{witness}) with \texttt{Verify(x,w) = yes}.
+
+Almost every problem you run into in the real world can be formulated as a
+problem in \textbf{NP}.
+
+\subsubsection{Key properties of NP}%
+\label{ssub:key-props-np}
+The definition of \textbf{NP} is asymmetric and does not include problems
+where we can easily verify \texttt{no} answers but not \texttt{yes}
+answers. For example, it's not clear that `is the input a \textbf{prime}
+number?' is in NP. There's not always a short proof and a witness.
+
+We can define \textbf{P} to be the class of all decision problems which
+have a polynomial-time algorithm, then $P \subseteq NP$. This is because
+\texttt{Verify} can simply ignore $w$ and solve $x$ and then return the
+solution.
+
+\subsubsection{Propositional Logic (short interlude)}%
+\label{Prop-logic}
+A \textbf{literal} is either a variable $x$ or its negation $\neg x$. An
+\textbf{assignment} for a formula is a map from its variables to the set
+\texttt{\{True,false\}}, and the formula's \textbf{truth value} under that
+assignment is calcualted as you would expect. For example, under the
+assignment $x \mapsto True$ and $y \mapsto False$, the truth value of $x
+\wedge ()$ ** %TODO
+
+The \textbf{SAT} problem asks `Is the input CNF formula satisfiable?'.
+This is in NP because we can quickly check whether a given assignment
+makes the formula tree. However, the hard part is the \textbf{Cook-Levin
+Theorem}. He says that every problem in NP is Cook-reducible to SAT. So,
+if there's a polynomial algorithm for SAT, then there's a polynomial
+algorithm for every problem in NP.
+
+A problem is \textbf{NP-hard} if any problem in NP is cook-reducible to it
+and \textbf{NP-complete} if it is also in NP. So SAT is NP-complete.
+
+By the Cook-Levin theorem, a problem is NP-hard if and only if SAT reduces
+to it. This is the normal way of proving NP-Hardness.
+
+The million dollar conjecture is $P \not = NP$. If this is true then no
+NP-hard problem has a polynomial-time algorithm, while if it is false,
+then every NP-complete problem has a poly-time algorithm.
+
+In practice, if a problem is NP-hard, there's normally no poly-time
+algorithm for it. Even if there is one, you really won't be able to find
+it. Basically, almost every problem has either a poly-time algorithm or is
+NP-hard.
 
 
 
