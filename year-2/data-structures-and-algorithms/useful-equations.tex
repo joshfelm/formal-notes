@@ -1,0 +1,813 @@
+%%=====================================================================================
+%%
+%%       Filename:  useful-equations.tex
+%%
+%%    Description:  Useful equations for dsa
+%%
+%%        Version:  1.0
+%%        Created:  02/01/20
+%%       Revision:  none
+%%
+%%         Author:  YOUR NAME (), 
+%%   Organization:  
+%%      Copyright:  Copyright (c) 2020, YOUR NAME
+%%
+%%          Notes:  
+%%
+%%=====================================================================================
+
+% Preamble {{{
+\documentclass[11pt,fleqn,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+% Listings {{{
+\usepackage[]{listings,xcolor} 
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=[Visual]Basic,
+    backgroundcolor=\color{lstgrey},
+    frame=single,
+    xleftmargin=0.7cm,
+    frame=tlbr, framesep=0.2cm, framerule=0pt,
+    basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+    captionpos=b,
+    tabsize=2,
+    keywordstyle=\color{Magenta}\bfseries,
+    identifierstyle=\color{Cyan},
+    stringstyle=\color{Yellow},
+    commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+% }}}
+
+
+\usepackage{hhline} 
+\usepackage{mathtools} 
+\usepackage[T1]{fontenc}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Useful equations}
+\rhead{Josh Felmeden}
+\usepackage{hyperref} 
+% }}}
+
+% Other packages {{{
+\usepackage{enumitem}
+\setlist{nolistsep}
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet} 
+\usepackage{amsmath} 
+\usepackage{booktabs} 
+\usepackage{tcolorbox} 
+\usepackage[symbol]{footmisc} 
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+% }}}
+
+% Title {{{
+\title{Useful equations}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+\tableofcontents
+\newpage
+
+\section{Definitions to grind/cram}%
+\label{sec:defs}
+\subsection{Runtimes}%
+\label{sub:Runtimes}
+\begin{itemize}
+    \item Graphs
+        \begin{itemize}
+            \item \textbf{Dijkstra's Algorithm:} $O((|V|+|E|)\log |V|)$
+            \item \textbf{Bellman-Ford Algorithm:} $O(|V||E|)$
+            \item \textbf{Johnson's Algorithm:} $|V||E|\log|V|$
+        \end{itemize}
+    \item Minimum Spanning Trees
+        \begin{itemize}
+            \item \textbf{Kruskal's Algorithm:} $O(|E|\log|V|)$
+        \end{itemize}
+    \item Flow
+        \begin{itemize}
+            \item \textbf{Edmonds-Karp Algorithm:} $O(|V||E|^2)$
+            \item \textbf{Ford-Fulkerson:} $O(v(f^*)|E|)$ ($v(f^*)$ is
+                the maximum flow)
+        \end{itemize}
+\end{itemize}
+
+\subsection{Lemmas}%
+\label{sub:Lemmas}
+\begin{itemize}
+    \item Graphs
+    \begin{itemize}
+        \item \textbf{Dirac's Theorem:} Any $n$-vertex graph $G$ with
+            minimum degree at least $n/2$ has a Hamilton cycle.
+        \item \textbf{Handshake Lemma:} Adding up the vertex degrees and
+            dividing by $2$ yields the number of edges in a graph.
+        \item \textbf{Berge's Lemma:} If $M$ has no augmenting paths
+            $\Rightarrow M$ is a maximum.
+        \item \textbf{Hall's Theorem:} A bipartite graph $G = (V,E)$ with
+            bipartition $(A,B)$ has a perfect matching iff $|A| = |B|$ and
+            for all $X \subseteq A, |N(X)| \ge |X|$
+    \end{itemize}
+    \item Hashing
+    \begin{itemize}
+        \item \textbf{Markov's Inequality}: Let $X \ge 0$ be a random
+            variable with mean $\mu$. Then, for all $t \ge 0$, $P(X \ge t)
+            \le \mu/t$
+    \end{itemize}
+    \item Flow
+    \begin{itemize}
+        \item \textbf{Max-flow min-cut:} The value of a max flow is equal
+            to the minimum capacity of the $c^+(A)$ over all cuts $(A,B)$.
+    \end{itemize}
+    \item Complexity Theory
+    \begin{itemize}
+        \item \textbf{Cook-Levin Theorem:} SAT is NP-Hard, and therefore
+        NP-Complete. Every problem that SAT cook-reduces to is also
+        NP-hard.
+    \end{itemize}
+\end{itemize}
+
+\subsection{Runtime of Dynamic Structures}%
+\label{sub:Runtime of Dynamic Structures}
+\begin{center}
+    \begin{tabular}{|r|c|c|c|}
+        \hline
+       & {\color{blue}Insert} & {\color{blue}Delete} & {\color{blue}Find} \\ \hline
+        Unsorted Linked List & $O(1)$ & $O(n)$ & $O(n)$ \\ \hline
+        Binary Search Tree & $O(n)$ & $O(n)$ & $O(n)$ \\ \hhline{|=|=|=|=|}
+        2-3-4 Tree & $O(\log n)$ & $O(\log n)$ & $O(\log n)$ \\ \hline
+        Red-Black Tree & $O(\log n)$ & $O(\log n)$ & $O(\log n)$ \\ \hline
+        Skip List & $O(\log n)$ & $O(\log n)$ & $O(\log n)$ \\ \hline
+    \end{tabular}
+\end{center}
+
+\section{Graphs}%
+\label{sec:Graphs}
+\subsection{Definitions}%
+\label{sub:Definitions}
+\begin{itemize}
+    \item Graphs are \textbf{isomorphic} if they are essentially the same
+        graph (vertices have the same degrees and are connected to the
+        same vertices) but they are labelled differently.
+    \item Graphs are \textbf{equal} if they are \textit{isomorphic} but
+        the labels are also the same.
+    \item The \textbf{neighbourhood} Of
+        a vertex is the set of vertices joined to it by an edge.
+    \item The \textbf{degree} of a vertex is the number of vertices joined
+        to it. 
+    \item A \textbf{walk} is a sequence of vertices. An \textbf{Euler
+        walk} is a walk that contains every edge in the graph exactly
+        once. If there is an Euler walk in a graph then either:
+        \begin{itemize}
+            \item Every vertex has even degree
+            \item All but two have an even degree (the start and end points).
+        \end{itemize}
+    \item A \textbf{path} is a walk where no vertices repeat
+    \item A graph is \textbf{connected} if any two vertices are joined by
+        a path.
+    \item A \textbf{subgraph} is a part of a some graph.
+    \item An \textbf{induced subgraph} is a subgraph that is only created
+        by removing vertices. That is, all the vertices in the subgraph
+        must have the same edges as in the original graph.
+    \item A graph is \textbf{Strongly connected} if there is a path from
+        any vertex to all other vertices. A graph is \textbf{weakly
+        connected} if for all vertices $(u,v)$ there is a path from $u$ to
+        $v$ \textbf{or} from $v$ to $u$
+    \item The \textbf{in-degree} of a vertex is the number of vertices
+        pointed at it. The \textbf{out-degree} is the opposite.
+    \item A \textbf{cycle} is a walk in which every vertex appears at
+        \textit{most} once (except the start and end nodes that appear
+        twice because they're the same node). A \textbf{Hamilton cycle} is
+        a cycle that has every vertex in the graph.
+    \item A \textbf{tree} is a connected graph with no cycles.
+    \item A \textbf{matching} is a collection of disjoint edges. It is
+        \textbf{perfect} if every vertex is contained in some matching
+        edge.
+    \item A graph is \textbf{bipartite} if the vertices of the graph can
+        be partitioned into two disjoint edges that contain no edges.
+    \item An \textbf{augmenting path} is a path in a graph that alternates
+        between matching and non-matching edges, which begins and ends in
+        unmatched vertices.
+\end{itemize}
+
+\subsection{Matchings}%
+\label{sub:Matchings}
+Given a bipartite graph, we can't form a matching by greedily adding edges
+(because sometimes it fails). We can repair the bad decisions we make with
+a greedy algorithm by using \textbf{augmenting paths}.
+
+Given some matching in a bipartite graph, an \textit{augmenting path} is a
+path such that:
+\begin{itemize}
+    \item $\{v_i, v_{i+1}\} \in M$ for all odd $i$
+    \item $\{v_i, v_{i+1}\} \not \in M$ for all even $i$
+    \item $v_i, v_k \not \in \cup_{e \in M}e$
+\end{itemize}
+
+If we have an augmenting path for a matching, then we use that path
+instead of the current one that we have. This means that we can now make a
+new greedy algorithm. Here, we have switch being a matching containing one
+more edge than M.
+
+\begin{lstlisting}
+Input: A bipartite graph G = (V,E)
+Output: A list of edges forming a matching in G of maximum size.
+
+M = [] //empty matching
+while G has augmenting path for M do {
+    Find augmenting path P for M
+    Update M = Switch(M,P)
+}
+\end{lstlisting}
+
+We can't search for augmenting paths by brute force, so we instead reduce
+the problem to find any path from one set to another in a \textbf{directed
+graph} (breadth-first search). This gives us the final algorithm:
+
+\begin{lstlisting}
+Find bipartition (A,B) in G
+m = [] //initialise
+while(true) {
+    Form directed graph with matching
+    P = new augmenting path if one exists
+    else break
+    Update M = switch(M,P)
+}
+return M
+\end{lstlisting}
+
+Overall, the runtime is $O(|E||V|)$. Using Berge's Lemma, we know that if
+there are no augmenting paths, then M is a maximum.
+
+\subsection{Semimatchings}%
+\label{sub:Semimatchings}
+A semimatching is a matching where each vertex in A has degree at most $k$
+and each vertex in B has degree at most $1$. We want to reduce this
+problem to just finding a matching so that we can use the max matching
+algorithm we defined just now.
+
+What we can do is to clone the people $k$ times, let the clones be
+maximally matched using max matching, and then delete the clones
+(combining each matching of the clones).
+
+\subsection{Hall's Theorem}%
+\label{sub:Hall's Theorem}
+What if we just want to know whether a max matching exists or not? (The
+\textbf{decision problem} rather than the solution. More on this in
+complexity theory). We can use Hall's theorem for this that runs in
+constant time.
+
+\section{Hashing}%
+\label{sec:Hashing}
+
+\subsection{Data structures}%
+\label{sub:data-structs}
+\subsubsection{Stacks}%
+\label{ssub:Stacks}
+
+Stacks are first in last out (\textbf{FILO}). They have 3 operations:
+\begin{itemize}
+    \item \textbf{create()} ($O(1)$)
+    \item \textbf{push(x)} ($O(1)$)
+    \item \textbf{pop()} ($O(1)$)
+\end{itemize}
+
+\subsubsection{Queues}%
+\label{ssub:Queues}
+Queues are first in first out (\textbf{FIFO}). They also have 3
+operations:
+\begin{itemize}
+    \item \textbf{create()} ($O(1)$)
+    \item \textbf{add(x)} ($O(1)$)
+    \item \textbf{serve()} ($O(1)$)
+\end{itemize}
+
+\subsubsection{Double-ended linked lists}%
+\label{ssub:Double-ended linked lists}
+A linked list has four operations:
+\begin{itemize}
+    \item \textbf{create()}: creates a new list and returns two IDs. ($O(1)$)
+    \item \textbf{insert(x,i)}: inserts $x$ after the node with ID $i$.
+        ($O(1)$).
+    \item \textbf{delete(i)}: deletes node with ID $i$. ($O(1)$).
+    \item \textbf{lookup(i)}: returns the node with ID $i$. ($O(1)$).
+\end{itemize}
+
+\subsubsection{Arrays}%
+\label{ssub:Arrays}
+Arrays have three operations: \texttt{create()}, \texttt{update(x,i)},
+\texttt{lookup(i)}. These all have $O(1)$.
+
+\subsubsection{Hash tables}%
+\label{ssub:Hash tables}
+Hash tables have four operations and have key-value pairs.
+\begin{itemize}
+    \item \textbf{create()}: Creates new has table. ($O(1)$)
+    \item \textbf{insert(k,v)}: Inserts $(k,v)$ into the table. ($O(1)$ on
+        \textbf{average})
+    \item \textbf{lookup(k)}: If $(k,v)$ is in the table, returns $v$ else
+        \texttt{Null}. ($O(1)$ on \textbf{average})
+    \item \textbf{delete()}: Deletes pair $(k,v)$. ($O(1)$)
+\end{itemize}
+
+\subsection{Pros and cons}%
+\label{sub:Pros and cons}
+\begin{center}
+    \begin{tabular}{c|c|c|c}
+        Task & Length-$l$ list & Size-$s$ array & Hash-table \\ \hline
+        Search for an element & $\Theta(l)$ & $\Theta(s)$ & $\Theta(1)$ \\ \hline
+        Sequence of $n$ insertions and/or removals & $\Theta(ln)$ &
+        $\Theta(sn)$ (holds $\le s$) & $\Theta(n)$ \\ \hline
+        Iterate over all elements in order & $\Theta(l)$ & $\Theta(s)$ &
+        No order \\ \hline
+        Find an element by position & $\Theta(l)$ & $\Theta(1)$ & No
+        order \\ \hline
+    \end{tabular}
+\end{center}
+\textbf{Arrays}: Good for storing \textit{ordered} data with random
+access/update.
+
+\textbf{Lists}: Good for storing ordered data that's being iterated over a
+lot.
+
+\textbf{Hash tables}: Good for storing unordered data (maybe associated
+with keys.)
+
+\subsection{Hash tables}%
+\label{sub:Hash tables}
+When we insert a value at point $k$, there might be another item there
+already (called a \textit{collision}). We can solve this by
+\textbf{chaining}.
+
+Instead of having one value at each point, we have an array of linked
+lists. This is good, but they do make the lists longer, impacting
+performance. We circumvent this by dynamic resizing.
+
+On insertion, if there are at least $n/2$ values in the table, make a new
+table that's twice as big, and reinsert each value into the new table.
+
+\subsubsection{The Hash functino}%
+\label{ssub:The Hash functino}
+We want our hash function to be good. We want the size of the array of
+linked lists to be a \textbf{prime number} (we use a lookup table for
+this). Then, to find the position of the linked list for a value (compute
+$h_p(k)$), we:
+\begin{itemize}
+    \item Split $k$ into base-$p$ words. $k$ = $\Sigma_{i=0}^{t}x_ip^i$
+        where $x_i = \lfloor k/p^i\rfloor \mod p$
+    \item Output $h_p(k) = (\Sigma_i a_ix_i) \mod p$
+\end{itemize}
+
+This takes $O(\log N)$ time. So our runtime for a sequence of $t$
+operations will be $O(t \log N)$ time. This leaves us with this final
+implementation of hash tables:
+
+\textbf{create(n = 100)}: Finds a prime between $p$ and $2n$.
+
+\textbf{insert(k,v)}: Increments the number of pairs stored, and adds
+$(k,v)$ to the table (utilising the hash function discussed above). If at
+least $p/2$ pairs are stored, calls \texttt{create(2p)} to make a new
+table and copies everything over.
+
+\textbf{lookup(k)}: Searches for $(k,v)$ in the list and returns $v$.
+\textbf{delete(k)}: Decrements the number of pairs stored and removes
+$(k,v)$ from the list.
+
+
+
+\section{Fast Fourier Transform}%
+\label{sec:fft}
+\subsection{Discrete Fourier Transform}%
+\label{sub:dft}
+\begin{flalign*}
+    &A(x) = a_0 + a_1x + a_2x^2 + \dots \\
+    &y_k = A(\omega_n^k)
+\end{flalign*}
+
+\subsection{Fast transforming}%
+\label{sub:fft}
+Fast Fourier Transform (FFT) is basically the same as the discrete FT, but
+it splits recursively splits the polynomial up into even and odd powers.
+For example, if we take $A[x] = 0 + 0x + 1x^2 - 1x^3$, then we get:
+\begin{align*}
+    A^{[0]} \leftarrow (0,1) \\
+    A^{[1]} \leftarrow (0,-1) \\
+    y^{[0]} \leftarrow FFT((0,1),2) \\
+    y^{[1]} \leftarrow FFT((0,-1),2)
+\end{align*}
+
+$FFT((0,1),2)$ is just the two squares of unity, and $FFT((0,-1),2)$ is
+the negative of the two squares of unity $(-1,1)$.
+
+\section{Traversing Graphs}%
+\label{sec:traversing-graphs}
+\subsection{Depth First Search}%
+\label{sub:dfs}
+Depth First searches use a stack to store the nodes. Therefore in a binary
+tree, we would go down an entire branch before returning to search the
+children.
+
+\subsection{Breadth First Search}%
+\label{sub:bfs}
+Breadth first searches use a queue to store the nodes. Therefore, in a
+binary tree, we would search all the children of each node before going
+down a level.
+
+\section{Shortest Path}%
+\label{sec:shortest-path}
+
+\subsection{Priority Queues}%
+\label{sub:priority-queues}
+A \textbf{priority queue} stores a set of distinct elements. The following
+operations are supported by them:
+\begin{itemize}
+    \item \textbf{insert(x,k)}: Inserts $x$ with $x.key = k$.
+    \item \textbf{decreasekey(x,k)}: Decreases the value of $x.key$ to $k$
+        ($k < x.key$).
+    \item \textbf{extractmin()}: Removes and returns the element with the
+        smallest key.
+\end{itemize}
+
+We could use a number of methods of storing this data structure, but the
+best one is a binary heap. Each operation takes $O(\log n)$ time. We can
+also sort the structure in $O(n \log n)$ time.
+
+\subsection{Dijkstra's algorithm}%
+\label{sub:Dijkstra's algorithm}
+To compute Dijkstra's algorithm, we:
+\begin{enumerate}
+    \item Start at some node (A)
+    \item Set all distances to infinite
+    \item Then, for every edge, if \texttt{dist(v) > dist(u) +
+        weight(u,v)}, then update the distance in the array.
+    \item Repeat until all nodes are \textbf{settled}
+\end{enumerate}
+
+\section{Minimum Spanning Trees}%
+\label{sec:min-span-trees}
+A \textbf{minimum spanning tree} is a subgraph such that every vertex is
+in the subgraph and it is a tree.
+
+\subsection{Kruskal's Algorithm}%
+\label{sub:kruskal}
+Kruskal's algorithm finds a minimum spanning tree in a connected,
+undirected graph using a disjoint set data structure:
+\begin{enumerate}
+    \item For every vertex, do \texttt{MakeSet(v)}.
+    \item Sort the edges in order of increasing weight
+    \item For each edge (in order), if \texttt{FindSet(u) != FindSet(v)}
+        then \texttt{Union(u,v)} and add to the minimum spanning tree.
+\end{enumerate}
+
+These operations run in $O(\log|V|)$ time, so the overall runtime becomes
+$O(|E| \log |V|)$
+
+\section{Dynamic Programming}%
+\label{sec:dynamic-programming}
+In the simplest sense, what we're trying to do with dynamic programming
+is:
+\begin{itemize}
+    \item Find a recursive formula for the problem in terms of answers to
+        the subproblems
+    \item Write down a naive recursive algorithm
+    \item Speed it up by storing the solutions to the subproblems
+    \item Derive an iterative algorithm by solving the subproblems in a
+        good order.
+\end{itemize}
+
+Sometimes, we need to start filling the array in from the top left. This
+allows us to fill in the rest of the array for computation.
+
+\section{Dynamic Search Structure}%
+\label{sec:Dynamic Search Structure}
+A dynamic search structure stores a set of elements. Each element $x$ must
+have a unique key - $x.key$. The following operations must be supported:
+\begin{itemize}
+    \item \texttt{insert(x,k)} - inserts $x$ with the key $k=x.key$
+    \item \texttt{find(k)} - returns the unique element $x$ with $x.key =
+        k$.
+    \item \texttt{delete(k)} - deletes the unique element $x$ with $x.key
+        = k$.
+\end{itemize}
+
+\subsection{2-3-4 Trees}%
+\label{sub:2-3-4}
+The key idea here is that the nodes can have 2, 3, or 4 children (duh).
+Every path from the root to a leaf has the same length. Always. 
+
+\subsubsection{Find}%
+\label{ssub:Find}
+The \texttt{find} operation is easy. We just follow a path from the root.
+The time complexity of this operation is $O(h)$, with $h$ being the height
+of the tree. This could be anywhere from $\log_4n$ to $log_2n$ (depending
+on the magnitude of each node).
+
+\subsubsection{Insert}%
+\label{ssub:Insert}
+To perform \texttt{insert(x,k)}, we search for the key as if performing
+\texttt{find(k)}. If the leaf is a 2-node, insert $x,k$, converting it
+into a 3-node. If the leaf is a 3-node, do the same. However, we cannot
+allow the node to be a 4 node.
+
+To avoid this, we can \textbf{split} the 4-nodes into two 2-nodes (if the
+parent isn't a 4 node). We take the middle node and push it up to the
+parent node. Now, no path lengths have changed and this operation takes
+$O(1)$ time.
+
+\subsubsection{Delete}%
+\label{ssub:Delete}
+To perform \texttt{delete(k)} on a leaf, we search for the $k$ using
+\texttt{find(k)}. If the leaf is a 3 or 4-node, delete $(x,k)$. We can't
+delete 2 nodes, so we need to either \textbf{fuse} or \textbf{transfer}.
+
+\textit{Fusing} a node is where we merge two nodes together with the
+parent key to create a 4-node. If the parent is the root, then we can also
+fuse them together by combining the root with the two children to make a
+4-node.
+
+\textit{Transferring} is where we have a 2-node and a 3-node. We can
+transfer the parent key down, and place the other key from the 3-node
+where the parent node was.
+
+Each of these functions take $O(\log n)$ time.
+
+\subsection{Skip lists}%
+\label{sub:skip-list}
+A skip list is essentially a linked list with some shortcuts put into
+place to make it a bit faster to find things. There are $n$ levels to a
+skip list.
+
+\subsubsection{Find}%
+\label{ssub:find-skip}
+To \texttt{find(k)}, we start at the top left. We then check the next node
+on that level. If the node is larger than $k$, then we go down a level and
+repeat until we find $k$.
+
+\subsubsection{Insert}%
+\label{ssub:insert-skip}
+To \texttt{insert(x,k)}, we simply find the place where the key should be
+and insert. Then, we simulate a coin toss. If heads, we replicate the key
+a level up, and repeat this until we hit tails.
+
+\subsubsection{Delete}%
+\label{ssub:delete-skip}
+\texttt{Delete(k)} is straightforward, we just find the key and delete
+from all levels.
+
+Again, all operations will take $O(\log n)$ time. This is expected time,
+while the one for 2-3-4 trees are the \textit{worst} case time.
+
+\section{Shortest Path 2}%
+\label{sec:short-path-2}
+Earlier, we looked at the shortest paths for graphs that don't have any
+negative weights. But, some graphs do actually have negative weights. We
+can't just add a constant because this would mess with the shortest path.
+Instead, we have another algorithm for it.
+
+\subsection{Bellman-Ford algorithm}%
+\label{sub:Bellman-Ford algorithm}
+This algorithm essentially repeatedly asks if it can find a shorter route.
+It runs $|V|$ iterations of itself, and in each iteration we relax every
+edge in the graph. After enough iterations (enough being every edge being
+processed $|V|$ times), we will get the shortest path for each node.
+
+Unfortunately, negative weight cycles break this algorithm, since we could
+go around the cycle infinite times and get a shorter path every time. So,
+we just add a final check to see if the algorithm would find a shorter
+path (which would be impossible without there being a negative weight
+cycle). If there is, then we flag it up.
+
+\begin{lstlisting}
+For all v, set dist(v) = infinity
+set dist(s) = 0
+for i = 1 to size(V) {
+    for each edge (u,v) in E
+        if(dist(v) > dist(u) + weight(u,v)) {
+            dist(v) = dist(u) + weight(u,v)
+        }
+}
+
+for each edge (u,v) in E {
+    if(dist(v) > dist(u) + weight(u,v)) {
+        output "negative weight cycle found"
+    }
+}
+\end{lstlisting}
+
+The algorithm sets all distances to infinity (which takes $O(|V|)$ time),
+and then begins the main loop (which will take $O(|V||E|)$ time), before
+doing a final check ($O(|E|)$ time) leaving us with a total runtime of
+$O|V||E|$.
+
+\subsection{All-pairs shortest paths}%
+\label{sub:All-pairs shortest paths}
+We've only focused on single source shortest paths, but what if we wanted
+to find shortest paths from every vertex to every other vertex? If the
+graph was all positive weights, then we could run Dijkstra's algorithm
+$|V|$ times, giving us $O(|V||E|\log |V|)$ time. If the graph has both
+negative and positive weights, we could run Bellman-Ford's algorithm $|V|$
+times, givng us $O(|V|^2|E|)$ time. We know that the output will be in
+$O(|V|^2)$ time, so we can't expect to do any better than $O(|V|^2)$ time
+in the algorithm.
+
+To solve this problem, we'll use a combination of both of the algorithms
+we've seen before.
+
+\subsubsection{Johnson's algorithm}%
+\label{ssub:Johnson's algorithm}
+As previously discussed, we can't just slap a constant on all of the
+weights because this messes up the correct answer for the shortest path.
+So instead, we're going to associate a value $h(v)$ with each vertex (this
+is called the \textbf{potential} of $v$). Now, we reweight the graph so
+that each edge $(a,b)$ has weight $weight(a,b)+h(a) - h(b)$. Note that
+reweighting does not affect negative cycles.
+
+To choose $h$, we add one additional vertex called $s$ to the graph, and
+add an edge from it to every vertex in the graph. Each of the edges has
+weight 0. Note that this cannot add any new negative cycles.
+
+Now, for each $v$, let $\delta(s,v)$ denote the length of the shortest
+path from $s$ to $v$. The key observation is that $\delta(s,v) \le
+\delta(s,u) + weight(u,v)$. Rearranging this, we get $weight(u,v) +
+\delta(s,u) - \delta(s,v)$. Looks familiar, right? Now, the weight of
+every edge becomes: $weight(u,v) + \delta(s,u) - \delta(s,v) \ge 0$.
+
+We can now piece together the whole algorithm.
+
+\begin{enumerate}
+    \item Add one additional vertex $s$ to the graph.
+    \item For every vertex, add an edge $(s,v)$ with weight 0.
+    \item Run Bellman-Ford with source $s$. If there's a negative weight
+        cycle, it will be detected in this step.
+    \item Reweight each edge so that $weight'(u,v) = weight(u,v) + h(u) -
+        h(v)$. Where $h(v) = \delta(s,v)$.
+    \item For each vertex, run Dijkstra's algorithm.
+    \item For each pair of vertices, compute $\delta(u,v) = \delta'(u,v) +
+        h(v) - h(u)$.
+\end{enumerate}
+
+Is this really faster? Well, here are the breakdowns of the time
+complexity of each step:
+
+\begin{itemize}
+    \item $O(1)$
+    \item $O(|V|)$
+    \item $O(|V||E|)$
+    \item $O(|E|)$
+    \item $O(|V||E|\log|V|)$
+    \item $O(|V|^2)$
+\end{itemize}
+
+So the overall time complexity is $O(|V||E|\log|V|)$ time.
+
+
+
+\section{Linear Programming}%
+\label{sec:LP}
+\subsection{Standard form}%
+\label{sub:Standard form}
+Here are some of the rules you can use to turn a linear function into
+standard form:
+\begin{itemize}
+    \item Convert all $\dots \rightarrow \min$ to $-\dots \rightarrow \max$
+    \item Convert all $=$ relations to $\le$ and a $\ge$
+    \item Convert all $\ge$ to negated $\le$.
+    \item Remove non-negativity. That is, provided that a variable doesn't
+        have to be non-negative, then split it up into $x_1,x_2$, where
+        the $x_1$ is the positive part and $x_2$ is the negative.
+    \item Finally, put it into a matrix.
+\end{itemize}
+
+\section{Flow}%
+\label{sec:Flow}
+\subsection{Ford-Fulkerson Algorithm}%
+\label{sub:Ford-Fulkerson Algorithm}
+\begin{lstlisting}
+Input: A (weakly connected) flow network (G,c,s,t)
+Output: A flow f with no augmenting paths
+
+construct flow f with f(e) = 0 for every edge
+construct residual graph Gf
+while Gf contains a path P from s to t do
+    Find P using (depth/breadth)-first search
+    Update f <- Push(G,c,s,t,f,P)
+    Update Gf on edges of P
+end while
+return f
+\end{lstlisting}
+
+\textbf{Runtime:} $O(v(f^*)|E|)$ where $f^*$ is the maximum flow.
+
+\subsection{Edmonds-Karp Algorithm}%
+\label{sub:EK}
+Same as Ford-Fulkerson, but we always pick P with few edges as possible.
+Basically we only need to use \textbf{breadth-first} search on the
+residual graph to find the augmenting paths rather than depth-first
+search.
+
+\textbf{Runtime:} $O(|V||E|^2)$.
+
+\section{Complexity Theory}%
+\label{sec:Complexity Theory}
+\subsection{The class NP}%
+\label{sub:NP}
+NP is the class of all decision problems such that there is a
+polynomial-time algorithm Verify that if and only if x is a yes instance
+of the decision problem, then there is some bit string $w$ (called a
+\textbf{witness}) with \texttt{verify(x,w) = yes}
+
+\textbf{P} is the class of all decision problems with a polynomial-time
+algorithm.
+
+\subsection{Cook Reduction}%
+\label{sub:Cook Reduction}
+A cook reduction from X to Y is a polynomial-time algorithm for a problem
+X which, given an input of size $s$ makes poly calls to an oracle for $y$
+whose input instances are all of size poly. We write this: $X \le_c Y$
+
+The point of this is that if there \textbf{is} a poly-time algorithm for
+Y, then there's one for X too. If there isn't one for X, then there's none
+for Y either.
+
+\subsection{Cook-Levin Theorem}%
+\label{sub:Cook-Levin Theorem}
+The \textbf{SAT} problem asks: `is the input CNF formula satisfiable?'.
+That is, CNF being \textbf{conjunctive normal form} ($x \vee (\neg y) \vee
+z \mapsto x \wedge (y \vee z) \wedge (\neg x \vee \neg z)$).
+
+The \textbf{Cook-Levin Theorem} states that every problem in NP is
+Cook-reducible to SAT. So, if there's a polynomial algorithm for SAT, then
+there's a polynomial algorithm for \textbf{every} problem in NP, so P =
+NP.
+
+\subsection{NP-Completeness}%
+\label{sub:NP-Completeness}
+We say a problem is \textbf{NP-hard} if any problem in NP is
+Cook-reducible to it, and \textbf{NP-complete} if it is also in NP. So,
+SAT is NP-complete.
+
+\textbf{Important}: By the Cook-Levin Theorem, a problem is NP-hard if and
+only if SAT reduces to it. This is how we normally prove it.
+
+\begin{itemize}
+    \item If a problem is NP-Hard, there's probably no poly-time algorithm
+        for it.
+    \item Even if there is one, you won't be able to find it.
+    \item In practice, almost every problem either has a poly-time
+        algorithm or is NP-hard.
+\end{itemize}
+
+Basically, NP-Hardness means that we need to find an alternative to the
+thing you were trying to prove.
+
+\subsection{Church-Turing Thesis}%
+\label{sub:Church-Turing Thesis}
+The \textbf{Church-Turing Thesis} says that any computable function is
+computable with a \textit{Turing machine}.
+
+The \textbf{Strong Church-Turing Thesis} says that any function computable
+in \textbf{polynomial time} is computable in \textbf{polynomial time}
+using a \textit{Turing machine}.
+
+This changes the problem to modeling the entire start to finish, step by
+step. Where with some Turing machine, we can compute a CNF formula that is
+satisfiable iff after running the machine on some input, it halts with the
+output \texttt{yes}.
+
+The long story is that we check consistency with an AND of \textbf{many}
+clauses that are in the form:
+\begin{align*}
+    [P_{i,t} = 1 \wedge S_{3,r=1} \wedge C_{i,T} = 0 \Rightarrow C_{i,r+1} = 1]
+\end{align*}
+
+\newpage
+\fontsize{64}{10}\selectfont
+{\color{red}\textbf{MICK LOVING}}
+
+\end{document}
