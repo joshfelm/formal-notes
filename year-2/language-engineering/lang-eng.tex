@@ -17,7 +17,7 @@
 %%=====================================================================================
 
 % Preamble {{{
-\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\documentclass[11pt,a4paper,headsepline,titlepage,dvipsnames,cmyk]{scrartcl}
 \usepackage[english]{babel}
 \typearea{12}
 % }}}
@@ -35,15 +35,19 @@
 \usepackage[T1]{fontenc}
 
 % Headers setup {{{
-\usepackage{fancyhdr}
-\pagestyle{fancy}
-\lhead{Language Engineering - A nice set of notes}
-\rhead{Josh Felmeden}
+\usepackage{scrlayer-scrpage}
+\usepackage{blindtext}
+\automark{section}
+\clearpairofpagestyles
+\ohead{Language Engineering}
+\ihead{\headmark}
+
 \usepackage{hyperref} 
 % }}}
 
 % Listings {{{
-\usepackage[]{listings,xcolor} 
+\usepackage[table]{xcolor}
+\usepackage[]{listings} 
 \lstset
 {
     breaklines=true,
@@ -1165,4 +1169,5 @@ lines above the leaves (that are instances of ASS axioms or SKIP axioms.)
 
 Each application of the consequence rule will be numbered with a number we
 can use to identify the associated entailment proofs.
+
 \end{document}
