@@ -1,0 +1,196 @@
+% Preamble {{{
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+\usepackage{hhline}
+\usepackage[table]{xcolor}
+\usepackage{mathtools}
+\usepackage[T1]{fontenc}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Advanced Topics with Programming Languages}
+\rhead{Josh Felmeden}
+\usepackage{hyperref}
+% }}}
+
+% Listings {{{
+\usepackage[]{listings}
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=[Visual]Basic,
+backgroundcolor=\color{lstgrey},
+frame=single,
+xleftmargin=0.7cm,
+frame=tlbr, framesep=0.2cm, framerule=0pt,
+basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+captionpos=b,
+tabsize=2,
+keywordstyle=\color{Magenta}\bfseries,
+identifierstyle=\color{Cyan},
+stringstyle=\color{Yellow},
+commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\specialcell}[2][c]{%
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+% }}}
+
+% Other packages {{{
+\usepackage{graphicx}
+\graphicspath{ {./pics/} }
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage[symbol]{footmisc}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{enumitem}
+\setlist{nolistsep}
+% }}}
+
+% tcolorbox {{{
+\newtcolorbox{blue}[3][] {
+colframe = #2!25,
+colback = #2!10,
+#1,
+}
+
+\newtcolorbox{titlebox}[3][] {
+colframe = #2!25,
+colback = #2!10,
+coltitle = #2!20!black,
+title = {#3},
+fonttitle=\bfseries
+#1,
+}
+% }}}
+
+% Title {{{
+\title{Advanced Topics with Programming Languages}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introduction}
+One way of looking at programming languages is to look at \textbf{types} and \textbf{type systems}. Haskell is a language that uses typing. There can be static and dynamic typing.
+
+%definition
+Types classify programs by the kind of data they compute.
+
+\section{Judgements}
+A \textbf{judgement} is a statement. In this topic, we will centre everything around an \textit{evident judgement}. A judgement becomes evident when you can \textit{prove} it. Therefore, when we sa a judgement, we need to provide evidence of proof.
+
+Judgements come with rules. Here is an axiom:
+\begin{lstlisting}
+zero nat
+\end{lstlisting}
+
+Zero is the object, and nat is the name. Alongside this, we can use an inference rule:
+\begin{lstlisting}
+n nat           'premise(s)
+------------- s 'name of rule
+succ(n) nat     'conclusion
+\end{lstlisting}
+
+These two structures can be used in \textbf{derivation trees} which are used to prove judgements. For example, to prove that two is a natural number, we can do the following:
+\begin{lstlisting}
+
+--------- axiom
+zero nat
+-------- s
+succ(zero) nat
+--------- s
+succ(succ(zero)) nat
+\end{lstlisting}
+
+We can also write
+\begin{lstlisting}
+data nat = zero | succ nat
+\end{lstlisting}
+
+\subsection{Simultaneous rules}
+we can state proofs of rules mix and match to use a proof that proves two things at once. For example:
+\begin{lstlisting}
+
+-------- ZE
+zero even
+\end{lstlisting}
+
+\begin{lstlisting}
+n even
+---------- ODD
+succ(n) odd
+\end{lstlisting}
+
+\begin{lstlisting}
+n odd
+----------- EVEN
+succ(n) even
+\end{lstlisting}
+
+This proves both odd and even.
+
+\section{Induction}
+Every set of rules generates an \textit{induction principle}. 
+
+Consider the claim \lstinline|if succ(n) nat then n nat|. This seems obvious, but we can actually prove this.
+
+\begin{blue}{blue}
+\texttt{Proof} We will use induction \\
+\texttt{P(n)}: `If n nat and n = succ(x) for some x then x nat' \\
+\texttt{Case zero}: Nothing to prove \\
+\texttt{Case(succ(n) nat)} The derivation of succ(n) nat ends with
+\begin{lstlisting}
+n nat
+--------- succ
+succ(n) nat
+\end{lstlisting}
+The D is a derivation of n nat.
+
+succ(n) = succ(x) and therefore n = x. We can conclude that n is nat and therefore x is nat.
+\end{blue}
+
+This statement is an \textbf{admissible rule}. A rule is admissible when we have a derivation of the premises, then we know we can construct a derivation of the conclusion. In essence, you need to \textit{prove} this one (usually by induction).
+
+In contrast, a rule is \textbf{derivable} if we can use a derivation of its premise as a building block in deriving its conclusion. In essence, you can \textit{infer} this one (stitch together stuff).
+
+\subsection{Simultaneous induction}
+Recalling the even and odd proof, we can write these as Let P(n even) and Q(n odd). If:
+\begin{itemize}
+    \item P(zero) and
+    \item whenever $n$ even and $\mathcal{P}(n)$ we have $\mathcal{Q}(\text{succ}(n))$ and
+    \item whenever $n$ odd and $\mathcal{Q}(n)$ we have $\mathcal{P}(\text{succ}(n))$
+\end{itemize}
+
+We are allowed to \textit{invert} a judgement, and this is called an \textit{inversion principle}.
+
+\end{document}

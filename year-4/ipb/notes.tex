@@ -1,0 +1,214 @@
+% Preamble {{{
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+\usepackage{hhline}
+\usepackage[table]{xcolor}
+\usepackage{mathtools}
+\usepackage[T1]{fontenc}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Information Processing and the Brain}
+\rhead{Josh Felmeden}
+\usepackage{hyperref}
+% }}}
+
+% Listings {{{
+\usepackage[]{listings}
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=[Visual]Basic,
+backgroundcolor=\color{lstgrey},
+frame=single,
+xleftmargin=0.7cm,
+frame=tlbr, framesep=0.2cm, framerule=0pt,
+basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+captionpos=b,
+tabsize=2,
+keywordstyle=\color{Magenta}\bfseries,
+identifierstyle=\color{Cyan},
+stringstyle=\color{Yellow},
+commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\specialcell}[2][c]{%
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+% }}}
+
+% Other packages {{{
+\usepackage{graphicx}
+\graphicspath{ {./pics/} }
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage[symbol]{footmisc}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{enumitem}
+\setlist{nolistsep}
+% }}}
+
+% tcolorbox {{{
+\newtcolorbox{blue}[3][] {
+colframe = #2!25,
+colback = #2!10,
+#1,
+}
+
+\newtcolorbox{titlebox}[3][] {
+colframe = #2!25,
+colback = #2!10,
+coltitle = #2!20!black,
+title = {#3},
+fonttitle=\bfseries
+#1,
+}
+% }}}
+
+% Title {{{
+\title{Information Processing and the Brain}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Information Theory}
+Information theory quantifies the amount of information that is potentially available from the communication channel using. So, we look to answer the question: can the receiver decide how informative the channel is likely to be; how much information is in the channel.
+
+\subsection{Randomness}
+The key is that if the information in the channel is predictable, the receiver is not going to learn much from this. Therefore, we will look at randomness (coin flipping, geiger counters, etc).
+
+We will also look and unexpectedness, and consider the relationship between randomness, unexpectedness, and information theory.
+
+Netflix is a good example of this. Their star rating of films helps them to recommend films to you, and use your experiences to recommend films to others. The recommended tab is the \textit{channel} in the information theory. The films are the medium, and Netflix is communicating to the user information about the film. If Netflix recommends a really popular film, the information is predictable, and the user is not learning much. Therefore, we are not gaining much information about the quality of the films.
+
+Another example is the star rating of movies. The star rating is not `random' enough for the consumer, in that there is not enough information that we as the user can learn from this. A good film with a lot of hype will likely have a good star rating, and therefore we would already know this.
+
+Therefore, we can say that a statement, despite being correct, can be useless if we can predict it.
+
+\begin{tcolorbox}
+\textit{The theory of information starts with an attempt to allow us to quantify the informativeness of information, but not its salience or validity.}
+\end{tcolorbox}
+
+\section{Shannon's entropy}
+For a finite discrete distribution with a random variable $X$, possible outcomes $\{x_1,, x_2, \dots, x_n\} \exists \mathcal{X}$ and a probability mass function $p_x$ giving probabilities $p_X(x_i)$, the entropy is:
+\begin{align*}
+H(X) = - \sum_{x_i \exists \mathcal{X}}p_X(x_i) \log_2 p_X(x_i)
+\end{align*}
+
+This formula \textit{quantifies} some information received. In the example of star ratings on netflix:
+
+\begin{center}
+\begin{tabular}{ll}
+    \toprule
+    1 star & 0.016 \\
+    2 star & 0.310 \\
+    3 star & 0.627 \\
+    4 star & 0.057 \\ \bottomrule
+\end{tabular}
+\end{center}
+
+We obtain the following formula:
+\begin{align*}
+H(X) = -0.016 \log_2 0.016 - 0.31 \log_2 0.31 - 0.627 \log_2 0.627 - 0.057 \log_2 0.057 \approx 1.28
+\end{align*}
+
+Choosing base two is arbitrary, but because we are dealing with information, it is useful to deal in bits. In other circumstances, it is possible to choose a different base. The result, $1.28$ is the entropy for the channel of Netflix film star ratings.
+
+If the star ratings were all equally likely, we would get an entropy of:
+\begin{align*}
+H(X) = -4 \times 0.25 \log_2 0.25 = 2
+\end{align*}
+
+This is higher value entropy meaning the information is more useful.
+
+In contrast, if all films are rated one star, we end up with entropy 0, meaning that it is useless. We assume $\log 0$ is 0 for shannon's entropy despite this not being the case in reality.
+
+\subsection{Nice properties}
+Shannon's entropy works on any sample space. It's good because you can calculate this on things that would otherwise be impossible, such as items bought from a grocers. This is because it is defined on probability space, while other calculations are calculated in vector space (such as mean, etc).
+
+It's \textbf{always positive}, unless it is zero, which is when the distribution \textit{isn't random} (aka \textit{determined}).
+
+If the distribution is \textit{uniform}:
+\begin{align*}
+p_X(x_i) = \frac{1}{n}
+\end{align*}
+
+for all $x_i$ where ($\#$ is equivalent to \texttt{len})
+\begin{align*}
+n = \#\mathcal{X}
+\end{align*}
+
+then, since $-\log_2(1/n) = \log_2n$
+\begin{align*}
+H(X) = \log_2n
+\end{align*}
+
+We won't prove it here, but is not difficult to prove that:
+\begin{align*}
+0 \le H(X) \le \log_2n
+\end{align*}
+
+with $H(X) = 0$ \textit{only} if one probability is one and the rest zero, and $H(X) = \log_2 n$.
+
+\subsubsection{Case of n = 2}
+With two outcomes, $a$ and $b$ with $p(a) = p$ and $p(b) = 1-p$ then
+\begin{align*}
+H = -p\log_2 p-(1-p)\log_2(1-p)
+\end{align*}
+
+The resulting graph of entropy will be symmetric; rising towards 1.
+
+\subsubsection{Source coding}
+the main reason to believe that Shannon's entropy is a good quantity for calculating entropy is its relationship to so called source coding.
+
+Consider storing a long sequence of letters \texttt{A, B, C, D} as binary (\texttt{AABACBDA} for example). If we wanted to digitise this, we might use a very simple binary representation of these characters (\texttt{A = 00, B = 01, ...}). Using this representation means the average bits per letter is 2. Now, if we had different distribution of letters, then we could possibly come up with a smaller, more compact version of the code. For example, if we had the following distribution:
+\begin{center}
+    \begin{tabular}{cccc}
+        A & B & C & D \\ \midrule
+        0.5 & 0.25 & 0.125 & 0.125
+    \end{tabular}
+\end{center}
+We could use the following encoding:
+\begin{center}
+    \begin{tabular}{cccc}
+        A & B & C & D \\ \midrule
+        0 & 10 & 110 & 111
+    \end{tabular}
+\end{center}
+
+Don't forget that this resulting code should be \textit{prefix free}.
+
+Now, we can prove that this code is shorter on average:
+\begin{align*}
+L = 0.5 \times 1 + 0.25 \times 2 + 0.125 \times 3 + 0.125 \times 3 = 1.75 < 2
+\end{align*}
+
+\end{document}
