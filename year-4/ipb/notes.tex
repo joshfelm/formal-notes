@@ -211,4 +211,152 @@ Now, we can prove that this code is shorter on average:
 L = 0.5 \times 1 + 0.25 \times 2 + 0.125 \times 3 + 0.125 \times 3 = 1.75 < 2
 \end{align*}
 
+This is also the same as the Shannon's entropy of the code. Each of the logs are giving us the length of the corresponding code word.
+
+The source coding theorem states that, for the most efficient code, we get:
+\begin{align*}
+H(X) \le L < H(X) + 1
+\end{align*}
+
+This means that if you have a sequence of objects that have some regularity and you want to code them into binary, the channel's entropy is a lower bound on the average length of a message and you can get a \textit{prefix free} code within one of Shannon's entropy.
+
+\subsection{Joint and Conditional Entropy}
+Typically, we want to use information theory to study the relationship between two random variables. So far, we have only looked at single variables.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Joint Entropy},
+nobeforeafter,
+halign lower=flush right, ]
+Given two random variables $X$ and $Y$, the probability of getting the pair $(x_i, y_j)$ is given by the \textbf{joint probability} $p(X,Y) (x_i,y_j)$. THe joint entropy is just the entropy of the join distribution:
+\begin{align*}
+H(X,Y) = - \sum_{i,j}p_{X, Y}(x_i, y_j)\log_2p_{X,Y}(x_i,y_j)
+\end{align*}
+
+This is essentially the probability that $x$ will produce $x_i$ and that $y$ will produce $y_j$
+\end{tcolorbox}
+
+Here's an example:
+\begin{center}
+    \begin{tabular}{c|cc}
+        & $x_0$ & $x_1$ \\ \midrule
+        $y_0$ & $1/4$ & $1/4$ \\
+        $y_1$ & $1/2$ & $0$
+    \end{tabular}
+\end{center}
+
+\begin{align*}
+H(X,Y) = -\frac{1}{2}\log_2 \frac{1}{4} - \frac{1}{2}\log_2 \frac{1}{2} = \frac{3}{2}
+\end{align*}
+
+\subsubsection{Conditional Entropy}
+$p_{X|Y}(x_i|x_j)$ is the \textbf{conditional probability} of $x_i$ given $y_j$. If we know that $Y = y_j$, it gives us the probability that the pair is $(x_i, y_j)$.
+
+\begin{align*}
+p_{X|Y}(x_i|y_j) = \frac{p_{(X,Y)}(x_i, y_j)}{p_Y(y_j)}
+\end{align*}
+
+The \textbf{marginal probability} for $x$ is: $p_X(x_i) = \sum_{j}p_{(X,Y)}(x_i,y_j)$. This is the way of getting the probabilities for one of the two random variables from the joint distribution.
+
+Let's now substitute the conditional probability into the formula for entropy:
+
+\begin{align*}
+H(X|Y = y_j) = -\sum_ip_{(X|Y)}(x_i|y_j)\log_2 p_{X|Y}(x_i,y_j)
+\end{align*}
+
+This is the entropy of $X$ as we know $Y = y_j$. We call this the \textbf{conditioned entropy}.
+
+The conditional entropy is the average amount of information still in $X$ when we know $Y$. It also has some pretty nice properties:
+
+If $X,Y$ are \textit{independent}, then:
+\begin{align*}
+    p_{X,Y} (x_i, y_j) = p_X(x_i) p_Y(y_j)
+\end{align*} 
+
+For all $i,j$ and
+\begin{align*}
+p_{X|Y}(x_i|y_j) = p_X(x_i)
+\end{align*}
+
+so
+\begin{align*}
+H(X|Y) = -\sum_{i,j} p_{X,Y}(x_i,y_j) \log_2 p_{X|Y}(x_i|y_j) = H(X)
+\end{align*}
+
+Which is what we want, since if $Y$ tells us nothing about $X$, then the conditional entropy should just be the same as the entropy of $X$.
+
+Conversely, if $X$ is \textit{determined} by $Y$, then $H(X|Y) = 0$. This could happen if the only $x_j,y_i$ pairs that actually occur are $(x_i,y_i)$.
+
+
+\subsection{Mutual Information}
+Given two (overlapping) variables, there will be some information that is shared by these two entropies, and this is called \textbf{mutual information}, and is defined as:
+\begin{align*}
+I(X,Y) = H(X) + H(Y) - H(X,Y)
+\end{align*}
+
+Or:
+\begin{align*}
+I(X,Y) = H(X) - H(X|Y) = H(Y) - H(Y|X)
+\end{align*}
+
+By substituting in the formulas, we end up with:
+\begin{align*}
+I(X,Y) = \sum_{i,j} p_{X,Y} (x_i, y_j) \log_2 \frac{p_{X,Y}x_i y_j}{p_X (x_j)p_Y(y_j)}
+\end{align*}
+
+Going back to the previous example:
+\begin{center}
+    \begin{tabular}{c|cc}
+        & $x_0$ & $x_1$ \\ \midrule
+        $y_0$ & $1/4$ & $1/4$ \\
+        $y_1$ & $1/2$ & $0$
+    \end{tabular}
+\end{center}
+
+This has $H(X,Y) = 3/2, H(X) \approx 0.81$ and $H(Y) = 1$ so $I(X,Y) \approx 0.31$
+
+If $X$ and $Y$ are independent, we just end up with $I(X,Y) = 0$. In fact, $I(X,Y) \ge 0$
+
+\subsection{Correlation}
+The correlation is defined as:
+\begin{align*}
+C(X,Y) = \frac{\langle(X-\mu_X)(Y-\mu_Y)}{\sigma_X \sigma_Y}
+\end{align*}
+
+Where $\mu_X$ is the average of $X$ and $\sigma_X$ is the standard deviation.
+
+Correlation only works if $X,Y$ take their values in vector space (meaningfully be able to multiply the two together).
+
+Consider:
+\begin{center}
+    \begin{tabular}{l|lll}
+        & -1 & 0 & 1 \\
+        \midrule
+        1 & 1/4 & 0 & 1/4 \\
+        0 & 0 & 1/2 & 0
+    \end{tabular}
+\end{center}
+
+Then:
+\begin{align*}
+C(X,Y) = 0
+\end{align*}
+
+Whereas $I(X,Y) = 1$.
+
+\subsection{The data processing inequality}
+There is something called \textbf{conditional independence}. Imagine playing a game of snakes and ladders, and $X,Y,Z$ are the resulting position after moves 1,2,3 respectively. Knowing $X$ will change the probability of $Z$, but only if we don't know $Y$, since if we know $Y$, it doesn't really matter what $X$ was. This means that $X$ and $Z$ are conditionally independent (conditioned on $Y$).
+
+The data processing inequality states that if:
+\begin{align*}
+X \rightarrow Y \rightarrow Z
+\end{align*}
+
+then:
+\begin{align*}
+I(X,Y) \ge I(X,Z)
+\end{align*}
+
+With equality if and only if $X \rightarrow Z \rightarrow Y$
+
 \end{document}

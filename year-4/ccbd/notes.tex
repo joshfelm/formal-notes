@@ -1,0 +1,306 @@
+% Preamble {{{
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+\usepackage{hhline}
+\usepackage[table]{xcolor}
+\usepackage{mathtools}
+\usepackage[T1]{fontenc}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Cloud Computing and Big Data}
+\rhead{Josh Felmeden}
+\usepackage{hyperref}
+% }}}
+
+% Listings {{{
+\usepackage[]{listings}
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=[Visual]Basic,
+backgroundcolor=\color{lstgrey},
+frame=single,
+xleftmargin=0.7cm,
+frame=tlbr, framesep=0.2cm, framerule=0pt,
+basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+captionpos=b,
+tabsize=2,
+keywordstyle=\color{Magenta}\bfseries,
+identifierstyle=\color{Cyan},
+stringstyle=\color{Yellow},
+commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\specialcell}[2][c]{%
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+% }}}
+
+% Other packages {{{
+\usepackage{graphicx}
+\graphicspath{ {./pics/} }
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage[symbol]{footmisc}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{enumitem}
+\setlist{nolistsep}
+% }}}
+
+% tcolorbox {{{
+\newtcolorbox{blue}[3][] {
+colframe = #2!25,
+colback = #2!10,
+#1,
+}
+
+\newtcolorbox{titlebox}[3][] {
+colframe = #2!25,
+colback = #2!10,
+coltitle = #2!20!black,
+title = {#3},
+fonttitle=\bfseries
+#1,
+}
+% }}}
+
+% Title {{{
+\title{Cloud Computing and Big Data}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Overview}
+\subsection{Economic Driving Factors}
+Cloud computing works by charging someone to use a service for a certain amount of time. If, for example, you let someone use your computer, you might charge them for their usage (if you were a real meanie). How that would be worked out is the \textit{operation expenditure} (Opex) and the \textit{capital expenditure} (Capex, cost of the computer). Combining these, we calculate the \textit{total cost of operation} and calculate the cost per day of the lifespan of the computer (in this example). So, if you used the computer for an hour, you would owe the person a 24th of this daily cost.
+
+Now, this might come down to half a penny, but of course, this doesn't exist any more, so we might charge a whole penny instead. This seems like a marginal profit, but in terms of percentages, this is a $100\%$ increase. The fundamentals of this are how cloud computing generates so much income.
+
+The attraction of this is that the users of the services do not have to pay the Capex, and simply pay opex for the rental of the service.
+
+\subsection{Normal Failure}
+Failures in these systems are to be expected. Say the servers you are buying are guaranteed to have a $99.999\%$ 3-year survival rate (`five-nines reliability'). This is good because there is a very high chance that this remains. Now, if you buy 10 of these servers, the probability that you have all of the servers still working is only $99.99\%$. Taking this to the extremes, if you buy 500,000 servers (this is standard practise for a lot of the big servers these days), the probability that all of them are still working is a measly $1\%$. Essentially, failure is something that should be normalised.
+
+\textit{Modular data centres} are used a lot in big data centres. A unit may be left in the shipping container, and this container is removed or added as a container, meaning that if one module fails, another can just be replaced, meaning that the whole centre doesn't collapse.
+
+In the current climate, the modular centres are considered a whole working unit, and this way of thinking was mobilised by a group of Google engineers.
+
+\subsection{Blank as a service}
+\begin{itemize}
+    \item \textbf{SaaS: Software as a service}
+    \begin{itemize}
+        \item End user application software that is remotely delivered over the internet.
+        \item Adobe is an example of this (Adobe Creative Cloud)
+        \item Used to be bought off the shelf as a CD
+    \end{itemize}
+    \item \textbf{PaaS: Platform as a Service}
+    \begin{itemize}
+        \item Developer application software (middleware) functionality is remotely accessible
+        \item Might provide a particular combination of OS, web-server, data-base and scripting
+        \item Popular instance is the free `LAMP stack' (Linux, Apache, MYSQL and PHP)
+        \item Used to be dominated by \textit{Google}
+    \end{itemize}
+    \item \textbf{IaaS: Infrastructure as a Service}
+    \begin{itemize}
+        \item IT infrastructure almost always virtualised and remotely accessible.
+        \item Virtualisation software allows one physical server to be used by multiple users, each on a virtual machine. If one crashes, the others keep running.
+        \item Used to be dominated by \textit{AWS} (although this is now a much bigger thing).
+    \end{itemize}
+\end{itemize}
+
+While Google and Amazon dominated their respective fields, both of these companies have expanded into the other fields. This is very complicated, but the key thing is that both Google and Amazon offer both PaaS and IaaS.
+
+In around 2015, Amazon created \textbf{FaaS: function as a service (aka `serverless')}:
+\begin{itemize}
+    \item No server processes visibly running. Pay only for the time spent executing a function
+    \item UNlike PaaS, scale out without increasing number of servers.
+    \item Amazon Lambda is the best known example, although both Google and Microsoft have answers to this.
+\end{itemize}
+
+\subsection{Impacts of Cloud Services}
+Cloud services have revolutionised business in many ways. It is now possible to do tasks that would previously require access to high performance machines. Instead, it can be sent to a big data centre, and this usage is just charged as rental.
+
+\textit{Interoperability} is a big issue. \textbf{Vendor lock-in} is a concern for a lot of clients, and this simply means that once a client is locked into a vendor, it becomes financially or practically unviable to switch to another supplier. This led to an attempt to develop a sense of unity between cloud companies, where companies created the \textit{Open Cloud Manifesto}. A lot of big companies signed up to this, but a lot of the top dogs didn't sign up for this (unsurprisingly, Google and Amazon). This manifesto seemingly no longer exists as an original. As a consumer, this is bad and worrying because vendor lock in is very possible.
+
+\section{IaaS and AWS}
+\subsection{Amazon Simple Storage Service}
+Amazon S3 is a cloud-based persistent storage. It operates independently from other Amazon services. The simple refers to the features, not that it's simple to use. You can store data in the cloud. You also don't store files, you store \textit{objects}, and these are kept in buckets. Objects have a size limit (5Tb) and a max size on a single upload is 5Gb. All buckets share the same namespace, so no sub-buckets.
+
+It's very easy to use; just use a web GUI that is similar to AWS. It also has a command line interface and has scripting. Default storage can be selected (geographically).
+
+S3 is accessed via API, either by SOAP (xml) or REST (http). Wrappers are available to abstract the API for programmers.
+
+This is just the storage, so now we will look at the computing of data in the cloud.
+
+\subsection{Amazon Elastic Compute Cloud (EC2)}
+This is a remotely accessible virtual network of virtual servers. Usually, EC2 is run with S3 providing the storage.
+
+A single EC2 virtual server, with the chosen OS etc, is an instance. An instance is instantiatied from an Amazon Machine Image (AMI)
+\begin{itemize}
+    \item One AMI can be cloned $n$ times to create $n$ instances
+    \item You can build your own by cloning an AMI from your local server
+    \item Or, Amazon have a bunch of prebuilt AMIs that you can choose from
+\end{itemize}
+
+EC2 dynamically assigns a unique IP address to each instance, and this IP can be reassigned, perhaps to someone else. The IP can also be static (also known as an Elastic IP address) at a cost.
+
+EC2 instances run in availability zones (AZs), grouped into regions. AZ is similar to a single data centre, guaranteeing an area has 99.95\% uptime.
+
+\subsubsection{Usage}
+Some basic API routes as S3, command-line or a bit of GUI too:
+\begin{itemize}
+    \item Amazon's own AWS web console
+    \item Various EC2 plug-ins for browsers
+    \item Third-party cloud management tools
+\end{itemize}
+
+Some AMIs are junk or malware, however, so be careful when selecting this.
+
+There are three types of storage:
+\begin{itemize}
+    \item Ephemeral local storage in the instance (dies with instance)
+    \item Persistent cloud (S3)
+    \item SAN-style Elastic Block Storage (EBS)
+    \begin{itemize}
+        \item Allows user to create volumes from 1Gb to 1Tb
+        \item Any number of volumes may be mounted from a single instance
+    \end{itemize}
+\end{itemize}
+
+S3 is slow, medium-reliable, but super-durable. Never loses data, so is good for DR backups. Instance storage is simple and cheap, but speed can be really poor. EBS is high on everything, but is complex and costly.
+
+There is some autoscaling based on matrics:
+\begin{itemize}
+   \item \textbf{Cloudwatch}: automated monitoring of EC2 instances. Reveals many statistics such as CPU utilisation, disk reads/writes and network traffic. Aggregates and stores monitoring data that can be accessed
+   \item \textbf{Auto Scaling}: dynamically adds or removes EC2 instances based on CloudWatch metrics. You define conditions upon which you want to scale up or down your EC2 instances. Auto scaling automatically adds or removes the specified amount of Amazon EC2 instances when it detects that the conditions have been met.
+   \item \textbf{Elastic Load Balancing}: automatically distributes incoming application traffic across multiple EC2 instances. Better fault tolerance. Elastic Load Balancing detects unhealthy instances within a pool and automatically reroutes traffic to healthy instances until the unhealthy instances have been restored. Customers can enable ELB within a single AZ or across multiple for consistent application performance.
+\end{itemize}
+
+\subsection{AWS Simple Queue Service SQS and Architecting for Scale-out}
+SQS is reliable, loosely-coupled fault-tolerant storage and delivery of messages. It can be between any clients or computers connected to the internet, and senders and recipients do not have to communicate directly. No requirement that either side be always-available or connected to the internet.
+
+A \textbf{message} is up to 256Kb of text-data, sent to SQS and stored until it is delivered. A \textbf{queue} serves to group related messages together.
+
+SQS is accessible to clients on any HTTP-enabled platform. Messages are stored redundantly over multiple data-centres truly distributed. Unfortunately, this brings about a few down-sides:
+\begin{itemize}
+    \item Message retrievals may be incomplete
+    \item Messages may not be delivered quickly (2-10 seconds)
+    \item Messages may be delivered out of order
+    \item Messages may be redelivered
+\end{itemize}
+
+\subsubsection{Mitch Garnaat's Monster Muck Mashup}
+This is a service that converts AVI videos to mp4 using:
+\begin{itemize}
+    \item `Boto' Python interface to AWS
+    \item S3 to store the video files
+    \item EC2 to do the conversion processing
+    \item SQS for inter-process communication
+\end{itemize}
+
+Uses AWS for \textit{scalability} (scale-out not up, not just buying new resources, adding cheap machines to improve ability.)
+
+The basic steps are:
+\begin{enumerate}
+\item Upload a bunch of video files to a S3 bucket
+\item For each file, add a msg to SQS input queue
+\item On the EC2 instance, repeat this until input queue is empty:
+\begin{enumerate}
+    \item Read message MI from input queue
+    \item Retrieve from S3 the video VI specified in MI
+    \item Do the conversion creating VO
+    \item Store VO in S3
+    \item Write message MO to SQS output queue
+    \item Delete MI from input queue
+\end{enumerate}
+\end{enumerate}
+
+This really illustrates how good AWS is at scaling software. It is good because any number of clients can connect to the bucket. If this bucket is 100\% full, it doesn't matter, because additional instances can all talk to the same buckets and queues, so the workload is met.
+
+\subsection{AWS simpleDB and AWS Relational Databases (RDB)}
+\subsubsection{Amazon SimpleDB}
+This software provides:
+\begin{itemize}
+    \item Reliable storage of structured textual data
+    \item Languages that allows you to store, modify, query, and retrieve data sets
+    \item Automatic indexing of all stored data
+\end{itemize}
+
+SimpleDB provides 3 main resources:
+\begin{itemize}
+    \item \textbf{Domains}: Highest-level container for related data \textit{items}: queries only search within one domain
+    \item \textbf{Items}: a named collection of \textit{attributes} that represent a data object. Each item has a unique name within the domain; items can be created, modified, or deleted; individual attributes within an an item can be manipulated
+    \item \textbf{Attributes}: an individual category of information within the item, with a name unique for that item. Item has one or more text string values associated with the name
+\end{itemize}
+
+The downside to this type of storage is that it really does only do one data type (textual). If, for example, you wanted to store pi, you would need to store it as a character string (`3', `.', `1').
+
+There is no Database \textbf{schema}, meaning if you mistype something, the database will just accept it as a definition, leading to some unfortunate results. It is not a traditional relational database management system:
+\begin{itemize}
+    \item SimpleDB items are stored in a hierarchical structure, not a table
+    \item SimpleDB attribute value max size is 1Kb
+    \item SimpleDB data is all stored as text
+    \item The query language is really basic
+    \item SimpleDB is distributed, so data consistency may suffer due to propagation delays
+\end{itemize}
+
+\subsubsection{Amazon Relation Database Service}
+There is also a relational database system, possibly as a response to Azure. You can set up, operate and scale a full MySQL RDBMS without having to worry about infrastructure provisioning, software maintenance, or common DB management tasks, like backups.
+
+The processing power and storage space can be scaled as needed with a single API call and you can fully initiate fully consistent database snapshots at any time. Can import a dump file to get started. Each DB instance exports a number of metrics to CloudWatch including CPU utilisation, etc.
+
+\subsection{Availability Zones}
+Availability zones are clusters of independent data centres that are up to 20 miles apart. They are interconnected using low latency and enable fault isolation and HA.
+
+Choosing which region to use comes down to a few reasons:
+\begin{itemize}
+    \item Data sovereignty and compliance
+    \begin{itemize}
+        \item Where are you storing user data?
+    \end{itemize}
+    \item Proximity of users to data
+    \item Services and feature availability
+    \item Cost effectiveness
+    \begin{itemize}
+        \item Each region has differing costs
+    \end{itemize}
+\end{itemize}
+
+High Availability (HA) is the ability to minimise service downtime by using redundant components. It also requires service components in at least two AZs.
+
+Fault tolerance is the same as HA, but also the ability to ensure that no service disruption by using active-active architecture meaning that all components are active all the time. This is of course a lot more costly that just having HA.
+
+IaaS may have HA, but FT unlikely. PaaS will usually have HA, but some services offer FT.
+
+
+
+\end{document}
