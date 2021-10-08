@@ -193,4 +193,23 @@ Recalling the even and odd proof, we can write these as Let P(n even) and Q(n od
 
 We are allowed to \textit{invert} a judgement, and this is called an \textit{inversion principle}.
 
+\section{Types}
+Term $e$ is \textbf{well-typed} iff there is $\tau$ such that $\emptyset \vdash e : \tau$ is derivable according the the \textit{static} rules of the language.
+
+Say we want to prove the following:
+\begin{align*}
+\emptyset \vdash \text{ let}(\text{str} [ \text{my} ]; x, (\text{times}(\text{len}(x); \text{num}(0))))
+\end{align*}
+
+Type systems restrict the set of allowed programs.
+
+\subsection{Basic properties of typing}
+\textbf{Lemma (Inversion of Typing)}: Suppose that $\Gamma \vdash e : \tau$. If $e = \text{ plus}(e_1 ;e_2)$ then $\tau = \text{ num}, \Gamma \vdash e_1 : \text{ num}$ and $\Gamma \vdash e_2 : \text{ num}$ and similarly for the other constructs of the language.
+
+\textbf{Lemma (Unicity of Typing)}: For every typing context $\Gamma$ and expression $e$ there exists at most one $\tau$ such that $\Gamma$ such that $\Gamma \vdash e : \tau$.
+
+\textbf{Lemma (Weakening)}: If $\Gamma \vdash e' : \tau'$ then $\Gamma, x : \tau \vdash e' : \tau'$ for any $x \not \in dom(\Gamma)$ and any type $\tau$.
+
+\textbf{Lemma (Substitution)}: If $\Gamma, x : \tau \vdash e' : \tau'$ and $\Gamma \vdash e : \tau$ then $\Gamma \vdash e'[e/x] : \tau '$
+
 \end{document}

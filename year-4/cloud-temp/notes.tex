@@ -1,0 +1,331 @@
+% Preamble {{{
+\documentclass[11pt,a4paper,titlepage,dvipsnames,cmyk]{scrartcl}
+\usepackage[english]{babel}
+\typearea{12}
+% }}}
+
+% Set indentation and line skip for paragraph {{{
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage[margin=2cm]{geometry}
+\addtolength{\textheight}{-1in}
+\setlength{\headsep}{.5in}
+% }}}
+
+\usepackage{hhline}
+\usepackage[table]{xcolor}
+\usepackage{mathtools}
+\usepackage[T1]{fontenc}
+\usepackage{tabularx}
+
+% Headers setup {{{
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\lhead{Cloud-temp}
+\rhead{Josh Felmeden}
+\usepackage{hyperref}
+% }}}
+
+% Listings {{{
+\usepackage[]{listings}
+\lstset
+{
+    breaklines=true,
+    tabsize=3,
+    showstringspaces=false
+}
+
+\definecolor{lstgrey}{rgb}{0.05,0.05,0.05}
+\usepackage{listings}
+\makeatletter
+\lstset{language=[Visual]Basic,
+backgroundcolor=\color{lstgrey},
+frame=single,
+xleftmargin=0.7cm,
+frame=tlbr, framesep=0.2cm, framerule=0pt,
+basicstyle=\lst@ifdisplaystyle\color{white}\footnotesize\ttfamily\else\color{black}\footnotesize\ttfamily\fi,
+captionpos=b,
+tabsize=2,
+keywordstyle=\color{Magenta}\bfseries,
+identifierstyle=\color{Cyan},
+stringstyle=\color{Yellow},
+commentstyle=\color{Gray}\itshape
+}
+\makeatother
+\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\specialcell}[2][c]{%
+\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+% }}}
+
+% Other packages {{{
+\usepackage{graphicx}
+\graphicspath{ {./pics/} }
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\usepackage{soul}
+\usepackage{babel,dejavu,helvet}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tcolorbox}
+\usepackage[symbol]{footmisc}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{enumitem}
+\setlist{nolistsep}
+% }}}
+
+% tcolorbox {{{
+\newtcolorbox{blue}[3][] {
+colframe = #2!25,
+colback = #2!10,
+#1,
+}
+
+\newtcolorbox{titlebox}[3][] {
+colframe = #2!25,
+colback = #2!10,
+coltitle = #2!20!black,
+title = {#3},
+fonttitle=\bfseries
+#1,
+}
+% }}}
+
+% Title {{{
+\title{Cloud-temp}
+\author{Josh Felmeden}
+% }}}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Virtualisation}
+The most fundamental type of cloud computing is IaaS compute, and the most fundamental type of this is the virtual machine. It has unmanaged services, which means you control what they do. You create, save or reuse them. They are networked and connected to storage and have certain security systems.
+
+EC2 instances are a form of virtualisation.
+\begin{itemize}
+    \item They mostly run on Xeon processors, but also have other processors available.
+    \item There are lots of different tiers available on AWS that use different purposes
+    \item They run in AMIs.
+    \item After creating a virtual machine, you can start, stop, and terminate the machines. Once the machine is terminated, it will not come back.
+\end{itemize}
+
+In virtualisation, there is some virtual memory that points to addresses in physical memory. It is an abstraction of the storage resources, because the virtual memory seems contiguous, but in physical memory it could be in various locations. The operating system manages this and also has hardware support.
+
+\begin{center}
+    \begin{tabularx}{\textwidth}{X|X}
+        \textbf{Virtual Memory} & \textbf{Virtual Machine} \\ \midrule
+        Abstraction of the RAM memory resources & Abstraction of the storage/process/IO resources. \\
+        Mapping of program (virtual) memory addresses to physical addresses & Time slicing VM use of virtual memory addresses/CPU/IO registers in physical addresses. \\
+        Operating system manages & Operating system/Hypervisor manages \\
+        Hardware support (memory management unit) & Hardware support (e.g. Intel VT)
+    \end{tabularx}
+\end{center}
+
+\subsection{The hypervisor}
+
+
+This virtualisation is not a new idea. It has been in use since around 1960, but it has been formalised in 1974, where they defined three important properties:
+\begin{itemize}
+    \item \textit{Fidelity}: Program gets the same output whether on VM or hardware
+    \item \textit{Performance}: Performs close to physical computer
+    \item \textit{Safety}: Cannot change or corrupt data on physical computer
+\end{itemize}
+
+This was ensured by analysing the instruction sets and identified two instructions that are the most important: \textbf{sensitive} instructions (that can change configurations of resources) and \textbf{privileged} instructions. Sensitive instructions need to be caught by the operating system, jumping from user mode to kernel mode. Therefore, all sensitive instructions need to be a subset of privileged instructions. This is all handled by the hypervisor.
+
+Therefore, we have the hypervisor in contact with the server hardware, and then on top of this, we have the VM (or multiple machines) that consist of a guest OS, middleware, and apps. This type of VM is called \textbf{bare metal}.
+
+Another type, called \textbf{hosted}, has a host OS running on top of the server hardware, and then the hypervisor.
+
+The difference between the two is clear; in type two, the hypervisor can write to the host OS meaning that it can be more lightweight, where as type one can be much faster, at the cost of having to contain stuff that is normally handled by the OS.
+
+\subsubsection{Simulated Hardware}
+\textit{Full virtualisation} is a complete or almost complete simulation of the underlying guest-machine hardware: virtualised guest OS runs as if it were on a bare machine.
+
+The alternative to this is \textit{paravirtualisation} and is only possible when the source code of the OS is available. The guest OS is edited and recompiled to make system calls into the hypervisor API to execute safe rewrites of sensitive instructions. In this example, the hypervisor doesn't simulate hardware.
+
+EC2 offers both of these virtual machines:
+\begin{itemize}
+    \item HVM --- hardware virtual machine
+    \begin{itemize}
+        \item Virtualised set of hardware
+        \item Can use OS without modification
+        \item Intel virtualisation technology
+    \end{itemize}
+    \item PV --- Paravirtualisation
+    \begin{itemize}
+        \item Requires OS to be prepared
+        \item Doesn't support GPU instances
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Xen}
+Xen is a free, open-source hypervisor developed at University of Cambridge. It has multiple modes:
+\begin{itemize}
+    \item Paravirtualisation: guest OS recompiled with modifications
+    \item Hardware assisted virtualisation: Intel x86 and ARM extensions
+    \item Widespread
+    \item Not easily virtualisable (17 instructions that violate the sensitive rules above)
+\end{itemize}
+
+\subsubsection{Areas of Virtualisation}
+There are three main areas of responsibility for virtualisation managers:
+\begin{itemize}
+    \item CPU virtualisation
+    \begin{itemize}
+        \item Guest has exclusive use of a CPU for a period of time
+        \item CPU state of the first guest is saved, and the state of the next guest is loaded before control is passed to it
+    \end{itemize}
+    \item Memory virtualisation
+    \begin{itemize}
+        \item Additional layer of indirection to virtual memory
+    \end{itemize}
+    \item I/O virtualisation
+    \begin{itemize}
+        \item Hypervisor implements a device model to provide abstractions of the hardware
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{KVM}
+Converts Linux into a type-1 hypervisor. Memory manager, process scheduler, I/O stack from Linux. The VM is implemented as a regular Linux process. KVM requires CPU virtualisation extensions to handle instructions.
+
+\subsubsection{Nitro Hypervisor}
+\begin{itemize}
+    \item Based on KVM
+    \item Offloads virtualisation functions to dedicated hardware and software
+    \item Hypervisor mainly provides CPU and memory isolation to EC2 instances
+    \item Nitro cards for VPC networking and EBS storage
+    \begin{itemize}
+        \item Can handle NVMe SSD for instance and net storage, transparent encryption
+        \item Nitro hypervisor not involved in tasks for networking and storage
+        \item In OS Elastic Network Adapter driver
+        \item Security groups implemented in the NIC
+    \end{itemize}
+    \item Can run bare metal
+\end{itemize}
+
+\section{Auctions}
+\subsection{Auction Theory}
+There are four common auction types:
+\begin{itemize}
+    \item Open Ascending-Price (English)
+    \item Open Descending-price (Dutch)
+    \item First-price sealed bid
+    \item Second-price sealed bid (Vickrey)
+\end{itemize}
+
+Auctions are not new, and have been used since the era of the Babylonians. Auctions are used because the \textit{seller is unsure} about the values that bidders attach to the object being sold. If the seller knew bidder values, he could just offer the object to the bidder with the highest value $v$, or just below.
+
+\subsubsection{Terminology}
+\textbf{Private values}:
+\begin{itemize}
+    \item Each bidder knows the value of the object to themself at the time of the bidding
+    \item No bidder knows with certainty the values attached by \textit{other} bidders, and knowledge of the other bidders' values have no effect
+\end{itemize}
+
+This assumption is most plausible when the value of the object to a bidder is derived from its consumption or use alone, such as a pizza or a bicycle.
+
+\textbf{Interdependence} is when the object worth may be \textit{unknown} at the time of the auction to the bidder.
+\begin{itemize}
+    \item Bidder may have only an \textit{estimate} or some private signal that is correlated with the true value.
+    \item Other bidders may possess \textit{information} that, if known, would affect the value that a particular bidder attaches to the object.
+\end{itemize}
+
+We call this specification \textbf{interdependent values} which are values that are unknown at the time of the auction and may be affected by the information available to other bidders.
+
+This assumption is most plausible for situations in which the object being sold that can possible be resold after the auction, such as a Harry Potter first edition book.
+
+\subsubsection{Equivalent Auctions}
+\begin{itemize}
+    \item \textbf{First-price sealed-bid auction}:
+    \begin{itemize}
+        \item The bidder's strategy maps private information to a bid
+        \item No information about other bidders is available as the auction is sealed
+        \item The bidder needs to consider what the bid, as they have no idea what other people might bid
+    \end{itemize}
+    \item \textbf{Dutch auction}:
+    \begin{itemize}
+        \item Conducted in the open, but offers no useful information to bidders
+        \item The only information available is that some bidder has agreed to buy at the current price, but that causes the auction to end.
+    \end{itemize}
+\end{itemize}
+
+These two are equivalent because bidding a certain amount in the FPSB auction is equivalent to offering to buy at that amount in a Dutch auction. Therefore, Dutch open descending price auction is strategically equivalent to the first-price sealed-bid auction.
+
+\begin{tcolorbox}
+\begin{center}
+    \textbf{strategic Equivalence}: for every strategy in one game, a player has a strategy in another game that results in the same outcomes
+\end{center}
+\end{tcolorbox}
+
+\begin{itemize}
+    \item \textbf{English auction}
+    \begin{itemize}
+        \item Offers information when other bidders drop out. By observing this, it may be possible to infer something about their privately known information
+        \item with \textit{private values}, however, this information is of no use
+    \end{itemize}
+    \item \textbf{English Auction Strategy}
+    \begin{itemize}
+        \item It cannot be optimal to:
+        \begin{itemize}
+            \item Stay in after the price, $p$ exceeds the value $v$ (incurring a loss)
+            \item Drop out before the price reaches the value (losing out on potential gains)
+        \end{itemize}
+        \item Therefore, the optimal strategy is to bid up to the value $p = v$
+    \end{itemize}
+\end{itemize}
+
+the strategy for a \textbf{Second-price sealed-bid auction} is also the same:
+\begin{itemize}
+    \item Bidder $B$ with private value $v$ bids a price $p$.
+    \item The highest competing bid has price $c$
+\end{itemize}
+
+So, the optimal bidding strategy for this auction is:
+\begin{itemize}
+    \item If $B$ bids at $p = v$:
+    \begin{itemize}
+        \item $B$ wins if $v = c$ (making profit $v-c$) and does not win if $v < c$.
+        \item If $v=c$, assume $B$ is indifferent between winning and losing
+    \end{itemize}
+    \item Alternatively, if $B$ bids $p$ lower than $v$ (i.e. $p<v$):
+    \begin{itemize}
+        \item If $v > p > c$, then $B$ still wins and profit is still $v-c$
+        \item If $c > v > p$, then $B$ still loses, so also no change, BUT
+        \item If $v > c > p$, the $B$ now loses, so makes less profit
+        \item Therefore, bidding $p < v$ can never increase profit for $B$ but can decrease profit.
+    \end{itemize}
+\end{itemize}
+
+We say that these auctions are \textbf{weakly equivalent} because the two auctions are not strategically equivalent, but the optimal strategies are the same if the values are private.
+
+With interdependent values, the information available to others in the open auction is relevant to a bidder's evaluation of worth. Seeing some other bidder drop out early may make the bidder realise that his own estimate is too great. Therefore, if the values are interdependent, the two auctions may not be equivalent from the perspective of the bidders.
+
+\begin{tcolorbox}
+\begin{center}
+    An auction is said to be \textit{incentive compatible} if it encourages bidders to bid their \textit{true value of the good}
+\end{center}
+\end{tcolorbox}
+
+Both English and Vickrey are incentive compatible, since when values are private, the optimal strategy is to bid $p = v$.
+
+However, Dutch and FPSB are not, since we want to bid lower than the true value; attempting to stop the auction just below the price of what other bidders value the good at.
+
+Incentive compatible auctions stop game-playing between bidders.
+
+\subsubsection{Revenue Equivalence Theorem (RET)}
+\begin{itemize}
+    \item In English/Vickrey auctions, bidders bid price $p = v$.
+    \item In Dutch/FPSB, bidders price $p < v$.
+    \item However, the expected revenue in a first-price auction is the same as the expected revenue in a second-price auction.
+\end{itemize}
+
+The revenue equivalence theorem states that if the values are private, and bidders are risk neutral, any standard auction will yield the \textbf{same expected revenue} to the seller.
+
+The revenue equivalence theorem requires \textit{risk neutral} bidders, meaning that they have no emotional attachment to the bids and they only seek to maximise expected profits. However, in reality, bidders are normally \textit{risk averse}, meaning that they will bid higher, as they will buy \textit{insurance} against the possibility of losing. When we take risk aversion into account, we get the result that the expected equivalence in the first-price auction is greater than that in a second-price auction.
+
+The RET also requires private values, but in reality, the values are often interdependent, since we often change our valuations based on valuations from others. When we take interdependence into account, ordinary ascending auctions are more profitable than standard (first-price) auctions.
+
+\end{document}
