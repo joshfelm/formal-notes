@@ -370,4 +370,95 @@ This is the usual hierarchy of levels, but might have more or less.
 One security model is the \textbf{Bell-LaPadula} method, meaning people can't read above their security clearance, or write to a security level lower than their level (don't want someone accidentally leaking data to lower levels). This method focuses on \textit{confidentiality}.
 
 Another model is the \textbf{Biba} method. This is a no read-down, no write-up. This preserves \textit{integrity}.
+
+\subsection{Linux Security Modules}
+The solution to Linux's security is the Linux Security Model (LSM) framework. This implements a reference monitor for Linux. It has dynamically loadable kernel module hooks into system call checks. The framework is verified, and modules are (in theory) small and verifiable. The hook function returns access descision:
+\begin{itemize}
+    \item \texttt{0}: Access granted
+    \item \texttt{ENOMEM}: No memory available
+    \item \texttt{EPERM}: Not enough privileges.
+\end{itemize}
+
+\subsubsection{SELinux}
+One we are going to look at in detail is \textbf{SELinux}. This is a framework originally developed by the NSA. It's based around type-based enforcement and RBAC (role based access controls).
+
+The types of hooks possible are:
+\begin{itemize}
+    \item Management hooks
+    \begin{itemize}
+        \item Called to handle object lifecycle
+    \end{itemize}
+    \item Path-based hooks
+    \begin{itemize}
+        \item Related to pathnames
+    \end{itemize}
+    \item Object-based hooks 
+    \begin{itemize}
+        \item Path kernel structure corresponding to objects
+    \end{itemize}
+\end{itemize}
+
+Need a mechanism to interact with SELinux from userland. This enables the filesystem to load policies and configuration. It also gets audit data.
+
+All subjects get labeled with a security context:
+\begin{itemize}
+    \item User
+    \item Domain
+    \item Role
+\end{itemize}
+
+Rules describe what each \textit{subject} domain can do with an \textit{object} domain. They can get a bit complicated. An example of this is \texttt{/etc/passwd}, where the user information readable by any user. Or \texttt{/etc/shadow} password information readable by root only. The way this is done looks like this:
+\begin{lstlisting}
+'normal users are allowed to read normal files
+allo user_t public_t : file read
+
+'users in the password_t domain can r/w files in the password_data_t domain
+allow passwd_t passwd_data_t : file {read write}
+
+'allow users to actually run the password program, and transition their domain
+allow user_t passwd_exec_t : file execute
+allow user_t passwd_t : process transition
+type transition user_t passwd _exec_t : process passwd_t
+\end{lstlisting}
+
+This seems very complicated, but it kind of makes sense. The rule design is very hard.
+
+\subsection{Intrusion detection}
+Intrusion detection is a service that monitors a system and looks for unusual or failed attempts to access system resources:
+\begin{itemize}
+    \item Could be a single event, could be a combination
+    \item Could be probabilistic
+    \item Could be running on the host
+    \item Could be running on the network.
+    \item Usually attempting to do detection in real-time (or near)
+\end{itemize}
+
+We are looking for failed authentication attempts or odd network traffic. Another thing we are looking for is users running unusual processes, or accessing unusual files. Essentially, anything unusual should be flagged.
+
+Here are some types of intrusion detection systems
+\begin{itemize}
+    \item Host based
+    \begin{itemize}
+        \item Runs as a privileged process on the host
+        \item Uses information from the OS/reference monitor
+    \end{itemize}
+    \item Network based
+    \begin{itemize}
+        \item Runs either on the host or on the networ
+        \item Looks at network traffic, who is contacting who and how often
+    \end{itemize}
+    \item Signature based
+    \begin{itemize}
+        \item Identify attacks based on known attack patterns
+    \end{itemize}
+    \item Anomaly based
+    \begin{itemize}
+        \item Identify attacks based on a machine-learning model of what is normal for a given user or process
+    \end{itemize}
+\end{itemize}
+
+False positives or negatives are really annoying but they can be fed into the rules for next time.
+
+The goals of the IDS are to run continuously and resist attempts to subvert mechanisms. It shouldn't make the system unusable in terms of performance or usability overhead. It should adapt to changes in a system's use and reconfiguration. It should also scale to work with big systems. It should degrade gracefully and not fail (ideally).
+
 \end{document}

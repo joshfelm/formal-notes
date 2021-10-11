@@ -365,7 +365,64 @@ With equality if and only if $X \rightarrow Z \rightarrow Y$
 
 We can use Shannon's entropy to look at the similarities in these spikes to see the shared information.
 
-An experiment was performed on a fly where it was shown a series of bars on a TV screen and the spike trains from the neurons at the back of the brain (the ones that observe horizontal movement) was recorded. More specifically, the timing of the spikes was recorded. This information was then \textit{discretised}, and evaluated.
+An experiment was performed on a fly where it was shown a series of bars on a TV screen and the spike trains from the neurons at the back of the brain (the ones that observe horizontal movement) was recorded. More specifically, the timing of the spikes was recorded. This information was then \textit{discretised}, and evaluated. The information recorded are the action spikes. \textit{Discretisation} meant that the information was looked at in 3ms, and then return a 1 if there is a spike, or a 0 if not (think time bins). This binary sequence was then split up into words. Each word corresponds to the amount of time that an entire piece of information has been encoded. The calculations performed revealed that the neurons that were being looked at only remember things in 30ms, so there was a natural `word length' for splitting up the binary sequence, thus 30ms was taken.
 
-The calculations performed revealed that the neurons only remember things in 30ms, so there was a natural `word length'. 
+These words can now be converted into a set of objects. The random variable that is taken as the communication channel is a chunk of spike train for 30ms, represented by one of the words. Now, we want to look at the probability of different words:
+\begin{align*}
+p(w_0) \approx \frac{\#(\text{occurance of } w_0)}{\# (\text{trials})}
+\end{align*}
+
+Now, two different tests were performed. The first is where the stimulus is random. The second is where a fixed five minute segment of the stimulus is shown ($H(W)$), and the responses are considered ($H(W|S)$). 
+
+Now, we can get the mutual information about the words given:
+\begin{align*}
+I(W,S) = H(W) - H(W|S)
+\end{align*}
+
+Or, the information about $S$ is the total information in $W$ subtract the noise.
+
+\subsubsection{Discretisation size}
+One important question is how to decide how small to make hte discretisation time and how long to make the words. In our example, given that $\delta t = 3ms$ gives $78 \pm 5$ bits per second or $1.8 \pm 0.1$ bits per spike.
+
+Unfortunately, if we have a 30ms word with 3ms letters, this gives us 10 letters per word giving $2^{10} = 1024$. If six seconds of data are used for the repeating stimulus, that is 100 different stimuli, then even for a three hour recording, there are 1800 trails for each stimulus. This is not a big amount for estimating 1024 probabilities.
+
+\subsection{Differential Entropy}
+\textbf{Differential Entropy} is the name given to Shannon's entropy for continuous probability distributions where the sample space is $\mathcal{X} \subseteq \mathbf{R}^d$. In the examples we will be looking at, $d = 1$. The idea is that: $h(X) = \int dxp(x) \log_2 p(x)$. This is a good guess as to what the continuous distribution would look like of Shannon's entropy.
+
+If we consider a uniform distribution where:
+\begin{align*}
+p(x) = \bigg \{ \begin{matrix}
+    1/a & x \in [0,a] \\
+    0 & \text{otherwise}
+\end{matrix}
+\end{align*}
+
+So
+\begin{align*}
+h(X) = \int_{-\infty}^{\infty} dx p(x) \log_2 p(x) = - \frac{1}{a}\int_{0}^{a}dx \log_2 \frac{1}{a}
+\end{align*}
+
+And so:
+\begin{align*}
+h(X) = \log_2 a
+\end{align*}
+
+This, unfortunately, does not guarantee that the result will be positive, which is one of the useful properties of Shannon's entropy.
+
+\subsubsection{Gaussian distribution}
+$$p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}}e^{\frac{-x^2}{2\sigma^2}}$$
+
+If we substitute and integrate by parts, we get:
+$$h(x) = \frac{1}{2} \log_2 2 \pi e \sigma ^2$$
+
+As you expand the disrtibutions, we can prove that for fixed variance, Gaussian has the highest entropy.
+
+Densities are not probabilities. The discrete case $p(x)$ is the probability that $X = x$. For the continous case:
+\begin{align*}
+\int_{x_0}^{x_1} dx p(x)
+\end{align*}
+
+is the probability that $x_0 \le x \le x_1$. The usual sums and probabilities go to integrals and densities doesn't work because there is a $p$ in the log.
+
+We also need to model the sensitivity of the receiver as well as the behaviour of the source.
 \end{document}
