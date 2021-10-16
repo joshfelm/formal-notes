@@ -415,9 +415,9 @@ $$p(x) = \frac{1}{\sqrt{2 \pi \sigma^2}}e^{\frac{-x^2}{2\sigma^2}}$$
 If we substitute and integrate by parts, we get:
 $$h(x) = \frac{1}{2} \log_2 2 \pi e \sigma ^2$$
 
-As you expand the disrtibutions, we can prove that for fixed variance, Gaussian has the highest entropy.
+As you expand the distributions, we can prove that for fixed variance, Gaussian has the highest entropy.
 
-Densities are not probabilities. The discrete case $p(x)$ is the probability that $X = x$. For the continous case:
+Densities are not probabilities. The discrete case $p(x)$ is the probability that $X = x$. For the continuous case:
 \begin{align*}
 \int_{x_0}^{x_1} dx p(x)
 \end{align*}
@@ -425,4 +425,7 @@ Densities are not probabilities. The discrete case $p(x)$ is the probability tha
 is the probability that $x_0 \le x \le x_1$. The usual sums and probabilities go to integrals and densities doesn't work because there is a $p$ in the log.
 
 We also need to model the sensitivity of the receiver as well as the behaviour of the source.
+
+\subsection{Relationship between Differential entropy and Shannon's entropy}
+Let $\delta = x_{i+1} - x_i$. Consider the discrete random variable $X^\delta$. Now, instead of the continuous distribution we had before, we now have a discrete representation of the interval (differentiation by first principle (by faking it)). A more elegant approach to this is the \textbf{mean value theorem}. This is where you choose two heights for the histogram: the first being the lowest possible point, and the other being the highest, and then choosing the mean point of this.
 \end{document}

@@ -493,10 +493,28 @@ Instead of overwriting data, data is written somewhere else meaning better recov
 \subsection{Performance}
 Containers are almost always better than virtual machines. While they both emulate infrastructure and encapsulate the tenant, they differ in key ways:
 \begin{itemize}
-    \item VMs provide harware level virtualisation, while containers provide OS level
+    \item VMs provide hardware level virtualisation, while containers provide OS level
     \item VMs need tens of seconds of provisioning, while containers only require milliseconds
     \item Virtualisation performance is slower than containers in most dimensions except networking
     \item VM tenants are fully isolated while containers provide process level isolation to tenants.
 \end{itemize}
 
+\section{Cloud Native Applications}
+\textit{Cloud Native} is container based and elastic. AWS's biggest customer is \textbf{Netflix}. They roll out so many instances and microservices, and there is roughly 1 application change per second, meaning new features are coming out very frequently.
+
+Microservices are the opposite of `monolithic applications' and support organisational agility, such as rolling releases and hot swapping, without any down time. This is achieved through horizontal auto-scaling, design for failure, modular design (containerised etc.). APIs are also used, as well as automating things.
+
+A \textit{monolithic} application is built for one big block. Microservices aim to break this apart, where we have modules separated by API gateways.
+
+The advantages of using this is that the services can be deployed to a subset of your users (called \textit{canary} deployment). This allows testing for small groups of people before rolling them out to everyone. These changes can be tiny; changing the size or colour of a button to see if it changes the click-through rate. Another deployment method is called \textit{blue/green}, where you have an example of your user base, and then you flip a switch and everyone has the new features instantly.
+
+Distributed systems are harder to program, since remote calls are slow and always at risk of failure. There is also the issue of \textbf{eventual consistency}. Maintaining strong consistency is really difficult for a distributed system, meaning everyone has to manage this.
+
+\subsection{Observability}
+Once you have a massive cluster, how do you keep track of what's going on inside? Observability is a measure of how well internal states of a system can be inferred from knowledge of its external outputs.
+
+\textbf{Logging} is a very useful method for observation. Local log files are useful at first, but as containers are ephemeral (deleted upon termination), if an instance crashes, you won't be able to retrieve the log data. Additionally, the log could grow potentially unlimited. \textit{Aggregated logs} are useful, and is what is used more commonly. It is a central server that records the log requests. Currently, a \textit{side car} approach is used for logstashes, meaning they have access to the same mounted volumes etc, and are an aid to the program.
+
+\subsection{Metrics}
+Metrics are more than logs. This checks the CPU, load average, interrupts, etc. and is able to identify bottlenecks. This is \textit{time sensitive}, so is stored in a time sensitive database. There is a plugin for Kubernetes that runs as a pod.
 \end{document}

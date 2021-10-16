@@ -461,4 +461,67 @@ False positives or negatives are really annoying but they can be fed into the ru
 
 The goals of the IDS are to run continuously and resist attempts to subvert mechanisms. It shouldn't make the system unusable in terms of performance or usability overhead. It should adapt to changes in a system's use and reconfiguration. It should also scale to work with big systems. It should degrade gracefully and not fail (ideally).
 
+\section{Software Vulnerabilities and Attacks 2}
+\subsection{Heap overflow}
+Heap based overflows involve a discussion of \texttt{malloc}, unfortunately. This is \textit{very} system dependent and has changed a lot over time. Therefore, we are going to go \textit{high-level} and describe the concepts and history. To understand in detail, the implementation of the system must be researched.
+
+While we normally allocate memory with \texttt{malloc} and \texttt{free}, they are actually using something called \texttt{mmap} (memory map). This command works via the kernel to assign and manage regions of memory. But, system calls are expensive and creating or new-ing objects dynamically is really common. C is supposed to be pretty portable, and since not all OSs implement POSIX APIs portably, we instead manage memory via the user, as opposed to the kernel.
+
+When a program starts, we give it a large region of memory somewhere in its virtual address space and an API for managing it. It can call the lower-level system calls if necessary. Data structures to manage things were initially based on a heap, so let's call this the heap and we keep it as far away as possible to avoid things bumping into each other.
+
+So, \texttt{malloc} and \texttt{free} are the libC API for dynamically assigning memory for objects. The essential idea is:
+\begin{itemize}
+    \item Ask for memory with \texttt{malloc/calloc}
+    \item Mark it as used with free
+    \item Dynamically grow or change with \texttt{realloc}
+\end{itemize}
+
+Heap overflows are kind of not realistic, so we will look at Glibc \texttt{malloc}.
+
+\subsubsection{Glibc Malloc}
+Memory starts out as a big empty array (called an arena). When malloc is called, put the following chunk data structure on the heap. Return the pointer to the start of the payload. Data gets more and more chunked as time goes on. On free, write some data into the old payload, including a pointer to the next chunk forward and a pointer to the last point back. There are various sizes, but sequential. When freeing memory, check the forward and back pointer, if the previous chunk is also freed, then merge the two chunks together and update the length to be combined (headers).
+
+We can attack this via making a chunk that looks like it's already been freed. We can set headers in our own tables, since we know that the size field will be added to the address before a pointer you control. If we manage to do an arbitrary write (return address) we can completely compromise the system. This is a lot of work for a single integer write, but sometimes this is all you need.
+
+\subsection{Return oriented Programming}
+We looked at \textit{smashing the stack} earlier, as well as \textit{injecting shellcode}. But, this doesn't really work anymore, since OSs mark memory sections as marked, so injecting shellcode is a thing of the past (since the 90s really). But, why do we need to write a program into memory at all?
+
+Shellcode itself simply sets up registers, pushes the location of the shell to the stack, gets the stack pointer, and then calls \texttt{execve}. There is already a command for doing this in C, however, called \texttt{system()}. This function:
+\begin{itemize}
+    \item Runs a program in the system shell
+    \item so there \textit{must} be a \texttt{/bin/sh} string already in memory to pass to the exec syscall
+    \item If we know its address, do we even need to push it on?
+\end{itemize}
+
+The basic idea is that instead of injecting the shellcode, we can set up the stack so that it looks like the arguments to a call to \texttt{system()} and assume the cdecl calling convention. Therefore, instead of returning onto our shellcode, we'll return into the libc \texttt{system()} function.
+To do this, we need a few things:
+\begin{itemize}
+    \item System needs to be already loaded into memory
+    \item ASLR can be problematic, but depends on how its implemented
+\end{itemize}
+
+Unfortunately for the attacker, the fixes for this are pretty easy. AMD64 architecture doesn't pass arguments on the stack by default. If more randomisation is added, it's harder to guess library functions. Also, ASCII armour strings are in memory by XORing them with patterns to make them harder to steal.
+
+Remember turing machines from second year? It turns out that if you make it in a certain way, you can make universal computation. So, wouldn't it be really unfortunate if you could make a Turing machine out of the instructions right before the return instruction in a program's memory?
+
+Turns out, you can do this, and this is called \textbf{Return Oriented Programming (rop)}. We know a buffer overflow gives us control over the stack, instead of overwriting just \textit{one} return address, we can write a series of stack frames. Each saved instruction pointer will be to an instruction just before a return instruction. This is called \textbf{gadgets}. Instead of writing shellcode, we find a series of gadgets that when run in sequence, have the same effect. If we manage to find a set of gadgets that is Turing complete, we can reuse the existing program code to implement ANY shellcode without injecting the actual shellcode.
+
+\newpage
+Right then, whats the plan of attack?
+\begin{enumerate}
+\item Find a gadget for `\texttt{pop rdi' ret}'
+\item[N-1.] Setup stack as \texttt{\&(pop rdi' ret) | \&("/bin/sh") | \&system}
+\item[N.] Return
+\end{enumerate}
+
+We also need to defeat ASLR, since libraries usually get dynamically loaded into memory by mmaping the whole library into memory. If we can leak a pointer of something within the pointers where all the functions are in a library (held in the .got file), we can learn where the pointers are. So, new plan of attack:
+\begin{enumerate}
+\item Find a gadget for `\texttt{pop rdi; ret}'
+\item Find .got entry for the puts function
+\item Leak it
+\item Recall main (so we don't randomise memory)
+\item Calculate libc's ASLR offset and where memory addresses really are
+\item Setup stack as \texttt{\&(pop rdi' ret) | \&("/bin/sh") | \&system}
+\item Return
+\end{enumerate}
 \end{document}
