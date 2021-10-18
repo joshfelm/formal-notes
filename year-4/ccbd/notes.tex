@@ -517,4 +517,36 @@ Once you have a massive cluster, how do you keep track of what's going on inside
 
 \subsection{Metrics}
 Metrics are more than logs. This checks the CPU, load average, interrupts, etc. and is able to identify bottlenecks. This is \textit{time sensitive}, so is stored in a time sensitive database. There is a plugin for Kubernetes that runs as a pod.
+
+\section{Serverless Systems}
+Firstly, it's important to know that serverless systems \textbf{still use servers!!} The essence of the serverless trend is the \textit{absence} of the server concept during software development. This allows developers to focus more time on things that will \textit{differentiate} their business from other businesses, rather than worry about the inner workings of a server. AWS defines serverless application as one that doesn't require you to provision or manage any servers. Unfortunately, this does lend itself to vendor lock-in.
+
+Serverless systems have lots of possible usages, such as computation, data, messaging, user management and logging.
+
+\subsection{The Four Pillars of Serverless}
+\begin{enumerate}
+\item No server management
+\item Flexible scaling
+\item No idle costs
+\item High availability
+\end{enumerate}
+
+When you think of serverless, the most common flavour is AWS Lambda. The Lambda flavour operates with \textbf{two sets of permissions}, one for the invocation, and one for the service (or resource).
+
+\subsection{Invocation}
+A Lambda function is invoked via event or schedule. Minimal Amazon Linux data is run containing the required runtime and function. Function provided with JSON invocation context and parameters. The function executes or times out. Result returned if defined. It is typically invoked in a few ms (also called a warm start) but can take around 1000ms sometimes (cold start). The container is retained for a short time to mitigate this latency.
+
+\subsection{Billing}
+Billing for Lambda systems depends on the amount of memory allocated and duration (for invocation). Therefore, the language used for scripting has a big impact on this. For example, Java would cost a lot due to its heavyweight libraries, while Python or Ruby would cost much less, being very lightweight.
+
+\subsection{The Four Stumbling Blocks of Serverless}
+\begin{enumerate}
+\item Performance Limitations (cold start etc)
+\item Monitoring and Logging (closed source, so difficult to expand existing tools)
+\item Vendor lock-in --- One of the worst forms of vendor lock in
+\item Security and Privacy --- All data written is encrypted by Lambda, but in multi-tenant cloud systems, there is a lot of suspicion.
+\end{enumerate}
+
+
+
 \end{document}

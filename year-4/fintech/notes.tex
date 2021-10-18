@@ -535,6 +535,17 @@ Such market mechanisms can give efficient allocation of resources without a cent
     \item Free markets are not guaranteed to achieve optimal allocations. conditions in which they fail are well known (such as a monopoly).
 \end{itemize}
 
-In reality, the smooth supply and demand curve isn't as smooth as it is in theory. This is a simplification that is really useful for teaching purposes. However, in the markets that we will be looking at, things are gonna get more complicated. It looks more \textit{stepped}. Each step in the supply curve represents an additional unit available for sale at the indicated price, while each step in the demand curve represents an additional unit desired at the indicated price.
+In reality, the supply and demand curve isn't as smooth as it is in theory. This is a simplification that is really useful for teaching purposes. However, in the markets that we will be looking at, things are gonna get more complicated. It looks more \textit{stepped}. Each step in the supply curve represents an additional unit available for sale at the indicated price, while each step in the demand curve represents an additional unit desired at the indicated price. These curves also don't stand still because the buyers become saturated, or the sellers run out of stock. Even without transactions, traders dynamically alter their margins.
 
+\subsection{Market Metrics}
+\begin{itemize}
+    \item \textbf{Smith's $\alpha$} --- Root mean square deviation of transaction prices around theoretical equilibrium price, expressed as a percentage (lower is better).
+    \begin{align*}
+    \alpha = \frac{100}{P_0} \sqrt{\sum_{t \in T} \frac{(P_t - P_0)^2}{|T|}}
+    \end{align*}
+    \item \textbf{Allocative Efficiency} --- Total utility (profit) earned by all traders, divided by theoretical max possible total utility (surplus), expressed as a percentage. Measures how effective the market is at extracting gains through trade.
+    \item \textbf{Single Agent Efficiency} --- Profit earned by an agent, divided by its expected profit if all trades take place at the equilibrium price (how effective a single trader is)
+\end{itemize}
+
+The results of an experiment of random agents creating artificial trades concluded that most of the intelligence is in the market, and not the traders. These `zero-intelligence' agents were surprisingly human like when they were constrained to make offers and bids that would not make them a loss.
 \end{document}
