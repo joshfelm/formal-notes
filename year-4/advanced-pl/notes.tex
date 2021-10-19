@@ -212,4 +212,82 @@ Type systems restrict the set of allowed programs.
 
 \textbf{Lemma (Substitution)}: If $\Gamma, x : \tau \vdash e' : \tau'$ and $\Gamma \vdash e : \tau$ then $\Gamma \vdash e'[e/x] : \tau '$
 
+\section{Dynamics}
+Now, we are going to look at the runtime \textit{semantics}. A \textbf{value} is an atomic structure that cannot be reduced any more (like a string or a value). Once we have that as a program, we know we don't need to evaluate it any more.
+
+Now, let's define the actual semantics of language \textbf{E}. It is defined by the form:  The transition judgement between states is inductively defined by the following rules. If we have some two argument (such as plus), evaluate the left hand side into a value first, before doing the second. While this doesn't make a difference to plus, it makes a different for more complicated things.
+
+At this point, if we have something that doesn't match the type, we end up being `stuck'. Additionally, we introduce the symbol: $\longmapsto^*$, which means derives in multiple steps. This is transitive: $e_1 \longmapsto^* e_2$, $e_2 \longmapsto^* e_3 \rightarrow e_1 \longmapsto^* e_3$.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Propositions},
+nobeforeafter,
+halign lower=flush right, ]
+    \begin{center}
+    If $e$ val, then there is no $e'$ such that $e \longmapsto e'$. \\
+    If $e \longmapsto e_1$ and $e \longmapsto e_2$ then $e \equiv e_2$.
+    \end{center}
+\end{tcolorbox}
+
+To ensure \textbf{type safe} programming languages, we know a few things:
+\begin{itemize}
+    \item Certain kinds of mismatches cannot happen at runtime (such as \texttt{"one" == 123})
+    \item Type safety expresses the \textit{coherence} between statics (Types) and dynamics (semantics)
+    \item A consequence of type safety is that evaluation cannot get stuck.
+\end{itemize}
+
+From here onwards, we write $\vdash e : \tau$ for $\emptyset \vdash e : \tau$.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Theorem (type safety)},
+nobeforeafter,
+halign lower=flush right, ]
+\begin{enumerate}
+\item If $\vdash e : \tau$ and $e \longmapsto e'$, then $\vdash e' : \tau$ (\textit{type preservation})
+\item If $\vdash e : \tau$, then either $e$ val, or there exists $e'$ such that $e \longmapsto e'$ (\textit{progress})
+\end{enumerate}
+\end{tcolorbox}
+
+\section{Lambda Calculus}
+So, well typed programs are very cool and all. But, if we were to add a division operator, what would happen if we divide by 0? This is well typed but the program can still get stuck. We can either define the rule with a 0 divisor rule, or add a check.
+
+We can check at runtime to return an error so that the computer still returns something (an error, which is not a type). These errors need to be differentiated:
+\begin{itemize}
+    \item \textbf{Unchecked error}: ruled out by the type system. No run-time checking performed because the type system rules out the possibility of the error arising
+    \item \textbf{Checked error}: not ruled out by the type system, hence run-time check must occur
+\end{itemize}
+
+Important to differentiate between the two because the checked error will incur significant overhead.
+
+Error, therefore is a new type:
+\begin{align*}
+\frac{}{{\color{red}\texttt{error } \text{err}}}
+\end{align*}
+
+\subsection{Preserving Type Safety with Error}
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Theorem Progress with Error},
+nobeforeafter,
+halign lower=flush right, ]
+If $\vdash e : \tau$ then either $e$ {\color{red}err}, $e$ {\color{green}val} or there exists $e'$ such that $e \longmapsto e'$.
+\end{tcolorbox}
+
+\subsection{Binary Product}
+We will introduce a new type: binary \textbf{product}. This looks like:
+\begin{align*}
+\text{Type } \tau ::= &\dots (\text{as in E}) \\
+&\texttt{prod}(\tau_1;\tau_2) \tau_1 \times \tau_2 \text{ binary product}
+\end{align*}
+
+\begin{align*}
+\text{Exp } e ::= &\dots (\text{as in E}) \\
+&\texttt{pair}(e_1;e_2) &&\langle e_1, e_2 \rangle &&\text{ordered pair} \\
+&\texttt{pl}(e_1;e_2) &&\langle e_1 \rangle &&\text{left projection} \\
+&\texttt{pr}(e_1;e_2) &&\langle e_2 \rangle &&\text{right projection}
+\end{align*}
+
+
 \end{document}
