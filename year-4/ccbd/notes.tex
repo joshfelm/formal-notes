@@ -499,6 +499,65 @@ Containers are almost always better than virtual machines. While they both emula
     \item VM tenants are fully isolated while containers provide process level isolation to tenants.
 \end{itemize}
 
+\section{Application Orchestration and Kubernetes}
+Orchestration is a number of things:
+\begin{itemize}
+    \item Running containers at scale requires management tools
+    \item Manage networking volumes, infrastructure
+    \item Automate
+    \begin{itemize}
+        \item Fault tolerance, self-healing
+        \item Auto scaling on demand
+        \item DevOps
+        \item Update/rollback without downtime
+    \end{itemize}
+    \item The tools available for us to do this are Mesos, Docker swarm, and Kubernetes
+\end{itemize}
+
+\subsection{Kubernetes}
+The features of Kubernetes include:
+\begin{itemize}
+    \item Automatic scheduling of work based on resource usage and constraints
+    \item Self-healing: automatic replacement and rescheduling of failed containers
+    \item Service discovery and load balancing
+    \item Automated rollouts and rollbacks
+\end{itemize}
+
+The most important things to get to grips with are the runtime objects: pods, deployments, and services.
+
+\subsubsection{Pod}
+A pod is a set of one or more containers that act as a unit and are scheduled onto a node together. They share a local network and can share file-system volumes.
+
+\subsubsection{Deployments}
+These describe the \textit{desired state} through declarative updates for pods and ReplicaSets. Essentially, you describe what you want, submit this to Kubernetes, and then it is deployed how you want (without actually telling it exactly what you want). The ReplicaSets balance the number of scheduled and running pods (kills or creates).
+
+The deployment is managed via the spec (what we want), the monitors status (current state), and the template (how).
+
+You are able to create a deployment to rollout a ReplicaSet, declare the new state of the pods, rollback to a previous version, or scale up the deployment to cope with more load.
+
+Deployments use \textbf{Yaml files} to describe them (similar to Python, in that it uses indentation to infer scope).
+
+\subsubsection{Services}
+Services define networking to access pods consistently. They also expose pods to the external world. They create groupings of pods that can be referred to by name and have a unique IP address and DNS hostname (these by default cluster scope only). The services ensure the pods that are in use are load balanced, and environment variables containing the IP address of each service in the cluster are injected into all the containers.
+
+Services are defined by a \textit{service config file} (also in Yaml).
+
+There are a few service types:
+\begin{itemize}
+    \item Influences networking configuration
+    \item Cluster IP
+    \begin{itemize}
+        \item Default
+        \item Service is discoverable/routable only within the cluster
+        \item kube-proxy watches API service and updates pod IPTables on change
+    \end{itemize}
+    \item NodePort
+    \begin{itemize}
+        \item Exposes the service on each Node's IP at a static port (the NodePort)
+        \item Access the service via <NodeIP>:<NodePort>
+        \item The simplest way to make your service externally accessible
+    \end{itemize}
+\end{itemize}
 \section{Cloud Native Applications}
 \textit{Cloud Native} is container based and elastic. AWS's biggest customer is \textbf{Netflix}. They roll out so many instances and microservices, and there is roughly 1 application change per second, meaning new features are coming out very frequently.
 
