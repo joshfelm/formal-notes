@@ -547,6 +547,91 @@ Billing for Lambda systems depends on the amount of memory allocated and duratio
 \item Security and Privacy --- All data written is encrypted by Lambda, but in multi-tenant cloud systems, there is a lot of suspicion.
 \end{enumerate}
 
+\section{Scalable Cloud Architectures}
+Software architecture is a set of structures needed to reason about a system. It includes software components, the relations between them and properties of both. The architecture may be implicit, meaning that it might not be written down, but every software has an architecture. If you build a significant system, you cannot not have an architecture.
 
+Looking at scaling, we can either scale with pure cores, or use multiple servers (called vertical or horizontal scaling respectively). With \textbf{vertical scaling}, there will be no need to change your architecture, while \textbf{horizontal scaling} will be cheaper.
+
+\subsection{Scaling cube}
+The scale cube only looks at horizontal scaling. There are three dimensions to this cube:
+\begin{itemize}
+    \item X axis: Horizontal duplication --- Scale by cloning services and data
+    \begin{itemize}
+        \item Each clone can do the work of all the other clones. Work is distributed among clones without bias
+        \item Inefficient compared to alternatives
+        \item But, very easy to do
+    \end{itemize}
+    \item Y axis: Functional decomposition --- Scale by splitting different things. Isolating and making scalable individual responsibility of components
+    \begin{itemize}
+        \item Needs to be split in the code base
+        \item More costly than the x axis.
+    \end{itemize}
+    \item Z axis: Data partitioning --- Scale by splitting similar things. We partition the domains of incoming requests
+    \begin{itemize}
+        \item Data partitioning split relative to the client
+        \item Improves fault tolerance and cache  performance
+        \item More costly than the other two
+    \end{itemize}
+\end{itemize}
+
+\subsection{Load balancers}
+Load balancers are used for:
+\begin{itemize}
+    \item Distributing requests
+    \item Managing availability
+    \item Performing health checks
+    \item Session affinity (sticky sessions)
+    \item List of backend servers
+    \item Load balancing policy
+    \item SSL termination
+    \item Alternative: DNS or router based
+\end{itemize}
+
+Load balancers can detect denial of service attacks and shut servers down rather than scaling the service up to keep up with the increased traffic (that could end up costing a hell of a lot of money).
+
+\textbf{Sticky sessions} are really useful. If we use a sticky load balancer, we can always route a client's request to the same server instance, perhaps with an IP hash. This sticky session is really good because say you order things on amazon and have a shopping cart full, we want the next request to go to the server that has just been handling this shopping cart. Cookies are managed by load balancers or the application cookie. It enables session replication via shared session DBs or caches. Sometimes, the session is stored with the client, though this can be risky as the internals of the application can become exposed to the client.
+
+There are a few load balancing algorithms, such as:
+\begin{itemize}
+    \item Round robin --- Simple even task distribution (ignores the difference in work)
+    \item Weighted round robin
+    \item Least connections
+\end{itemize}
+
+Load balancers allow high availability. If one load balancer has a high load, it can switch to a secondary load balancer. Kubernetes provides stateless LB via a service (round-robin by default). Additionally, they have sticky sessions.
+
+\subsection{Decoupling services}
+
+\subsubsection{Message topics}
+Consumers can subscribe to different message topics, meaning that producers just send a message to a pub/sub (publish/subscribe), and then only the consumers that are subscribed to a topic would receive this message. This generates a disconnect between the producers and the subscribers but also means more scalability because the producers don't need to worry about each individual consumer.
+
+Message queues are also used, and they are \textit{asynchronous}, meaning it can be queued now and then run later, waiting until a consumer is ready to process. This decouples application logic and is also much more scalable, although it introduces latency into the system.
+
+\subsubsection{Service registries}
+Service registries resolve addresses for names and are based on HA, transactional data stores. For example, Apache.
+
+These decoupling services allow for \textit{event driven} algorithms.
+
+\subsection{Automation}
+You can't manually scale instances in your architecture, so you need to automate this. You'll need an elasticity controller that looks at metrics (CPU, mem, disk...). When exceeded, add more nodes, and when it isn't using much, can decommission some of these nodes.
+
+Another way of judging whether or not we need to scale a system is to look at a job queue and scale depending on this.
+
+\subsection{Sharding}
+Sharding is the act of partitioning and storing a dataset in multiple databases. This might occur when a database gets really full, because replicating this data wouldn't solve the problem, or it might also hold some redundant data. This is particularly useful when having multiple caches. If we have multiple caches and each cache has the same data, we will have a lot of cache \textit{misses}, so we are not getting the most bang for our buck.
+
+\subsection{Decentralised Hashing}
+Regular caches distribute evenly across buckets as a function of $n$. However, if $n$ changes, all objects need redistribution. The solution to this is \textit{consistent hashing}:
+\begin{itemize}
+    \item Each peer received similar amounts of keys
+    \item Little reshuffling on peers entering or leaving
+    \item Map each object to a point on the edge of a circle
+    \item Make a node hold keys for a range of consecutive keys
+    \item If a node is removed, its interval is taken over by a neighbour node. All the remaining caches are unchanged.
+    \item If a new node enters, keys are redistributed from a preceding node. All remaining nodes are unchanged.
+\end{itemize}
+
+\subsection{Database scaling}
+Database scaling is one of the harder things to scale. One technique is \textbf{read-replicas}, but this is not good for writing. Another example is \textbf{sharding} (looked at above). 
 
 \end{document}
