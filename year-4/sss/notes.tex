@@ -12,6 +12,7 @@
 \setlength{\headsep}{.5in}
 % }}}
 
+\usepackage{tabularx}
 \usepackage{hhline}
 \usepackage[table]{xcolor}
 \usepackage{mathtools}
@@ -524,4 +525,189 @@ We also need to defeat ASLR, since libraries usually get dynamically loaded into
 \item Setup stack as \texttt{\&(pop rdi' ret) | \&("/bin/sh") | \&system}
 \item Return
 \end{enumerate}
+
+\section{Software Defence}
+\subsection{Program Analysis}
+We need to ensure that the software development lifecycle is secure. It's not easy to find bugs manually in large scale programs.
+
+Manual testing can only go so far. If we have loops, it can become quite difficult to see all of the possible execution paths, even in very small programs. Static analysis, therefore, is very difficult.
+
+Program analysis is the automatic process of analysing the behaviour of computer programs regarding a property such as correctness, reliability, safety, and security. The types we will see is:
+\begin{itemize}
+    \item Static Analysis: performed without executing the program
+    \item Dynamic Analysis: performed at runtime
+    \item Hybrid: a mix of the two
+\end{itemize}
+
+\subsubsection{Static Program Analysis}
+This method of analysis is just looking at the code without executing it. This becomes really quite difficult with large scale programs. For things like memory allocation, you might not even know how that will work (random analysis etc.). Binary code is even more challenging because actually understanding it would take such a long time. Compilers make heavy use of this analysis to ensure correctness of programs.
+
+This is beneficial because we can analyse every component and path of the application if we have access to the code.
+
+
+The tools we have access to are:
+\begin{itemize}
+    \item LLVM
+    \item For binary code we have a few: IDA, Ghidra, Miasm, angr...
+\end{itemize}
+
+\subsubsection{Dynamic Progam Analysis}
+This method of analysis is essentially like debugging --- it is analysed at runtime. Dynamic analysis is both very precise and scales very well. However, it is limited to the executed code of the program, so coverage is a problem.
+
+The benefits are that we can look at things like the dynamic allocation of memory and profiling and so on.
+
+The tools we have access to are:
+\begin{itemize}
+    \item Intel pin, Dyninst, Valgrind
+    \item Security tools (...)
+\end{itemize}
+
+\subsubsection{Soundness and Completeness}
+We have two separate conditions we need to check for when analysing a program: \textbf{soundness} and \textbf{correctness}.
+
+\begin{itemize}
+    \item \textit{Soundness} is essentially saying that if analysis says no bugs, there are no bugs and vice versa. {\color{blue}If analysis says true $\rightarrow$ true}.
+    \item \textit{Completeness} essentially states that if there are no bugs, analysis will say there are no bugs. {\color{blue}True $\rightarrow$ analysis says True}.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{c|c|c}
+   & \textbf{Complete} & \textbf{Incomplete} \\ \hline
+   \textbf{Sound} &
+   \begin{minipage}[t]{0.4\textwidth}
+   \begin{itemize}
+   \item Reports all errors
+   \item Reports no false alarms
+   \end{itemize}
+   \centering
+   {\color{red}\textbf{Undecidable}}
+   \end{minipage}
+   &
+   \begin{minipage}[t]{0.4\textwidth}
+   \begin{itemize}
+   \item Reports all errors
+   \item May report false alarms
+   \end{itemize}
+   \centering
+   {\color{green}\textbf{Decidable}}
+   \end{minipage}
+   \\ \hline
+   \textbf{Unsound} &
+   \begin{minipage}[t]{0.4\textwidth}
+   \begin{itemize}
+   \item May not report all errors
+   \item Reports no false alarms
+   \end{itemize}
+   \centering
+   {\color{green}\textbf{Decidable}}
+   \end{minipage}
+   &
+   \begin{minipage}[t]{0.4\textwidth}
+   \begin{itemize}
+   \item May not report all errors
+   \item May report false alarms
+   \end{itemize}
+   \centering
+   {\color{green}\textbf{Decidable}}
+   \end{minipage}
+\end{tabular}
+\end{center}
+
+In most cases, the program will be both unsound and incomplete.
+
+\subsubsection{Generic Approach}
+We need to decide whether our program is intraprocedural or interprocedural:
+\begin{itemize}
+    \item Intra --- per function analysis (ignoring side effect of function calls)
+    \item Inter --- Function analysis (considering side effects of function calls)
+\end{itemize}
+
+Next, we generate a control flow graph (CFG), and then optionally generate the interprocedural CFG (ICFG) and finally we data-flow analyse the generated CFGs.
+
+\subsubsection{Intermediate Representation}
+We can represent each complex statement that we have via `high-level' assembly code. This will contain:
+\begin{itemize}
+    \item Binary logic and arithmetic operators
+    \item Use of temporary memory locations
+    \item Assignment to variables, temporary locations
+    \item A label assigned to each instruction
+\end{itemize}
+
+E.g.:
+\begin{lstlisting}
+var1 = (var2 + var3)  + func(A)
+' Translates to
+L1: t1 = var2 + var3
+L2: t2 = func(A)
+L3: var1 = t1+t2
+\end{lstlisting}
+
+As shown, it is called 3-address code because we only use 3 memory addresses. This is maintained by creating new temporary variables (in this example, \texttt{t1} and \texttt{t2}).
+
+
+\subsubsection{Basic Block (BB)}
+A maximal sequence of instructions with single entry and exit. Execution of BB is \textit{atomic} under normal conditions.
+
+\subsubsection{Control Flow Graph}
+Control flow graphs are a representation of how the execution may progress inside a given function It is a graph $(V,E)$ such that:
+\begin{itemize}
+    \item $V = \{B_i\}$ where $B_i$ is a basic block.
+    \item $E = \{B_i,B_j\}$ where the last instance of $B_i$ is a jump to the first instance of $B_j$ and the first instance of $B_j$ follows the last instance of $B_i$ in the TAC.
+\end{itemize}
+
+\subsubsection{Call Graph}
+A call graph is computed for the whole program and is represented as a directed graph $(V,E)$ such that:
+\begin{itemize}
+    \item $V = \{F_i\}$ where $F_i$ is a function
+    \item $E = \{(F_i,F_j)\}$ where $F_i$ calls $F_j$.
+\end{itemize}
+
+\subsubsection{Redundant Expressions}
+An expression is redundant at a location if:
+\begin{itemize}
+    \item It is computed at location $i$
+    \item This expression is computed on every path going from initial location to location $i$
+    \item On each of these paths, operands of $e$ are not modified between the last computation of $e$ and location $i$.
+\end{itemize}
+
+Optimisation is performed as follows:
+\begin{itemize}
+    \item Computation of the available expressions (via data flow analysis)
+    \item $x:=e$ is redundant at location $i$ if $e$ is available at $i$
+    \item $x:=e$ is replaced by $x:=t$ (where $t$ is a temp memory address containing the value of $e$).
+\end{itemize}
+
+We then look at the variables to see if they are changing to evaluate whether they are redundant or not.
+
+\subsubsection{Dataflow Equation for Available Expressions}
+For a basic block $b$ we note:
+\begin{itemize}
+    \item $In(b)$: available expressions when entering $b$
+    \item $Kill(b)$: expressions made \textit{non-available} by $b$ (because an operand of $e$ is modified by $b$)
+    \item $Gen(b)$: expressions made \textit{available} by $b$ (computed in $b$ and operands not modified afterwards)
+    \item $Out(b)$ available expressions when exiting $b$
+\end{itemize}
+
+\begin{align*}
+Out(b) = (In(b) \backslash Kill(b)) \cup Gen(b) = F_b(In(b))
+\end{align*}
+
+Where $F_b$ is a \textbf{transfer function} of block $b$.
+
+To compute $In(b)$:
+\begin{itemize}
+    \item If $b$ is the initial block:
+    \begin{align*}
+    In(b) = \emptyset
+    \end{align*}
+    \item If $b$ is not the initial block, an expression $e$ is available at its entry point iff it is available at the exit point of {\color{red}\textit{each}} predecessor of $b$ in the CFG
+    \begin{align*}
+    In(b) = \bigcap_{b' \in Pre(b)} Out(b')
+    \end{align*}
+\end{itemize}
+
+This is called forward data-flow analysis along the CFG paths.
+
+\subsubsection{Reaching Definition}
+Every assignment is a definition. A definition $d$ reaches a point $p$ if there exists a path from the point immediately following $d$ to $p$ such that $d$ is not killed (overwritten) along that path. 
 \end{document}

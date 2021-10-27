@@ -502,7 +502,7 @@ These \textit{financial regulators} are the reason that banks are more popular t
     \item \textbf{Compliance easy} --- Governments wants something that is easy to regulate.
 \end{itemize}
 
-\section{Economic Agents and Market Based systems 1}
+\section{Economic Agents and Market Based systems}
 Market economics is an important metaphor for new methods in computer science or engineering, dealing with allocation of scarce resources. It requires software versions of both traders and marketplaces. Designing these things is hard, but can be done automatically. 
 
 It is useful to distinguish between \textbf{macro} and \textbf{micro}economics. Macro is the high level stuff that we don't need, and micro is just maths, which is more useful for problem solving.
@@ -548,4 +548,40 @@ In reality, the supply and demand curve isn't as smooth as it is in theory. This
 \end{itemize}
 
 The results of an experiment of random agents creating artificial trades concluded that most of the intelligence is in the market, and not the traders. These `zero-intelligence' agents were surprisingly human like when they were constrained to make offers and bids that would not make them a loss.
+
+These results are actually gained, but they are \textbf{special cases}. We can actually predict when these ZI-C markets will fail to reach the equilibrium. For this reason, we can develop a better trader, known as a ZI-Plus trader.
+
+These traders still work on their quota, as ZI-C does, but also use some machine learning; adjusting this using machine learning rules. They were able to succeed in markets where ZI-C failed.
+
+\subsection{Maths Behind ZI-P}
+ZI-C agents are hard bounded by the supply-demand curve. They are not able to offer prices that would breach this and cause them a loss. If we look at these curves, we get a probability density function (it would be equivalent to the area above the supply curve for sellers, or the area below the demand curve for buyers)
+
+Transactions only occur when a bid and offer price cross. If we overlay the pdf for both supply and demand curve, we get the probability density function for the equilibrium price. Note that we are dealing with symmetric supply and demand curve here, which affects this slightly. The peak of this pdf is the equilibrium price. This means that it is not surprising that ZI-C agents reach equilibrium since this is the most likely value.
+
+In asymmetric markets, the mid point (expected value) is no longer the peak. It could actually be the first point, if there is elastic supply, meaning ZI-C would fail to converge in these markets.
+
+Very informally, the ZI-P sellers have a thing to sell, and a \textit{limit price} such that it will not lose money. The price asked for $P$ is $L$ and sme profit margin $M$: $P=(1.0+M)L$.
+\begin{itemize}
+    \item If we have price $P$ and:
+\begin{itemize}
+    \item Sellers are accepting bids below $P$ or
+    \item Sellers are making offers below $P$
+\end{itemize}
+\item then decrease $M$ (not below zero). Otherwise:
+\begin{itemize}
+    \item If trades are happening at prices above $P$ then increase $M$ (even if we have nothing to sell)
+\end{itemize}
+\end{itemize}
+
+Each ZI-P seller keeps their values private. The quantity in which the margin steps up or down is aiming for a target price, that is roughly the last quote price in the market. There is a little bit of randomness, too. ZI-P uses the Widrow-Hoff learning rule with \textbf{momentum (damping) factor}.
+
+What makes a trader `best'? It is really hard to compare them, so instead of analysing them, \textit{empirical studies} are the method of choice. More on this later.
+
+Testing agents in a \textit{homogeneous} market is sometimes not good, since for things like financial markets, this is impossible. This exact problem is what led to MGD (modified GD agent). For this reason, the following tests were performed:
+\begin{itemize}
+    \item \textbf{Homogeneous population test} --- Tested in a market of a single agent
+    \item \textbf{One-in-many test} --- Tested in a market where all but one trader is using a different method, and only one instance of the agent
+    \item \textbf{Balanced test} --- Tested in a completely split market where each agent has a counterpart
+\end{itemize}
+
 \end{document}
