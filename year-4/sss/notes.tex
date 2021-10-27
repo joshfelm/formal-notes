@@ -526,6 +526,7 @@ We also need to defeat ASLR, since libraries usually get dynamically loaded into
 \item Return
 \end{enumerate}
 
+<<<<<<< HEAD
 \section{Software Defence}
 \subsection{Program Analysis}
 We need to ensure that the software development lifecycle is secure. It's not easy to find bugs manually in large scale programs.
@@ -710,4 +711,52 @@ This is called forward data-flow analysis along the CFG paths.
 
 \subsubsection{Reaching Definition}
 Every assignment is a definition. A definition $d$ reaches a point $p$ if there exists a path from the point immediately following $d$ to $p$ such that $d$ is not killed (overwritten) along that path. 
+=======
+\subsection{Dynamic Analysis}
+We have already looked at the static version of analysis, and this is useful, but it leaves some gaps in the space that we have not analysed. As previously discussed, there may be some functions that are never statically referenced in previously visited code. The solution to this is to run dynamic analysis. The program should be run multiple times and observe the targets of indirect code jumps and calls.
+
+\textbf{Dynamic analysis} is a technique that is performed at runtime and has historically been used for performance monitoring and software testing. Security related behavioural analysis is all based on dynamic analysis.
+
+We can monitor call instructions at runtime using \textbf{GDB}. We can set a breakpoint at each function call before the program starts and then look at the stack. But, this is a lot of effort. Instead, we can use the binary to log the targets of all indirect call or jump instructions for us automatically.
+
+\subsubsection{Instrumentation}
+This is a technique that injects instrumentation code into a binary to collect run-time information. It might just inject some \texttt{printf} functions to say when a function is entered, or inject things like a loop counter that is output when the loop increments. NOTE: it does not modify the semantics of the program.
+
+Instrumentation is useful when we are profiling for compiler optimisation or performance profiling. It is also useful for Bug detection or vulnerability identification or even exploit generation. It is also used for architectural research, using both processor and cache simulation, and trace collection.
+
+\textbf{Static instrumentation} is instrumentation performed before runtime. This comes in three flavours:
+\begin{itemize}
+    \item \textbf{Source code instrumentation} --- instrument source programs
+    \item \textbf{IR instrumentation} --- instrument compiler-generated (like LLVM)
+    \item \textbf{Binary instrumentation} --- Instrument executables directly by inserting additional assembly instructions.
+\end{itemize}
+
+\textbf{Dynamic binary instrumentation} is performed just after runtime (just in time --- JIT). We use binary instrumentation because libraries are a big pain for source or IR level instrumentation. It also easily handles multi-lingual programs. Additionally, worms and viruses are rarely provided with source code.
+
+\begin{itemize}
+    {\color{green}
+    \item Pros:
+    \begin{itemize}
+        \item No need to recompile or relink
+        \item Discovers code at runtime
+        \item Handles dynamically generated code
+        \item Attaches to running processes
+    \end{itemize}
+    }
+    {\color{red}
+    \item Cons:
+    \begin{itemize}
+        \item Usually higher performance overhead
+        \item Requires a framework which can be detected by malware
+    \end{itemize}
+    }
+\end{itemize}
+
+\subsubsection{Pin}
+Intel Pin is a dynamic binary instrumentation tool. It supports both Linux and Windows executables for x86, x86\_64 and IA-64 architectures. It allows a tool to insert arbitrary code in arbitrary places in the executable while the executable is running. This also makes it possible to attach pin to already running processes.
+
+Pin allows the full examination of any x86 instruction, tracking function calls (including library and sys calls), and tracking application threads, among others.
+
+
+>>>>>>> 00952d319c1dd6a3e0757453978a98576531d858
 \end{document}
