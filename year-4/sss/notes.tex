@@ -526,7 +526,6 @@ We also need to defeat ASLR, since libraries usually get dynamically loaded into
 \item Return
 \end{enumerate}
 
-<<<<<<< HEAD
 \section{Software Defence}
 \subsection{Program Analysis}
 We need to ensure that the software development lifecycle is secure. It's not easy to find bugs manually in large scale programs.
@@ -711,7 +710,6 @@ This is called forward data-flow analysis along the CFG paths.
 
 \subsubsection{Reaching Definition}
 Every assignment is a definition. A definition $d$ reaches a point $p$ if there exists a path from the point immediately following $d$ to $p$ such that $d$ is not killed (overwritten) along that path. 
-=======
 \subsection{Dynamic Analysis}
 We have already looked at the static version of analysis, and this is useful, but it leaves some gaps in the space that we have not analysed. As previously discussed, there may be some functions that are never statically referenced in previously visited code. The solution to this is to run dynamic analysis. The program should be run multiple times and observe the targets of indirect code jumps and calls.
 
@@ -758,5 +756,4 @@ Intel Pin is a dynamic binary instrumentation tool. It supports both Linux and W
 Pin allows the full examination of any x86 instruction, tracking function calls (including library and sys calls), and tracking application threads, among others.
 
 
->>>>>>> 00952d319c1dd6a3e0757453978a98576531d858
 \end{document}
