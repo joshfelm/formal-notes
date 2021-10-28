@@ -693,6 +693,333 @@ Regular caches distribute evenly across buckets as a function of $n$. However, i
 \subsection{Database scaling}
 Database scaling is one of the harder things to scale. One technique is \textbf{read-replicas}, but this is not good for writing. Another example is \textbf{sharding} (looked at above). 
 
+\section{Coordination in Distributed Systems}
+Errors in distributed systems can either be a \textbf{fault}, which is a single component misbehaving, and a \textbf{failure}, which is where the whole system stops. If we have a data center with 10000 hard drives, the probability that one hard drive fails per day is almost 1. Additionally, communication and clocks are unreliable. This leads to a lot of potential errors. We can also get process pauses, such as garbage collection.
+
+\subsection{Replication and Linearisability}
+Once a value has been set for a key, all subsequent read operations return that value until a new value is set. This is a system that conforms to \textit{linearisability}.
+
+\subsection{CAP theorem}
+A good cloud might seek to achieve these three things:
+\begin{itemize}
+    \item Consistency
+    \begin{itemize}
+        \item All nodes should see the same data at the same time
+    \end{itemize}
+    \item Availability
+    \begin{itemize}
+        \item Node failures do not prevent survivors from continuing to operate
+    \end{itemize}
+    \item Partition tolerance
+    \begin{itemize}
+        \item The system continues to operate despite network partitions
+    \end{itemize}
+\end{itemize}
+
+However, a bloke called Eric Bewer has a theorem that states that a cloud service cannot simultaneously provide these, and there will always be some kind of trade off.
+
+Consider the following:
+\begin{itemize}
+    \item Nodes X and Y suffer a partition
+    \item X wants to move forward with a job but gets no reply from Y
+    \item X must now either
+    \begin{itemize}
+        \item wait to hear back from Y (sacrificing availability)
+        \item Proceed without hearing back (threatening consistency)
+        \item or never be partitioned in the first place (losing partition tolerance)
+    \end{itemize}
+\end{itemize}
+
+The CAP theorem was understood to mean that the designer's job is to pick 2 out of 3. But, with cloud, we need partition-tolerance, so you have to choose between C and A. However, these three are not binary concepts. Each is a matter of degree, so we only rule out the possibility of `perfect' consistency and availability.
+
+Let's now observe some trade-offs:
+\begin{itemize}
+    \item \textbf{Strong consistency} --- After an update completes, any subsequent access will return the same updated value.
+    \item \textbf{Weak consistency} --- Subsequent accesses are not guaranteed to return the updated value
+    \item \textbf{Eventual consistency} --- Eventually, all subsequent accesses will return the updated value (e.g. updates will eventually propagate to replicas).
+\end{itemize}
+
+This eventual consistency is good for something like a blog post. But in a different context, it might not be enough.
+
+Prioritizing C could be used where a cloud supports operations in the real world that are really hard to roll back.
+
+We might have a lot of replicas. Now, there are some problems we need to overcome when dealing with a lot of replicas, and these might be something like where multiple requests come in and it is unsure which one should be processed first. The way around this is to assign each `problem' a value, and then to choose a valid value at random. Not one that is `best' or came first, just a valid value. These replicas will have three main roles:
+
+\begin{itemize}
+    \item Proposers: learn values that are already accepted and propose these values
+    \item Acceptors: let proposers know already accepted values, accept or reject proposals, and reach a consensus on choosing a particular proposal or value
+    \item Learners: become aware of the chosen proposal or value and action it
+\end{itemize}
+
+Replicas may play more than one of these roles at different times. Often, a replica is elected to be a `distinguished' (or privileged) learner/proposer. This is where they are the only one allowed to play the role. Also, different proposals must never use the same ID number (obviously).
+
+Here is how the algorithm unfolds:
+\begin{itemize}
+    \item Proposer P picks an ID number N, which is higher than any chosen before.
+    \item P asks some majority of acceptors to prepare for proposal N.
+    \item Only a majority and not all are asked because if a majority of replicas agree on a value, then a different majority cannot agree on a different one.
+    \item At this stage, P hasn't proposed a value, and is only trying to engage enough acceptors
+    \item Acceptors may or may not sign up for this
+    \item If an acceptor A gets a prepare message from P with ID, N, bigger than any seen so far, then A promises to ignore future proposals with ID less than N.
+    \item If A has already accepted a proposal, A tells P the value of the last accepted proposal.
+    \item If N is too low, A ignore P.
+    \item If P gets the majority of promises back, P can set a value.
+    \item If the acceptors have told their accepted values, P chooses the value, v, associated with the highest proposal ID number. If no accepts so far, P sets value.
+    \item P request acceptors accept this proposal
+    \item They must accept unless P was too slow and already proposed another proposer.
+    \item An acceptor will accept the first proposal it sees. System will not hang waiting to compare multiple ideas.
+    \item An acceptor will accept the proposal with the highest ID number. This keeps the system going when proposers die mid proposal.
+    \item A majority of acceptors must accept the same value keeping the system consistent
+    \item Once a value is chosen, all proposals with a higher ID number choose to recommend this same value, meaning we can build a consensus without newcomers disrupting it.
+\end{itemize}
+
+\subsection{Apache Zookeeper}
+Zookeeper is part of a family of linearisable, durable data stores, with a rich client that prioritises consistency over availability. There are typically five nodes in a cluster and are optimised for read, rather than write.
+
+\section{DevOps}
+Software development lifecycle:
+\begin{enumerate}
+\item Planning
+\item requirements Definition
+\item Software design
+\item Software development
+\item Software testing
+\item Software deployment
+\end{enumerate}
+
+Before we had Agile and DevOps, we used to use the waterfall system. The main problem with this was that because it is very one way, it becomes very hard to change things later on in the development. As a result, the final product may not reflect customer requirements and becomes very expensive to change features and spec late in the process.
+
+\textbf{Agile} became the favoured development method in the 1990s. It has iterative development cycles using `sprints'. Each of these sprints delivers a minimum viable product, each of the sprints usually being 2 weeks long. The product owner is the customer specifying feature requirements for each sprint and signing off releases. Agile methodology allows for quick iteration on feedback.
+
+\textbf{DevOps} breaks the wall down between development and operations. The goal is simple: releasing updates as quickly as possible without losing quality. It's a solution to cultural norms: developers want \textit{agility} while operations want \textit{stability}. DevOps is an extension of the Agile methodology:
+\begin{itemize}
+    \item People: Break down Dev and IT Ops silos through improved communications and joint accountability for product quality
+    \item Processes: Increase throughput and quality by automating manual processes
+    \item Tools: Create an end-to-end scripted tool chain (pipeline) for speed and consistency.
+\end{itemize}
+
+DevOps uses cross functional Dev/Ops teams. This allows for:
+\begin{itemize}
+    \item Collaboration
+    \begin{itemize}
+        \item Sprint dev teams may include QA and IT Ops members
+    \end{itemize}
+    \item Responsibility
+    \begin{itemize}
+        \item Teams are responsible to end-to-end quality of product
+    \end{itemize}
+    \item Awareness
+    \begin{itemize}
+        \item Devs learn about potential Ops issues, Ops learn about code
+    \end{itemize}
+    \item Communication
+    \begin{itemize}
+        \item Teams use integrated comms tools like slack and JIRA to improve issue reporting and response
+    \end{itemize}
+\end{itemize}
+
+Another benefit of DevOps is that there are frequent \textit{commits} and \textit{builds}. These builds should be automated so that they can be performed multiple times per day. These processes should also be automated:
+\begin{itemize}
+    \item Continuous Integration:
+    \begin{itemize}
+        \item Shared source code repository
+        \item Automated unit testing on commit
+        \item Frequent integration builds and tests
+        \item \textbf{Ensures robust code base}
+    \end{itemize}
+    \item Continuous delivery
+    \begin{itemize}
+        \item CI + more testing + packaging
+        \item \textbf{Ensures production-ready release}
+    \end{itemize}
+    \item Optionally, could go further with Continuous deployment
+    \begin{itemize}
+        \item CI + CD + automated deployment to prod environment
+    \end{itemize}
+\end{itemize}
+
+The third benefit of DevOps is \textbf{robust product releases}:
+\begin{itemize}
+    \item Fail-Fast philosophy
+    \begin{itemize}
+        \item CI/CD automated tests pinpoint code issues early
+        \item Dev teams alerted immediately
+    \end{itemize}
+    \item Integrated monitoring
+    \begin{itemize}
+        \item Developers include instrumentation code in app to create metrics data
+        \item Metrics dashboards reviewed by team for emerging troublespots
+    \end{itemize}
+    \item Integrated Security (SecOps)
+    \begin{itemize}
+        \item Include automated tests on code vulnerabilities, package integrity, valid certificates in CI/CD
+    \end{itemize}
+\end{itemize}
+
+And the fourth and final benefit is \textbf{consistent deployment environments}
+\begin{itemize}
+    \item Identical Environments
+    \begin{itemize}
+        \item Dev/Stage/Prod environments are identical in specification
+        \item Avoids `works on my machine!'
+        \item Use identical machine configs
+    \end{itemize}
+    \item Infrastructure as Code (IaC)
+    \begin{itemize}
+        \item Templating
+        \item Config Management
+        \item Scripting
+    \end{itemize}
+\end{itemize}
+
+\subsection{Infrastructure as Code}
+The idea behind IaC is to automate the creation, deletion and updates to infrastructure. It also provides consistent repeatability for multiple environments. It enables secure one-use disposable environments. Version controlling infrastructure is also very easy with this. Performing infra-audits is also easy. All of these things are dependent on robust IaaS APIs.
+
+\subsection{Configuration Management}
+The use of config management greatly simplifies configuration of multiple servers (or nodes).
+\begin{itemize}
+    \item Config can be OS patches, apps, websites, scripts, properties ...
+    \item Define config state for a node type
+    \item CM server/client regularly ensures node state is valid and up to date
+\end{itemize}
+
+The config is \textit{idempotent}:
+\begin{itemize}
+    \item Resources are only allocated once
+    \item Manual changes are detected and rolled back
+\end{itemize}
+
+Popular CM systems include:
+\begin{itemize}
+    \item Chef, Puppet, Ansible, SaltStack, DSC
+\end{itemize}
+
+IaC often uses \textit{templating}, which is infrastructure defined in either a JSON or YAML template file. The template engine parses file and calls IaaS APIs to build a collection of resources (a `stack'). The most popular IaC templating engines include:
+\begin{itemize}
+    \item CloudFormation (AWS)
+    \begin{itemize}
+        \item Has a template section (objects to be created) and several optional sections (including parameters, conditions, mappings, etc.)
+    \end{itemize}
+    \item Terraform (HashiCorp)
+\end{itemize}
+
+\section{Google's Core Cloud Technologies}
+We aer going to look at the `under the hood' of Google's underlying infrastructure:
+\begin{itemize}
+    \item MapReduce (Hadoop)
+    \item Google File System (GFS) (HDFS)
+    \item Big table (Hbase)
+    \item Spanner
+    \item F1
+\end{itemize}
+
+All of these Google technologies are \textit{proprietary}. The equivalents in brackets are the free equivalent, offered by \textbf{Apache}. The Hadoop software system does not really have any direct equivalent for Spanner or F1.
+
+\subsection{MapReduce}
+MapReduce is the key that allowed Google to cluster webpages, and is really the secret behind Google's success. MapReduce is a style of programming and of implementation for generating and processing very large data sets. It's not a specific algorithm, but rather more of an architecture. It was created at Google, and since then around 10,000+ programs have been implemented via MapReduce at Google alone.
+
+It was intended to automatically parallelize `big' data analysis tasks over large clusters built from networks of cheap commodities with some fault-tolerances.
+
+MapReduce partitions the input data into a number of `splits' (the parallelization we mentioned earlier). The size of these splits are defined by the user on creation of the job. There is a \textit{master} in the interim that assigns work to individual machines (called workers). The \textbf{map} part of MapReduce is where some workers are given responsibility for the input files, while the \textbf{reduce} part is where the workers are in charge of the output files.
+
+The master tells the workers on the map side to partition their received data (one of the splits), and this data is going to be read by particular reduce workers.
+
+\begin{enumerate}
+    \item First, there is a read operation, where one of the workers \textit{reads} from one of the splits. This is where they extract key/value pairs out of the data
+    \item This data is then passed to a \textit{map} function. The map function has been specified by the user, and this creates intermediate k/v pairs; initially stored in a buffer in the worker's memory, before being written to some point in memory.
+    \item At this point, the worker feeds back to the master the location of the k/v pair in memory.
+    \item The master forwards this data to the reduce workers
+    \item This data, among others worked out by other workers, will be read by a reduce worker.
+    \item This reduce worker iterates over this new data, and passes each unique key and intermediate values to the user's reduce function (again, provided by the programmer).
+    \item The results of this are written to the relevant output file.
+\end{enumerate}
+
+This is, of course, repeated for a lot of different workers and for a lot of different output files.
+
+\subsubsection{MapReduce's Hello World}
+The equivalent of hello world for MapReduce is counting the number of occurrences of each word in a body of text.
+
+The function might look something like:
+\begin{lstlisting}[language=python]
+map(String key, String value):
+    //key: document name
+    //value: document contents
+    for each word w in value:
+        EmitIntermediate(w,"1");
+
+Reduce(String key, Iterator values):
+    //key: a word
+    //values: a list of counts
+    int result = 0;
+    for each v in values:
+        results += ParseInt(v);
+    Emit(AsString(result));
+\end{lstlisting}
+
+\subsubsection{MapReduce Fault Tolerance}
+In reality, the instances of MapReduce will have hundreds or thousands of worker machines, so normal failure is a significant issue. To resolve this, a master pings every worker occasionally. If a worker does not respond before a timeout, then the master marks the user as being failed.
+
+Because the results of any map tasks completed by the failed worker, the master resets the failed server's list of map tasks as unallocated and reschedules them onto other map worker machines, replacing the failed machine.
+
+All reduce workers that still need data from the failed map worker are notified of the replacement map worker(s) and so the reducers switch to reading form the local disks of those replacement map workers.
+
+When a map task finishes, it sends a notification to the Master and includes names of the local temporary files where the map outputs are: if the master receives such a notification for a task that has already been completed by a different worker, it ignores it, else it records the completion data.
+
+\subsection{Google File System (GFS)}
+When Google started, it committed to building a huge scalable distributed storage capability using cheap commodity components. The components used were cheap and therefore unreliable, so `normal failure' had to be something dealt with by hte file storage system. GFS delivers this.
+
+Files in GFS are divided into fixed-sized 64Mb blocks called \textbf{chunks}. Each chunk is assigned a unique i.d. called a \textbf{chunk handle}. Chunks are stored on \textbf{chunkservers}. Fault tolerance is provided by replicating each chunk across multiple servers. Meta-data needs to be recorded to GFS knows what is where.
+
+GFS consists of three main component types:
+\begin{itemize}
+    \item GFS Master Server (x1)
+    \item GFS Chunk server (multiple)
+    \item GFS Client (multiple)
+\end{itemize}
+
+\section{BigTable}
+BigTable manages large-scale structured data; designed to reliably scale to petabytes of data spread across thousands of machines. BigTable is widely applicable within Google. Workload types vary from batch processing jobs where data-throughput rates are key. It is also the seminal ``NoSQL'' database: ultra large scale, but not fully relational. The locality of the data is under the control of the client.
+
+A BigTable \textit{cluster} is a set of processes running BigTable. Each cluster serves a set of \textit{tables}. Each table is a sparse, distributed, persistent, sorted \textit{map}. The map is from three dimensions (row, column, time) onto a string value (a \textit{cell}). The rows contain data sorted in alpha-order by row key. Rows with consecutive keys are grouped into \textit{tablets}. A table can have any number of columns; the keys of which are grouped into sets called \textit{column families}. Different cells can contain multiple versions of the same data differentiated by a \textit{timestamp}. Garbage collection can keep the most recent $n$ versions of data and/or only keep data that is within $n$ seconds of `now'.
+
+The API of BigTable gives access to functions for:
+\begin{itemize}
+    \item put/get of table entries
+    \item creating/deleting tables and column families
+    \item changing metadata associated with clusters, tables, and column families
+\end{itemize}
+
+Clients can provide scripts that are executed on BigTable servers: scripting languages called \textit{Sawzall}; client scripts are unable to write back into BigTable, but they can produce filtered, summarized and transformed data from the table. BigTable can be an input source to, or an output target from, MapReduce. The read/write access to disk is via GFS.
+
+\subsubsection{SSTables}
+BigTable internally uses \textbf{sorted-string tables} (SSTable), which are an immutable file format, to store data. There isn't much public information on SSTable, but there is an open-source release of this called \textbf{LevelDB}, written in Ruby, that is very similar to how BigTable uses SSTables.
+
+\subsubsection{Chubby/Paxos}
+\textbf{Chubby} is a distributed lock service for shared-resource access synchronisation: a system that prioritises availability and reliability rather than high performance. It implements \textbf{Paxos}.
+
+\subsection{Spanner}
+Spanner is Google's globally distributed database. It is so called as it `spans' the entire globe; data physically located in any data center anywhere on the planet should be seamlessly accessible and \textit{consistent}. NoSQL approaches like BigTable can store data across multiple datacentres, but ensuring the data is consistent in all locations is very hard. It is an issue due to latency between regions.
+
+Timestamping is used to combat this and is usually done via Network Time Protocol (NTP). NTP can sometimes cause problems, however, such as the subtraction of a leap-second that caused several web services to go down.
+
+For Spanner, Google ignored NTP and developed \textit{TrueTime}. Spanner data-centers are equipped with their own atomic clops, and with GPS receivers to get time reference from GPS signals. The clocks and GPS Rx feed time data to a number of master servers. The masters disseminate time data to all other server machines in the DC. Each server runs a daemon that constantly chekcs with the masters in the local DC and in other DCs to get the time reference signals and to compute this from a consensus view on what the real time is. This means that data can be committed to DCs at multiple difference locations and the common clock means that there is no dispute about which one happened first.
+
+Using Spanner, Google can accurately replicate data across multiple data centres. This gives greater system resilience as any outage can be quickly addressed by firing up the most recent replica or mirror image. It also reduces latency, since if one replica is getting a lot of hits, and a backlog is building up, requests can be diverted to another replica. Spanner automatically shards data across data-centers around the world and automatically reshards data as the amount of data or number of servers changes. Load balancing is done automatically.
+
+The upfront costs for these clocks and GPS technologies are in the thousands of dollars, but spread across the data centers on a per server basis, they are actually quite cheap.
+
+Spanner offers a number of novel features:
+\begin{itemize}
+    \item Applications given fine-grain dynamic control of data replication configs.
+    \item Externally consistent reads and writes
+    \begin{itemize}
+        \item External consistency guarantees that a transaction will always receive current information. A system is said to provide external consistency if it guarantees that the schedule it will use to process a st of transactions is equivalent to its external schedule.
+    \end{itemize}
+    \item Globally consistent reads across the database at a timestamp.
+\end{itemize}
+
+These features enable Spanner to support a really high scaling system, with things such as consistent backups in bulk.
+
 \subsection{F1}
 F1 is Google's NoSQL database. It is built on Spanner and uses five replicas spread across the US. It is a rewrite of Google's advertising backend.
 
