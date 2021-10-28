@@ -549,5 +549,92 @@ In reality, the supply and demand curve isn't as smooth as it is in theory. This
 
 The results of an experiment of random agents creating artificial trades concluded that most of the intelligence is in the market, and not the traders. These `zero-intelligence' agents were surprisingly human like when they were constrained to make offers and bids that would not make them a loss.
 
+\section{Empirical Methods}
+\subsection{Confidence intervals}
+If you have $n$ sets of $k$ samples, you have $n$ estimates of the population mean $\mu$. You often are unable to get a perfect estimate in finite time, but you may be able to get bounds: $c_1, c_2$ such that
+\begin{align*}
+Pr(c_1 < \mu < c_2) = 1 - a
+\end{align*}
 
+$[c_1,c_2]$ is the \textit{confidence interval}. $a$ is the \textit{significance level} ($0 < a < 1$ and $0.1$ is common)
+
+One way to get a particular CI (confidence interval) is to take a lot of samples, and then compute the percentiles. Often, it is better to approximate via the \textit{central limit theorem}: for large numbers of samples ($n > 30$), sample means can be treated as coming from a normal distribution with mean = $\mu$ and standard deviation = $\sigma / sqrt(n)$ (the standard error). $(1-a)$Cl then given by:
+\begin{align*}
+\bigg (\bar x - z_{1-\frac{a}{2}} \cdot \frac{s}{\sqrt n}, \bar x + z_{1-\frac{a}{2}} \cdot \frac{s}{\sqrt{n}} \bigg )
+\end{align*}
+
+\subsection{Comparing method A with method B}
+Calculate CI on samples from both A and B.
+\begin{itemize}
+    \item If the confidence levels don't overlap at all and one is clearly higher, we can conclude that the method higher is definitely better.
+    \item However, if the confidence levels overlap and the means are in the bounds of the other's confidence levels, then at the stated confidence levels, there is no difference between A and B.
+    \item If the CIs overlap, but neither mean is in the others confidence levels, we need to do a better test.
+\end{itemize}
+
+\subsection{Choosing a test}
+\textbf{Parametric tests} require these assumptions usually:
+\begin{itemize}
+    \item Independent observations (unless paired data)
+    \item Observations are random draws from a normal/gaussian distribution
+    \item Observed (dependent) variable is measured on at least an interval scale
+    \item $n \ge 30$ usually advised
+    \item Data are drawn from populations having equal variance
+    \item Hypotheses usually about numeric values especially about hte mean
+    \item Often also requires
+    \begin{itemize}
+        \item Symmetric, mesokurtic
+        \item Homoscedasticity
+        \item Equal cell-sizes in the data table
+    \end{itemize}
+\end{itemize}
+
+\textbf{Non-parametric} tests require these assumptions usually:
+\begin{itemize}
+    \item Independent observations (unless paired data)
+    \item Few assumptions regarding the population's distribution
+    \item Scale of measurement of dependent variable may be normal or ordinal
+    \item Primary focus is on rank-ordering and/or frequencies of data
+    \item Hypotheses are usually about ranks, medians, or frequencies of data.
+    \item Sample size requirements are less stringent than those for parametric tests
+\end{itemize}
+
+NB: Parametric tests are often described as `distribution-free', but theyre more accurately described as `distribution-free-er'.
+
+\subsubsection{Wilcoxon-Mann-Whitney U Test}
+The U-test is:
+\begin{itemize}
+    \item A powerful test for two independent samples on a continuous dependent variable
+    \item Non-parametric version of the independent Student's t-test
+    \item Like the t-test, it compares measures of central tendency
+    \item Unlike the t-test, it uses medians instead of means, so no assumption of normal distribution
+    \item Very commonly used
+\end{itemize}
+
+The method is as follows:
+\begin{itemize}
+    \item Combine A and B into one list and sort, remembering which data from A and B
+    \item Rank the list from highest to lowest, award average rank to ties
+    \item Separate back into two samples and sum the ranks for A and B to get $R_1, R_2$.
+    \item If the null hypothesis is true, the two rank sums should be `similar'
+    \item Compute $U_1 = n_1 . n_2 + ((n_1(n_1+1))/2) - R_1$
+    \item Compute $U_2 = n_1 . n_2 + ((n_2(n_2+1))/2) - R_2$
+    \item Compute $U = \min(U_1, U_2)$
+    \item Compare $U$ to \textit{critical value} for $U_{n_1, n_2, \infty}$ (from a lookup table of critical values)
+    \item If $U<U_{n_1,n_2,\infty}$ then reject null hypothesis
+\end{itemize}
+
+To use this test, we need:
+\begin{itemize}
+    \item Independent variable has two groups
+    \item Dependent variables measurement scale is at least ordinal
+    \item Data are randomly selected samples from two independent groups
+    \item Population distributions of the dependent variable for the two groups share a similar (unspecified) shape but have differences in measures of central tendency
+\end{itemize}
+
+NOTE: Avoid $N$ multiple pairwise tests, as accuracy falls off really quickly.
+
+We have a better test for the kind of things we are looking at, which is called the RRO test (robust rank-order test), but we will not be covering it here.
+
+\subsection{Adjacent Values}
+Adjacent values are indicators of the extent of \textit{tails} of the distribution. The \textit{upper adjacent values} is the largest actual value in the data-set that is less than twice the inter-quartile range greater than the median. The \textit{lower adjacent value} is the smallest actual value in the data-set that is greater than the point twice the inter-quartile range less than the median.
 \end{document}
