@@ -693,4 +693,45 @@ Regular caches distribute evenly across buckets as a function of $n$. However, i
 \subsection{Database scaling}
 Database scaling is one of the harder things to scale. One technique is \textbf{read-replicas}, but this is not good for writing. Another example is \textbf{sharding} (looked at above). 
 
+\subsection{F1}
+F1 is Google's NoSQL database. It is built on Spanner and uses five replicas spread across the US. It is a rewrite of Google's advertising backend.
+
+F1 chose to use Spanner over other solutions for several reasons:
+\begin{itemize}
+    \item Spanner removes the need to manually reshard
+    \item Spanner provides synchronous replication and automatic failover
+    \item F1 requires strong transactional semantics and this is not practical in other NoSQL systems.
+\end{itemize}
+
+F1 has several design goals:
+\begin{itemize}
+    \item \textbf{Scalability}: scale up, trivially and transparently, just by adding resources
+    \item \textbf{Availability}: system must never go down
+    \item \textbf{Consistency}: provide ACID transactions
+    \item \textbf{Usability}: full SQL support, without using SQL
+\end{itemize}
+
+\section{The Hadoop Ecosystem}
+Originally, there was Hadoop, which is Apache's answer to MapReduce. Of course, Hadoop needed something like GFS, which Apache dubbed HDFS.
+BigTable was needed, and this was called HBase. These three projects were known as `The Hadoop Core'.
+
+Writing MR jobs is pretty tricky, so some programmatic abstraction was required. This was called Apache Pig. Additionally, they needed an SQL-like query language, which they called Apache Hive.
+
+\textbf{Mahout} is Apache's scalable machine learning platform, and runs on Hadoop/Spark. It provides tools for using Hadoop to create systems that perform clustering, classification, and collaborative filtering at high sped on large data sets.
+
+\textbf{Giraph} is a graph database system used by Hadoop.
+
+\subsection{Hive}
+Hive is best suited to \textit{data warehousing}. It operates on relatively static data where the response time is not critical. It has its own SQL-like query language called HiveQL/HQL, which is much more concise than lower level MR code.
+
+Routes into Hive could either be a CLI, a web interface, or programmatically. Hive has a \textbf{driver} that compiles input, optimises computation and executes subjobs.
+
+\subsection{Pig}
+Pig is actually short for Pig Latin, and works on HDFS and NoSQL. Users describe how data is read/processed/stored in parallel. Dataflows could be linear or DAG (directed, acyclic graph). Interestingly, it has no if/for/while. Unlike SQL/HQL, Pig allows users to describe exactly how data will be processed.
+
+\subsection{Cascading}
+Similar to Hive and Pig, it is another layer on Hadoop, extending its use. It is still in development. Cascading lets you specify plans for queries. It provides a set of operators and tools for combining them into a DAG (as used in Pig). Each vertex in the DAG is an operator, and data flows from operator to operator. Therefore, it's very similar to Pig, except the graph can be displayed.
+
+Once one job is finished, the next queued job is woken up, and then begins executing.
+
 \end{document}

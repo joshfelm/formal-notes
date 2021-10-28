@@ -584,4 +584,70 @@ Testing agents in a \textit{homogeneous} market is sometimes not good, since for
     \item \textbf{Balanced test} --- Tested in a completely split market where each agent has a counterpart
 \end{itemize}
 
+\subsection{Options and Betting Markets}
+So far, we have looked at how to make money, which simply has been buy low, sell high. This only works (and is profitable) when prices are rising. If prices are falling, with our current knowledge there is no good time to buy. We will look at this here.
+
+\subsubsection{Short-selling}
+To \textit{go long} on X means to buy X, expecting the price to rise (a \textit{bullish} position). To \textit{go short} on X means to sell X, expecting the price to fall (a \textit{bearish} position). This is often abbreviated to just long/short.
+
+Short-selling:
+\begin{enumerate}
+\item Borrow n*XYZ from a lender
+\item Sell n*XYZ now (time = $t_1$) at price $P_1$
+\item Price of XYZ falls to $P_2$
+\item At time = $t_2$ buy n*XYZ at $P_2$ and return to lender
+\item Profit = n*($P_1 - P_2$) - LenderFee - costs (could be storage/insurance/transport)
+\end{enumerate}
+
+\subsubsection{Derivative Contracts}
+There are contracts that keep track of this called \textit{derivative contracts}. These are contracts that \textit{derive} their value from some other asset (known as underlying). There are lots of types, but we will look at two:
+\begin{itemize}
+    \item \textbf{Future}: contract that \textit{will} be executed by/on a set delivery date
+    \begin{itemize}
+        \item Futures contracts are required to be executed
+        \item When issued, it specifies the forward price
+        \item On the delivery, the contract is executed at the forward price
+        \item The buyer of the forward is called the \textit{long position} and the seller is the \textit{short position}
+    \end{itemize}
+    \item \textbf{Option}: contract that \textit{may} be executed by/on the expiry date
+    \begin{itemize}
+        \item Options contracts confer a right (but not obligation) to execute
+        \item Option specifies a strike price (or strike) aka the exercise price
+        \item Options ot sell are puts, options to buy are calls
+    \end{itemize}
+\end{itemize}
+
+Both futures and options are \textit{standardised} (size of contract and expiry date are prespecified) and \textit{exchange-traded} (traded in a secondary market on an exchange, just like stocks and shares).
+
+\subsubsection{Equity Options}
+One options contract is right to buy/sell N shares (N=100). the price of the option depends on the price of underlying, strike and risk premium. The \textbf{Strike price} is the price at which you can buy or sell underlying on exercise. The \textbf{Expiry} is the last date on which you can exercise option (two types, \textit{American} options, where exercise happens any date up to expiry and \textit{European} options, where exercise happens only on the expiry data also called maturity). The option is written/issued by its seller, and held/exercised by its buyer.
+
+The option price is determined by three factors:
+\begin{itemize}
+    \item \textbf{Intrinsic value}: money received if the option is exercised now
+    \item \textbf{Volatility premium}: dependent on underlying's price volatility
+    \item \textbf{Time value}: potential risk-free return on money saved wrt buying underlying.
+\end{itemize}
+
+Call options:
+\begin{itemize}
+    \item Right to buy N units of underlying
+    \item Option-holder can buy at strike price
+    \item If exercised, option writer must sell N shares at strike price
+    \item In-the-money if the underlying price is greater than the strike price
+    \item Out-of-the-money if the underlying price is less than the strike
+    \item At-the-money if underlying is the same as strike
+\end{itemize}
+
+Puts options:
+\begin{itemize}
+    \item Right to sell N units of underlying
+    \item Option-holder an sell at strike price
+    \item If exercised, option-writer must buy N shares at strike price
+    \item In-the-money if the underlying price is greater than the strike price
+    \item Out-of-the-money if the underlying price is less than the strike
+    \item At-the-money if underlying is the same as strike
+\end{itemize}
+
+
 \end{document}
