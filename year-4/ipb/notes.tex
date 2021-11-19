@@ -428,4 +428,227 @@ We also need to model the sensitivity of the receiver as well as the behaviour o
 
 \subsection{Relationship between Differential entropy and Shannon's entropy}
 Let $\delta = x_{i+1} - x_i$. Consider the discrete random variable $X^\delta$. Now, instead of the continuous distribution we had before, we now have a discrete representation of the interval (differentiation by first principle (by faking it)). A more elegant approach to this is the \textbf{mean value theorem}. This is where you choose two heights for the histogram: the first being the lowest possible point, and the other being the highest, and then choosing the mean point of this.
+
+\subsection{Mutual information for continuous probabilities}
+The differential mutual information is:
+\begin{align*}
+I(X,Y) = \int p(x,y) \log_2 \frac{p(x,y)}{p(x)p(y)}
+\end{align*}
+
+And satisfies the same identities as the mutual information:
+\begin{align*}
+I(X,Y) = h(X) + h(Y) - h(X,Y)
+\end{align*}
+
+It has some advantages over the differential entropy; in particular, it is invariant under changes of variable in $X$ and $Y$. The differential mutual information is the same as the mutual information in the sense that, using the notation above:
+\begin{align*}
+I(X^{\delta x}, Y^{\delta y}) \rightarrow I(X,Y)
+\end{align*}
+
+as $\delta x$ and $\delta y$ approach zero. Furthermore,
+\begin{align*}
+I(X,Y)) \ge 0
+\end{align*}
+
+\subsection{Applications of differential entropy}
+The sick part of entropy is its relationship to communication through the source coding theorem. At first, it might appear that there is no analogous set of ideas for differential entropy since, in a sense, the amount of information encoded in the outcome of a continuous variable must be infinite if read to infinite precision. However, of course, in real world communication, nothing is read to infinite precision and there is a theory of communication using continuous signals which includes the signal noise and imprecision of signal transmission. we won't look at this here, and instead consider the example of infomax.
+
+\section{Infomax}
+This is another information theory example we will consider. It is an approach to \textit{unmixing} data, and gives an in-principle explanation for how the brain might perform auditory source separation. In other words, it shows how source separation might be performed.
+
+The problem is as follows: imagine you are in a crowded room (classically at a \textit{cocktail party}. Lots of people are talking, but if oyu concentrate on one voice at a time, you can separate it from the racket. The opposite effect can be observed when meditating or sitting in thoughtful silence, where we suddenly notice how loud distant noises are. These sounds are filtered without thinking. This is called auditory source separation and the question of how to do this is called the \textbf{cocktail party problem}.
+
+The problem can be formalised. Given the sources $\mathbf{s}(t)$ where $\mathbf{s}$ is a vector over multiple sources. Now we do source separation with only two recordings, one for each ear. Here, we are just going to consider the simpler problem of source separation when there are many recordings as there are sources, we also assume the mixin is linear and instantaneous. Real mixing of auditory sources in a room will only have these properties approximately. Using this assumptions, we have:
+\begin{align*}
+\mathbf{r}(t) = M\mathbf{s}(t)
+\end{align*}
+with $M$ being a square mixing matrix. Our goal is to find the unknown source signals $\mathbf{s}(t)$ from the known recordings $\mathbf{t}$
+
+Although it makes little difference, we will restrict ourselves to two sources, so $\mathbf{s}$ and $\mathbf{r}$ are two-dimensional vectors and $M$ is a two by two matrix.
+
+We assume the two sources are independent $p_{s1,s2} = p_{s1}p_{s2}$; the point of source separation is to unmix independent sources. Now, we want to find the unmixing matrix $W$ so that knowing:
+\begin{align*}
+\mathbf{x}(t) = W\mathbf{r}(t)
+\end{align*}
+
+is as good as knowing the sources. Since we know $\mathbf{x} = WM\mathbf{s}$, we want $WM$ to be a diagonal matrix multiplied by a permutation matrix. Changing the amplitude of the source, or reordering doesn't matter. This means that
+\begin{align*}
+WM = \text{diag}(d_1,d_2)
+\end{align*}
+
+or
+\begin{align*}
+WM= \begin{pmatrix}
+    0 & d_1 \\
+    d_2 & 0
+\end{pmatrix}
+\end{align*}
+
+where $d_1$ and $d_2$ are real numbers. Hence:
+\begin{align*}
+\mathbf{s} \rightarrow^\text{mixing} \mathbf{r} = M\mathbf{s} \rightarrow^\text{unmixing} \mathbf{x} = W \mathbf{r}
+\end{align*}
+
+
+One difficulty with looking at this problem is that it involves continuous random variables, while we have so far only looked at the discrete case. For this reason, some of the results will just be quoted. Some changes are that we get:
+\begin{align*}
+h(X) = -\int p(x) \log p(x) dx
+\end{align*}
+
+But it is no longer always positive.
+
+now, the idea is to solve the problem by using the face that $S_1$ and $S_2$ are independent. We only need to find $W$ so that $X_1$ and $X_2$ are also independent. One approach could be to decorrellate the random variables:
+\begin{align*}
+C(X_1,X_2) = \langle (X_1 - \langle X_1\rangle)(X_2 - \langle X_2 \rangle ) \rangle _{(X_1,X_2)}
+\end{align*}
+
+where the expectation value for continuous random variable has the obvious definition:
+\begin{align*}
+\langle g(X) \rangle = \int p_X (x) g(x) dx
+\end{align*}
+
+It is easy to check that the correlation vanishes if $X_1$ and $X_2$ are independent, however, the flaw in this approach is that the converse is not true. It is possible to have zero correlation while still having statistical dependence.  to see this, imagine that $EX_1$ and $EX_2$ are zero and that we have chosen $W$ so that the correlation matrix is the identity:
+\begin{align*}
+C_ab = C(X_a, X_b) = 1
+\end{align*}
+
+It is then easy to see that rotations:
+\begin{align*}
+\begin{pmatrix}
+    X_1' \\
+    X_2'
+\end{pmatrix}
+= 
+\begin{pmatrix}
+    \cos \theta & \sin \theta \\
+    =\sin \theta & \cos \theta
+\end{pmatrix}
+\begin{pmatrix}
+    X_1 \\
+    X_2
+\end{pmatrix}
+\end{align*}
+
+do not change the correlation matrix. For this reason, the decorrelation prescription has a rotational ambiguity and something more is needed. That is to require that $I(X_1,X_2) = 0$ since this happens if and only if $X_1, X_2$ are independent. The problem is that $I(X_1,X_2)$ is pretty had to calculate. So, infomax basically just looks at $h(X_1,X_2)$:
+\begin{align*}
+I(X_1,X_2) = h(X_1) + h(X_2) - h(X_1, X_2)
+\end{align*}
+
+Maximising the joint entropy $h(X_1,X_2)$ will give a \textit{minimum} of the mutual information, meaning the variations in the individual entropies $h(X_1)$ and $h(X_2)$ can be ignored. Unfortunately, due to the possibility of trivially scaling the entropy, $X_a \rightarrow \lambda X_a$ causes the joint entropy $h(X_1, X_2) \rightarrow h(X_1,X_2) + \log |\lambda|$ so $h(X_1,X_2)$ can be made arbitrarily large by scaling, something that tells us nothing about mixing and unmixing. Inspired by the behaviour of neurons, this is solved by adding a saturation non-linearity:
+\begin{align*}
+y_1 = g(x_1 + w_1) \\
+y_2 = g(x_2 + w_2)
+\end{align*}
+
+where
+\begin{align*}
+g(u) = \frac{1}{1+e^{-u}}
+\end{align*}
+
+Is a saturating non-linearity so $g : (-\infty, \infty) \rightarrow (0,1)$
+
+This leaves us with:
+\begin{align*}
+\mathbf{s} \rightarrow^\text{mixing} \mathbf{r} = M\mathbf{s} \rightarrow^\text{unmixing} \mathbf{x} = W\mathbf{r} \rightarrow^\text{non-linearity} \mathbf{y} : y_a = g(x_a + w_a)
+\end{align*}
+
+From here on, we will write
+\begin{align*}
+y_a = g(x_a + w_a) = f(r_1,r_2:W,w_1)
+\end{align*}
+
+where $f$ is the function parameterised by $W$ and $w_a$ mapping from the recording to $y$. Before considering the source separation problem, lets look at the effect of the non-linearity on its own. We consider the one-to-one case:
+\begin{align*}
+r \rightarrow^\text{multiply} x = Wr \rightarrow^\text{non-linearity} y = g(x + w) = f(r;w,W)
+\end{align*}
+
+Where $W$ and $w$ are now both scalars and $r,x,y$ are outcomes for random variables $R,X,Y$. We consider maximising the entropy $h(Y)$, which maximises the information in $Y$ about $R$:
+\begin{align*}
+I(R;Y) = h(Y) - h(Y|R)
+\end{align*}
+
+However, $h(Y|R)$ is constant since $R$ determines $Y$. In the discrete case, we are familiar with, this would be easy to discuss since it would just be zero. In the continuous case, its not that simple. Its actually negative infinity, but the consequence is the same (it doesn't depend on $W$ and $w$). To maximise $h(Y)$ we need to calculate derivatives and these are calculable and well defined, even if the quantity being differentiated is not. In this case:
+\begin{align*}
+h(Y) = - \int p(y) \log p(y) dy
+\end{align*}
+
+and this is estimated by
+\begin{align*}
+h(y) = -\log p(y)
+\end{align*}
+
+In other words, if $n$ values of $y$ are drawn from $Y$ then
+\begin{align*}
+\frac{1}{n} \sum_i h(y_i) \rightarrow h(Y)
+\end{align*}
+
+as $n$ gets large.
+
+Of course, we do not have $p_Y(y)$ and it would be difficult to estimate, but we actually don't need it to get hte derivative of $h(y)$. We have seen that already since $y = f(r;W,w)$
+\begin{align*}
+p_Y(y) = \frac{p_R[r = f^{-1}(y)]}{|f'(f^{-1}(y))|}
+\end{align*}
+
+so
+\begin{align*}
+h(y) = -\log p_R (r) + \log |f'|
+\end{align*}
+
+and $p_R(r)$ is independent of the parameters. Now, for our choice of saturating and non-linearity
+\begin{align*}
+g(u) &= \frac{1}{1 + \exp(-u)} \\
+\frac{dg}{du} &= g(1-g)
+\end{align*}
+
+and hence
+\begin{align*}
+\log |f'| = \log W + \log f + \log (1-f)
+\end{align*}
+
+Now we know $f$:
+\begin{align*}
+f = g(Wr + w)
+\end{align*}
+
+so
+\begin{align*}
+\frac{df}{dW} = rf(1-f)
+\end{align*}
+
+and hence
+\begin{align*}
+\frac{dh(y)}{dW} = \frac{1}{W} + \frac{1}{f}rf(1-f) - \frac{1}{1-f}rf(1-f) = \frac{1}{W} + r(1-2y)
+\end{align*}
+
+Similarly
+\begin{align*}
+\frac{dh(y)}{dw} = 1-2y
+\end{align*}
+
+these quantities $r,y,W$ are numbers we have access to:
+\begin{itemize}
+    \item $W$ is a parameter,
+    \item $r$ is the recorded signal
+    \item we can sample $r(t)$ at a set of times to get a set of $r$s
+    \item $y$ is a function of $s$.
+\end{itemize}
+
+Now, we choose a starting $W$ and $w$ and estimate the gradient and then change $W$ and $w$ a small amount, repeating until the optimum values are found. The optimum value would look like
+\begin{align*}
+f(r) = \int_{-\infty}^{r} p_R(u) du
+\end{align*}
+
+Now, we don't know $p_R(r)$ and we chose $f(r)$ at the start, here it is a member of a two-parameter family of functions parameterised by $W$ and $w$. Ideally, if the derivative of the saturating non-linearity is somewhat close to the distribution of $R$, then infomax will find the $W$ and $w$ that line everything up so that $Y$ will have something close to an even distribution.
+
+In out two to two case, we want to maximise $h(Y_1,Y_2)$, the idea being that this should find a matrix $W$ whose eigen-directions give statistically independent $Y_a$, this is the bit we want since it will make $X_a$ independent. Doing this calculation gives:
+\begin{align*}
+\frac{dh(y)}{dW_{ab}} &= (W^T)_{ab}^{-1} + r_a (1-2_{yb}) \\
+\frac{dh(y)}{dw_a} &= 1-2_{ya}
+\end{align*}
+
+allowing the maximum of $h(Y_1,Y_2)$ to hopefully be found. This should unmix the signal.
+
+\section{The Bayesian Brain}
+Here, we will look at the idea that the brain performs Bayesian inference on data. 
+
 \end{document}

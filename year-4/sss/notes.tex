@@ -1043,4 +1043,179 @@ Some software mitigations we can do are at the OS levels:
 
 But on an Intel CPU hyperthreading (SMT) makes exploiting \textbf{much} easier. Hyperthreading pretends that each core is essentially two cores (parallelisation is doubled). Hyperthreading should really be disabled, which is a massive shame because the performance cost of disabling this can be up to 25\%. 
 
+% ==================== WORK DONE ON 16/09 ======================== {{{
+\section{Hardware Security}
+\subsection{Rootkit}
+A rootkit is a malicious program that gives an attacker a permanent root access to a system, while simultaneously hiding its presence. It an steal information or allow remote code execution.
+
+Typically, the attacker steps are as follows:
+\begin{itemize}
+    \item Initial intrusion
+    \item Open remote access
+    \item Privilege escalation
+    \item Download the malicious payload
+    \item Install rootkit
+    \item Perform malicious action on command
+\end{itemize}
+
+On a high level, the kernel space is where hardware can be controlled. User space interacts with the kernel which in turn interacts with the hardware. Between the kernel space and the hardware, we have the \textit{virtual layer} where virtual machines are optionally managed. Our goal is to hide the rootkit in the \textit{kernel space}.
+
+\begin{lstlisting}[language=C]
+int getdents(unsigned int fd, struct linux_dirent *dirp, unsigned int count);
+\end{lstlisting}
+
+The system call \texttt{getdents()} reads several \textit{linux\_dirent} structures from the directory referred to by the open file descriptor \texttt{fd} into the buffer pointed to by \texttt{dirp}. The argument \texttt{count} specifies the size of that buffer.
+
+We are able to modify the returned value of the linux command \texttt{ls} to exclude our malicious code using \texttt{getdents()}. We can also modify the behaviour of anything that could reveal the presence of the malware and gives an easy means to obtain root privileges.
+
+There are approximately three techniques:
+\begin{itemize}
+    \item Modify the kernel code
+    \item Hooking modify where certain functions point to
+    \item Modify data structure (such as active process lists).
+\end{itemize}
+
+There are also multiple types of rootkit:
+\begin{itemize}
+    \item Application
+    \item Kernel
+    \item Virtualised
+    \item Bootloader
+    \item Hardware and firmware
+\end{itemize}
+
+\subsection{Attack Surface and Trusted Computing Base}
+The \textbf{attack surface} is all the possible ways for an attacker to compromise a system:
+\begin{itemize}
+    \item Users
+    \item Network
+    \item Operating systems
+    \item Software
+    \item Hardware
+    \item etc.
+\end{itemize}
+
+We will be looking at how to \textit{limit} the attack surface. One such method is \textbf{sandboxing}. This is the process of isolating certain applications that might not be from a trusted source, where even if the code is malicious, we limit the spread of the code.
+
+We want to define our sandbox with the following parameters:
+\begin{itemize}
+    \item \textbf{Security}: Goal vs adversary
+    \item \textbf{Policy}: Goal you want to achieve
+    \begin{itemize}
+        \item Confidentiality
+        \item Integrity
+        \item Availability
+    \end{itemize}
+    \item \textbf{Threat model}: assumption about the adversary
+    \begin{itemize}
+        \item Reasonable assumptions
+        \item Attacker omnipotent nothing can be done
+        \item But also need to not be too weak
+    \end{itemize}
+    \item \textbf{Mechanism}: how the policy is implemented
+\end{itemize}
+
+The \textbf{trusted computing base} (TCB) is the part of the system that we trust in order to achieve the objective.
+
+\subsection{Trusted Platform Module}
+The \textbf{trusted platform module} (TPM) is:
+\begin{itemize}
+    \item Trusted computing group
+    \begin{itemize}
+        \item Microsoft, Intel, IBM etc
+    \end{itemize}
+    \item Promoting standard for more trusted computing
+    \begin{itemize}
+        \item Additional chip on the motherboard
+        \item Called TPM
+    \end{itemize}
+    \item Used for 
+    \begin{itemize}
+        \item Disk encryption
+        \item \textbf{System integrity}
+        \item Password protection
+        \item and more
+    \end{itemize}
+\end{itemize}
+
+We can achieve trust if we can verify the system has booted correctly. We assume the PC hardware has not been modified, and we need to monitor the boot process:
+\begin{itemize}
+    \item Initial boot measure by the core root of trust (CRTM)
+    \item Hash the BIOS, store results in TPM, start the BIOS
+    \item Let BIOS do its job, load next stage, hash it, store in TPM, etc.
+\end{itemize}
+
+To ensure that the boot has loaded correctly, we follow those steps to authenticate the boot.
+
+The TPM registers are:
+\begin{itemize}
+    \item Platform configuration registers (PCRs)
+    \item A PCR hold the summary of a series of values
+    \begin{itemize}
+        \item Not the entire chain of hash
+        \item The chain could be infinite
+    \end{itemize}
+    \item A PCR register is extended
+    \begin{itemize}
+        \item PCR = HASH
+        \item Shielded TPM location
+        \item Measurements are provided by software
+    \end{itemize}
+\end{itemize}
+
+For TPM, we rely on \textbf{remote attestation}:
+\begin{enumerate}
+\item An untrusted prover $P$ and a trusted verifier $V$.
+\item $V$ knows $P$ expected memory content.
+\item $V$ sends challenge with a nonce to $P$.
+\item $P$ computes a measurement.
+\item $V$ verifies the measurement.
+\end{enumerate}
+
+Remote attestation can either give:
+\begin{itemize}
+    \item Positive result
+    \begin{itemize}
+        \item Correct memory content
+        \item Good device
+    \end{itemize}
+    \item Negative result
+    \begin{itemize}
+        \item Malfunctioning/malicious device
+    \end{itemize}
+    \item No response
+    \begin{itemize}
+        \item Malfunctioning/malicious device
+    \end{itemize}
+\end{itemize}
+
+The PCR cannot be modified and only reset at reboot. TPM contains a key used to sign the attestation. The verifier will verify both the TPM certificate and the PCRs. The attestation contains the PCRs value and the sign of the PCRs against the nonce.
+
+TPM and remote attestation don't need to stop at the OS, they can realistically attest pretty much everything.
+
+There are some limitations of this, however. It is only able to verify static information. For long running applications, it might be necessary to reboot the system to do a sensitive operation. Runtime status of a device is not known, so an attacker can compromise a system during execution. Finally, reboot might not be sufficient, for example, jailbreaking an iPhone circumnavigates the `safe boot', which should only allow secure code to execute.
+
+\subsection{Intel Secure Guard Extension (SGX)}
+Intel SGX is a secure extension to the operating system. Returning to rootkits, we know that attackers can compromise pretty much everything. To avoid this, we can execute code in its own enclave, and this is where SGX hardware comes in. (NOTE: there are some vulnerabilities)
+
+The main idea is that we run an application within some isolation unit so it cannot be affected by the OS. Don't trust the OS or the hypervisor, and only the hardware is trusted, thereby reducing the attack surface to only the virtual later, or certain layers of the app.
+
+SGX prevents memory snooping attacks since security boundary is the CPU package. Data is encrypted outside the CPU, meaning it is not possible to see the data passing between hardware.
+
+Each \textit{enclave} has its own code and data. There are controlled entry points meaning that we can only enter enclave code at a specific point.
+
+The SGX application flow is as follows:
+\begin{enumerate}
+\item Define and partition application into trusted and untrusted parts
+\item App create enclave
+\item Trusted function is called
+\item Code in enclave process some secret
+\item Trusted function returns
+\item App continues as normal
+\end{enumerate}
+
+\subsection{ARM Trustzone}
+ARM Trustzone is similar to Intel SGX, but it has a secure zone that has trusted OS, and trusted application running alongside other, untrusted software. Within the untrusted zone, there will be trusted drivers that are given information from the dispatcher, run by a secure monitor that runs below all other software.
+% ================================================================ }}}
+
 \end{document}
