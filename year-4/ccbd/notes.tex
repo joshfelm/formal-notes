@@ -1061,4 +1061,173 @@ Similar to Hive and Pig, it is another layer on Hadoop, extending its use. It is
 
 Once one job is finished, the next queued job is woken up, and then begins executing.
 
+% ================ WORK DONE 16/09 ===============================
+\section{Cloud Databases: NoSQL}
+NoSQL is a really good answer to traditional RDBMs since as databases got bigger, people designed bigger single servers, where costs increase nonlinearly. Even when scaled up, they suffer from `inelasticity', in that it's hard to scale them back down again when demands reduced. Instead,  on clusters of cheap commodity servers and don't need ACID. We'll look at different types of NoSQL databases
+
+\subsection{Key-Value DBs}
+This is the simplest of NoSQL DB types. There are virtually no constraints (schemaless). A consequence of this is that they are often very fast, and don't require a heavy up-front investment in designing schema and are essentially similar to an associative array that allows any value (no typing restrictions).
+
+Keys must be unique within any one of the KV namespace, which may be the whole DB or one of several buckets within a DB.
+
+Values can be pretty much any digital object.
+
+KV pairs are often mapped to server nodes via a hash function to balance storage or processing load over them. There is no standard for KV datastores; different KVs have differing constraints:
+\begin{itemize}
+    \item Some offer ACID transactions
+    \item Some allow very big objects in values, while others have hard limits
+    \item Some constrain data-types of keys to be only string/numbers.
+\end{itemize}
+
+Some KV systems have built-in indexing of values:
+\begin{itemize}
+    \item As KV pairs are added to DB, an index is compiled of unique values
+    \item Produces a value->key LUT; index tells you all the keys for a given value.
+\end{itemize}
+
+Some KV systems auto-compress.
+
+\subsection{Document Databases}
+Document DBs manage more complex data structures than KV datastores. They are NOT stores of electronic documents.
+
+Like KVs, DocDBs don't require you to define a common structure for all records in the data store. Unlike KVs, DocDBs allow you to query and filter collections of documents as you would rows in a RDB table.
+
+In NoSQL, a `document' is a structured object: it contains information not only about the data being stored, but also how that data is structured. A document in a DocDB is at root a set of KV pairs, but some of the values can themselves be sets of KV pairs. These documents within documents are called \textit{embedded documents}
+
+Most commonly, documents are described as JSON or XML files.
+
+\subsection{Columnar DBs}
+Column-family DBs, or columnar DBs, are used for the really big data. The technical term is VLDB, very large DB. Scaling for previously discussed DBs is possible, but are either hard, or extremely costly. Google's BigTable was the birth of `column family' DBs.
+
+`Column family' comes from the fact that groups of related columns that are frequently used together can be gathered into groups, called families. columns within a family are kept together on disk, to reduce access times.
+
+The data-modeller defines the column \textit{families} prior to implementing the DB, but devs can subsequently add columns to a family.
+
+This means the designer of a DB specifies only a course grained structure. Column families are analogous to keys in KVDBs, with similar constraints wrt uniqueness of names in a namespace
+
+Like DocDBs, ColFam DBs do not require column entries in all rows.
+
+\subsection{Graph DBs}
+Some forms of data are most naturally represented in a database as a set of nodes, edges joining nodes to represent relationships between them (many to many relationships that is difficult for RDBMs and SQL).
+
+Specialised graph databases have been developed for efficient storage of such data.
+
+Most graph algorithms are iterative, travers the graph in some way, so MapReduce approach does not map onto graph processing very well.
+
+Neo4J is a newer development that seems to be en route to becoming the de facto standard and outperform Apache's Giraph. 
+
+\section{Queues and Real-time Stream Processing}
+We have already talked about message queues, but here is a recap:
+\begin{itemize}
+    \item Asynchronous
+    \item Decoupling
+    \item Resilience
+    \item Redundancy
+    \item Guarantees
+    \item Scalable
+\end{itemize}
+
+However, message queues provide no transformation or processing.
+
+Apache Kafka was originally used by LinkedIn, before being released as open source. Here are some of the features:
+\begin{itemize}
+    \item Full independence of the producer and consumer
+    \item Persistence
+    \item Distributed and replicated
+    \item Streams of records stored in categories called topics
+    \item Guarantees:
+    \begin{itemize}
+        \item Messages are appended in the order they are sent
+        \item Messages are consumed in the order they are stored
+        \item A replication factor $N$, meaning up to $N-1$ server failures are tolerated without losing messages
+    \end{itemize}
+\end{itemize}
+
+Kafka has a log-based queue, and this is the basic persistence method used. Logs are sharded and replicated, ensuring topics are not limited to one node's capacity. It also uses a pub/sub strategy, but offers extra features, such as record persistence and replication, in a similar manner to many queues.
+
+Kafka is critically dependent on Zookeeper. ZK is a distributed configuration adn synchronisation service, where Kafka stores basic metadata about clusters, consumers, etc.
+
+Kafka consumer groups can function as a queue. It also allows you to broadcast messages like pub-sub, but the Topic structure has both queue and pub/sub properties and can handle scale processing.
+
+\subsection{Real-time stream processing}
+Stream processing is the method by which data is processed from a continual stream of raw data, and can be used in things such as the Large Hadron Collider.
+
+We want both high throughput and low latency, along with fault tolerance. RTSP is also `straggler tolerant', where a straggler is an individual task who's execution time is taking much longer than expected.
+
+A stream processor has a framework providing queueing or message passing (push/pull pipelines or pub/sub).
+
+When considering RTSP, data needs to be considered:
+\begin{itemize}
+    \item Data sources: How is the data stored? (binary/string)
+    \item Size: How big is the data?
+    \item Order
+\end{itemize}
+
+It is required that messages are delivered \textit{exactly once} and messages are guaranteed to be delivered in the order they were sent. (always once and exactly once)
+
+We can use Kafka for stream processing, too. There are three approaches to extend Kafka to handle this:
+\begin{itemize}
+    \item Do it yourself
+    \begin{itemize}
+        \item Looks simple
+        \item But is actually hard
+    \end{itemize}
+    \item Fully fledged stream processing system
+    \begin{itemize}
+        \item Apache Storm, Spark, Flink, Samza
+    \end{itemize}
+    \item Lightweight stream-processing library
+    \begin{itemize}
+        \item Kafka streams included in Kafka for ages, which is powerful and easy to use.
+    \end{itemize}
+\end{itemize}
+
+\section{Spark}
+Complex jobs, interactive queries and online processing all need efficient primitives for data sharing, but in MapReduce, the only way to share data across jobs is stable storage (like the file system).
+
+MapReduce would require a lot of I/O operations, and these calls could take up to 90\% of the processing time. An alternative to this is \textit{in-memory data sharing}. The basic idea is that we just write, well, in memory, rather than return to the disk every time. It can be between 10 or 100 times faster.
+
+Spark and other \textbf{resilient distributed databases (RDDs)} is the technology that allows this.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={RDD},
+nobeforeafter,
+halign lower=flush right, ]
+An Rdd is:
+\begin{itemize}
+    \item An immutable, partitioned, logical collection of records that can be stored in memory across the cluster
+    \item May be partitioned by a key in each record
+    \begin{itemize}
+        \item A key that partitions in a smart way improves performance
+    \end{itemize}
+    \item May not be \textit{materialized} until needed
+    \item May be \textit{cached} in memory if repeated use is anticipated (can also tell the system to cache data)
+\end{itemize}
+\end{tcolorbox}
+
+RDDs are created and manipulated through applying bulk transformations on disk or in memory (map, filter, join). Outputs to the driver node are generated by applying actions in parallel to RDDs (reduce, collect, count). RDDs are \textit{lazy}; they don't materialize data until absolutely necessary.
+
+Using an example of Log mining, we can load error messages from a log into memory and then interactively search for various patterns:
+\begin{lstlisting}
+lines = spark.textFile("...")
+errors = lines.filter(_.startsWith("ERROR"))
+messages = errors.map(_.split('\t')(2))
+messages.cache() // expected to use it again
+
+messages.filter(_.contains("foo")).count
+messages.filter(_.contains("bar)).count
+\end{lstlisting}
+
+we have to care about fault tolerance in RDDs quite a lot, so here's how it is done:
+\begin{itemize}
+    \item Fault recovery without costly replication:
+    \begin{itemize}
+        \item Rather than just checkpointing data
+        \item Just remember the series of transformations that built an RDD and use this series to re-compute the lost data if required.
+    \end{itemize}
+    \item  
+\end{itemize}
+% ===================================================================
+
 \end{document}
