@@ -755,5 +755,292 @@ Intel Pin is a dynamic binary instrumentation tool. It supports both Linux and W
 
 Pin allows the full examination of any x86 instruction, tracking function calls (including library and sys calls), and tracking application threads, among others.
 
+\subsection{Fuzzing}
+Fuzzing is a type of analysis. It's not like fuzzy matching, or fuzzy logic, it is something else. It tests to see if memory corruption bugs are actually \textit{exploitable}, that is to say we can wrangle it for nefarious uses. This matters because the number of vulnerabilities per year is going up. This means that the system itself is less secure.
+
+The process is to run a program on many \textit{abnormal/malformed} inputs and look for unintended behaviour. An observable side effect is essential, and it should be scalable. The underlying assumption is that if the unintended behaviour is dependent on an input, an attacker can craft such an input to exploit a bug.
+
+There are multiple types of fuzzing:
+\begin{itemize}
+    \item Input based: mutational and generative
+    \begin{itemize}
+        \item Mutate seed inputs to create new test inputs
+        \begin{itemize}
+            \item Simple strategy is to randomly choose an offset and change the byte
+            \item Pros: Very easy to implement and low overhead
+            \item Cons: Highly structured inputs will become invalid quickly because it has low coverage.
+        \end{itemize}
+        \item Generation Based: Learn/create the format/model of the input and based on the learned model, generate new inputs
+        \begin{itemize}
+            \item Well-known file formats
+            \item Pros: Highly effective for complex structured input parsing applications because it has high coverage
+            \item Cons: Expensive as models are not easy to learn or obtain
+        \end{itemize}
+    \end{itemize}
+    \item Application based: black and white box
+    \begin{itemize}
+        \item Black box: Only the interface is known
+        \item White box: Inner workings of the program are known. Application can be analysed and monitored (can use static and dynamic analysis). Normally means we have the source code
+    \end{itemize}
+    \item Input Strategy: memory-less and evolutionary
+\end{itemize}
+
+The problem with traditional fuzzing is that if we use black-box and mutation, we are essentially aiming with luck. Think shit and walls. So, if we apply more heuristics to mutate better and learn good inputs, we can apply more analysis to understand the application behaviour. This is known as \textit{smart/evolutionary fuzzing}:
+\begin{itemize}
+    \item Recall: memory-less and evolutionary fuzzing
+    \item Rather than just throwing inputs at the program, \textit{evolve them}
+    \item The underlying assumption is that inputs are parsed enough before going further deep in execution
+\end{itemize}
+
+This will take some time and resources, so the scalability may be affected; do we have access to the resources and the required time to get this.
+
+The feedback to enable the fuzzing to evolve should be either
+\begin{itemize}
+    \item Code-coverage based fuzzing
+    \begin{itemize}
+        \item Most of the contemporary fuzzers are here
+        \item Uses code-coverage as the proxy metric for the effectiveness of a fuzzer
+    \end{itemize}
+    \item Directed fuzzing
+    \begin{itemize}
+        \item This method is not much explored
+        \item The idea is that there should be a way to find the destination and a sense of direction.
+    \end{itemize}
+\end{itemize}
+
+For smart code-coverage based fuzzers, it is important to have some knowledge about:
+\begin{itemize}
+    \item Where to apply mutation (which offsets in input)
+    \item What values to replace with
+    \item How to avoid traps (paths leading to error handling code)
+\end{itemize}
+
+\textbf{Symbex} can be used in combination with fuzzing and it means \textit{symbolic/concolic} execution. Unfortunately, Symbex is not very scalable because symbolic execution programs are very resource heavy. It does allow us to collect strings, however. We are able to enhance the scaling capabilities of symbex:
+\begin{itemize}
+    \item Native execution, contrary to IR based execution in existing symbex tools
+    \item Instruction-level symbolic execution
+    \item Optimistic solving
+\end{itemize}
+
+\textbf{VUzzer} goes even further with more analysis. The main idea is to prioritise/deprioritise certain paths, as some can be difficult to execute because they are guarded by constraints (nested conditions). They also leverage the application's control and data-flow features to infer input properties. It combines both static and dynamic analysis along with heuristics to improve coverage.
+
+There are still problems, though. We are unaware of whether offset is processed by the application, which is a waste of mutation time. Also, we don't know what or where to mutate, since different bugs have different triggering conditions.
+
+Evaluating fuzzers is also pretty hard, because how do we measure efficiency?
+\begin{itemize}
+    \item Could measure code-coverage, but what about directed fuzzers?
+    \begin{itemize}
+        \item Also for binary only fuzzers, measuring code coverage is not that straight forward.
+        \item For Code based fuzzers, what about library code?
+    \end{itemize}
+    \item Uniqueness of crashes
+    \begin{itemize}
+        \item How do you differentiate between several crashes? Often, coredump does not have enough information
+        \item Root cause analysis (not much is there)
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Fuzzing for Race Bugs}
+Applying fuzzing for data race bugs is really interesting (allegedly). Race conditions are pretty serious (we have looked at this before) so fuzzing for these is pretty important. Actually, RAZZER is a fuzzer that was used to find some new race condition bugs in Linux. 
+
+We can fuzz the scheduler to identify these. Existing approaches are:
+\begin{itemize}
+    \item Identify shared objects
+    \item An input that executes instructions involving shared objects
+    \item Thread scheduler
+    \begin{itemize}
+        \item Rather than letting OS decide, introducing a scheduler that can control the thread scheduling
+        \item Schedule threads with respect to different ordering
+    \end{itemize} 
+\end{itemize}
+
+\section{Software Defence Mechanisms}
+We will look at compiler and OS level protections. The \textbf{stack canary} (also called security cookies) are values added to binaries during compilation to avoid buffer overflow attacks. Another method is to use W\^X (write xor execute). ASLR (address space layout randomisation) is a technique that means it is harder to get solid memory addresses in the stack.
+
+\subsection{Canaries}
+We know from buffer overflow attacks that:
+\begin{itemize}
+    \item At CALL, return address is saved on the stack
+    \item The stack grows downwards
+    \item Local buffers are allocated on the stack
+    \item Return address is POPed into the EIP
+    \item EIP can point to anywhere in the memory
+\end{itemize}
+
+We can protect against this saved return attack by:
+\begin{itemize}
+    \item StackGuard protection
+    \item Use a different prologue
+    \begin{itemize}
+        \item Push a canary into the stack
+        \item It's a constant \texttt{0x000aff0d}
+    \end{itemize}
+    \item Different Epilogue
+    \begin{itemize}
+        \item Checks to see if the canary is still there. If it has been overwritten, we know that a buffer overflow has happened
+    \end{itemize}
+\end{itemize}
+
+This works for \texttt{strcpy} because the \texttt{0x00} will stop \texttt{strcpy} from copying any further. These canaries are called \textit{terminator canaries}.
+
+Unfortunately, this isn't perfect. Local variables that are located after (on top of) \textbf{buf} are not protected. Also, the saved frame pointer EBP can be altered.
+
+StackShield is another protection method. It saves return addresses in an alternate memory space named \textbf{retarray}. Two gloabl variables are used: \textbf{rettop}, initialised on startup and is the address in memory where retarray ends. The other variable is \textbf{retptr} and is the address where the next clone is to be saved.
+
+The function prologue ensures the return address is copied from the stack to \textbf{retarray} and \textbf{retptr} is incremented. The epilogue ensures the saved clone RET is retrieved and is checked with the RET from the stack. If it has changed, we can either overwrite the changed one, or just exit.
+
+With newer versions of GCC, there is a new stack layout:
+\begin{itemize}
+    \item Function params
+    \item Function return addresses
+    \item Frame pointer
+    \item Cookie
+    \item Locally declared variables and buffers
+    \item Callee save registers
+\end{itemize}
+
+\subsection{Writeable xor Executable}
+The basic idea is that memory pages have permission to be either writeable or executable but not both. It protects against attacks that rely on code execution on data segments, and is a subclass of DEP (data execution protection).
+
+\subsection{Address Space Layout Randomisation}
+With ASLR, the predictability of memory addresses is reduced by randomising the address space layout for each instantiation of a program. Therefore, heap, stack, bss, and text section of the program get different addresses every time.
+
+\subsection{Control Flow Integrity}
+This is a strong attack mitigation technique. It restricts the control-flow of an application to \textit{valid} execution traces. The assumption is that any attack deviates from the intended execution (which is the set of precomputed or static states). At runtime, if an invalid state is detected, an alert is raised, usually terminating the application. It is not the same as bug detection because other runtime monitoring techniques like sanitisers target development setting, detecting violations when testing the program (for example, during fuzzing). CFI on the other hand is an active defence mechanism to mitigate an ongoing attack.
+
+CFI detects control-flow hijacking attacks by limiting the targets of control-flow transfers, and consists of two abstract components:
+\begin{itemize}
+    \item Static analysis component that recovers the CFG of the application (at different levels of precision)
+    \item The dynamic enforcement mechanism that restricts control flows according to the generated CFG. IT involves instrumentation (discussed earlier)
+\end{itemize}
+
+Control flow can be categorised in two ways:
+\begin{itemize}
+    \item Unconditional and conditional jumps
+    \item Direct (target known at compile time) and indirect (target is known at runtime)
+\end{itemize}
+
+Due to the write integrity of the code section, direct transfers are protected, so it is the indirect control-flow that we want to protect.
+
+\subsubsection{Types of indirect control flows}
+\textbf{Forward edge transfers} direct code forward to a new location and are used in indirect jump and indirect call instructions (such as \texttt{jmp *rax} or \texttt{callq *rbx}). \textbf{Backwards-edge transfers} are used to return to a location that was used in a forward-edge earlier (such as returning from a function call through a return instruction). Therefore, we have both forward and backwards-edge CFI.
+
+\subsubsection{Constructing CFG}
+Depending on the precision, a combination of static and dynamic CFG construction can be used. Forward edge over-approximates the targets of the indirect transfer, while indirect function calls are complex:
+\begin{itemize}
+    \item Approximates based on function prototypes
+    \item Different CFI mechanisms use different forms of type equality, so any valid function or functions with the same arity or functions with teh same signature. At runtime, any function with matching signature is allowed.
+\end{itemize}
+
+Function matching can be further enhanced by looking at \textbf{address-taken} functions. These are functions whose address is calculated and assigned. There are more complex approaches to enhance the precision such as path sensitive computations.
+
+\subsubsection{Runtime enforcement}
+For forward-edge transfers, the code is often instrumented with some form of equivalence check --- only valid targets are allowed. Each callsite and function entry-point is instrumented to check this equivalence (known as trampoline code). Backwards-edge transfers are harder to model as returns can come from any valid callsite. Shadow stacks are used to enforce the recent caller.
+
+\section{Hardware Vulnerabilities}
+We like to pretend that everything is digital and forget that hardware actually exists and can be a little bit analog. The bugs that we get from hardware can have some serious consequences for programmers.
+
+\subsection{DRAM --- Rowhammer}
+When we access memory, we activate the row in the bank by letting the capacitor discharge into an active memory buffer. We have to actively refresh the data stored in the capacitors. Unfortunately, electronic engineering is messy:
+\begin{itemize}
+    \item Capacitors are leaky!
+    \item Current in wires can induce current in other nearby wires.
+    \item 1s and 0s aren't really charged on uncharged capacitors, it's whether the capacitor is releasing more/less than a threshold voltage.
+\end{itemize}
+
+This used to be fine because electronic components were really large, but now that they're small, it's more of a problem. This leads to a bug in DRAM chips that has been known since 2010 called \textbf{Rowhammer}. The basic idea is that if you repeatedly charge and discharge a row in DRAM really quickly, it can sometimes cause errors in nearby rows. Manufacturers know about it, but it is not really documented since it is seen as a \textit{reliability} issue. Cached memory largely fixes this, too. It was also discovered that you can flip bits in memory without even accessing them.
+
+Rowhammer looks like this (in assembly)
+\begin{lstlisting}
+code1a:
+    mov (x), %eax
+    mov (y), %ebx
+    clflush (X)
+    clflush (Y)
+    mfence
+    jmp code1a
+\end{lstlisting}
+
+Say X was in row 1 and Y in row 4, if you load X into the active buffer and Y into the b buffer really really fast, you'll get errors in rows 2 and 3. Some interesting things were discovered about this:
+\begin{itemize}
+    \item Bit flips are \textit{consistent}:
+    \begin{itemize}
+        \item You might not know which bit will flip, but it will be the same bit
+        \item Same hardware generally flips the same bits
+    \end{itemize}
+    \item Double sided row hammering makes flipping bits \textit{really likely}
+    \begin{itemize}
+        \item Even in chips thought to be resistant
+    \end{itemize}
+\end{itemize}
+
+If we can get a variable held in two different rows in one bank, we can induce a random, but consistent single bit error in surrounding rows, but it is hard to know how virtual memory translates to \textit{real memory locations}. So, there will be an element of getting lucky, although we only need to get lucky once, and we can increase this luck by running many things at once.
+
+This is cool and all, but we're just producing single bit errors, so what is the use of this?
+
+\subsubsection{NaCL}
+NaCL is a sandbox for C/C++ code that aims to make things safe. The sandbox runs with privileges and checks whether a chunk of code is safe to run. If so, it loads into memory aligned on 32B boundaries. If we can corrupt this, we can run unsafe hidden code.
+
+The useful thing about x86 architecture is that there is no requirement for aligning instructions. Different instructions have different lengths, and some have multiple lengths!
+
+The code section is readable by loaded processes, so we can spot when the rowhammering has been successful.
+
+Attack method:
+\begin{itemize}
+    \item Load a sequence of safe code that have unsafe instruction-sequences at 1-bit different offsets
+    \item Rowhammer NaCL's code loading code (load NaCL into memory a lot and hope we get lucky)
+    \item Either, we get an invalid instruction sequence (crash)
+    \item Or we Rowhammer the kernels memory accidentally (crash again)
+    \item Or we get lucky!
+\end{itemize}
+
+\subsubsection{Preventing Rowhammer}
+We could buy better RAM, but how do you tell?
+
+ECC RAM is an option that can fix single bit errors and reboot on 2 bit errors (but 3 bit errors are exploitable), but it is slower and more expensive.
+
+\subsection{Speculative Execution}
+Everyone remembers the fetch decode execute and write back cycle. This is how CPUs execute programs, and this cycle takes time (for each instruction, there are 4 things to do). On modern CPUs, we are able to parallelise (\textit{pipeline}) the whole process. As one instruction has finished fetching, the next is fetched while the first decodes. And then fetch the next as the first executes and the second decodes.
+
+This works well so long as no instruction depends on the results of a prior one.
+
+It becomes a little bit sticky after a conditional jump: do you know whether the program will take the branch? You could either block until you know for sure, or guess (and we guess).
+
+If we correctly predict the branch, then great. If we get it wrong, this is fine \textit{as long as you catch it before writeback}. There are a bunch of algorithms for this, such as `always assume no', `backwards taken, forwards not', or `programmer hints'.
+
+Modern branch prediction is much more complex, and a lot of the speed in computing comes from this prediction. The basic idea is that it keeps a record of what the branch has done before and predicts on the basis of that. It's not very well documented, varies chip by chip and is pretty obscure.
+
+There are some unanswered questions here:  What happens if executing an instruction speculatively (based on branch prediction) causes data to be loaded into cache? If so, should you flush the cache on branch misprediction?
+
+\subsection{Meltdown and Spectre}
+This is a family of real world side channel attacks based on specualtive execution. Meltdown \textit{melts down} security barriers and spectre makes speculative execution scary. The attacks allow us to leak secure memory (in keys) and affects nearly all OSs and processor architectures. We do have some \textbf{software} mitigations available now, but they come at a considerable cost.
+
+\subsubsection{Spectre}
+Spectre really just looks like these two lines:
+\begin{lstlisting}
+if (x < array1_size)
+    y = array2[array1[x] * 4096]
+\end{lstlisting}
+
+\texttt{array1} is a pointer to some region of memory. We are allowed to access \texttt{array1\_size} bytes of it. \texttt{x} is controlled by an attacker and 4096 is the size of a cache page.
+
+Now, \texttt{if(x < array1\_size)} should fail, but it is going to take some time to get through the CPU pipeline. We can trick the branch predictor into guessing that the branch will be taken (make it succeed repeatedly beforehand) and then the second line will be executed speculatively.
+
+\texttt{array2[array1[x] * 4096} is going to cause a page miss, so a new page will be loaded into the CPU's cache, and that page will depend on the value of \texttt{array1[x]} which would normally trigger a segmentation fault which happens during the last stage of a CPU's pipeline.
+
+But, the exception won't be thrown because the branch predictor will catch up so the if statement should never have been taken, so all of the registers, exception flags, memory writes will be rolled back.
+
+However, the CPU's cache is NOT flushed. So, the currently cached memory page is dependent on whatever was at that illegally accessed memory address. So, if you were able to time accessing each page of memory, you could find out which page was quick to access adn that would leak the value or \texttt{array1[x]}.
+
+You can also trigger this with JS. So you could actually host a webpage on a shared server, dump all of memory for every process and user on there, and you can leak every key in memory.
+
+\subsubsection{Mitigations}
+Some software mitigations we can do are at the OS levels:
+\begin{itemize}
+    \item see \texttt{/sys/devices/system/cpu/vulnerabilities} on Linux
+    \item Not perfect, but makes it \textbf{much} harder to exploit
+\end{itemize}
+
+But on an Intel CPU hyperthreading (SMT) makes exploiting \textbf{much} easier. Hyperthreading pretends that each core is essentially two cores (parallelisation is doubled). Hyperthreading should really be disabled, which is a massive shame because the performance cost of disabling this can be up to 25\%. 
 
 \end{document}

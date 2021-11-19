@@ -739,4 +739,287 @@ Puts options:
     \item At-the-money if underlying is the same as strike
 \end{itemize}
 
+\subsection{Options Strategies}
+Of course, multiple options can be combined to create a different strategy. For example, a \textit{bullish spread} is a combination of a long call and a short call, meaning both losses and profits are capped, but prices are still going to rise. This could also be created with short and long puts. On the contrary, a \textit{bearish spread} can be created, equally from short and long put/calls, but this time the prices are going to fall. If you think the prices are not going to move much, you can create a \textit{long butterfly}, and this is created by a long call, 2 short calls, and another long call.
+
+There are lots more combinations of these, but I won't go into them here.
+
+\subsection{Betting Exchanges}
+Betting exchanges are electronic marketplaces where gamblers interact to find someone to take the opposite side of their bet: they `buy' (\textit{back}) or `sell' (\textit{lay}) the outcome of the event.
+
+Traditionally, the bookmaker sells a lay to the customer. Traditional bookies have argued that allowing anonymous customers to lay events encourages corruption because it's easier to throw a race than it is to win it.
+
+Betfair was the company that really drove this market forward. 
+
+\section{Economies of Gaming}
+Essentially RuneScape GE LOOOOL.
+
+\subsection{Economics of Game Development}
+Games have gotten exponentially bigger over time, both in terms of development teams and actual size of the codebase. This is only for the AAA games. The average game budget of the average game is on a shoe string budget, and only a tiny fraction become noteworthy/profitable successes, while the rest fall by the wayside. It's a big shift: the loss of mid sized studios as a result of absorption by a gorilla company or fragmented into small companies. This shift is theorised to have come about as a result of growth in content cost and marketing costs.
+
+The problem is that it becomes really hard to take creative risks when you're borrowing so much money to make the game. Therefore, the well known succeeds. It is much the same in Hollywood.
+
+\section{Sentiment Analysis}
+Sentiment can be an \textit{attitude} or \textit{opinion} towards X. We can assign a numeric value to this sentiment from -1 to 1.
+
+In the internet age, opinions are really important. Everybody has an opinion and can broadcast these opinions to the world really easy. Additionally, these opinions really influence spending. For example, a one-star increase in Yelp rating leads to a 5-9\% increase in revenue. It also allows smaller restaurants to prosper because these reviews can substitute for more traditional forms of reputation.
+
+Given the value of public sentiment is so valuable, gathering these opinions is really useful. This is called \textit{sentiment analysis} and is the process of computationally identifying and categorising opinions expressed in a piece of text, especially in order to determine whether the writer's attitude towards a particular topic, product, service, etc is positive, negative, or neutral.
+
+Sentiment analysis is a difficult challenge. There are three levels of analysis:
+\begin{enumerate}
+\item \textbf{Document-level}: For a given document, identify the overall attitude to the object under discussion
+\begin{itemize}
+    \item Supervised Learning
+    \begin{itemize}
+        \item It's possible to use supervised learning to use this (but this needs a ground truth) to learn from
+        \item Features: `bag of words' approach. Simply using the frequency or presence of words in the review as input (rather than the raw text)
+        \item After this, its possible to use a naive Bayes classifier, or support vector machine
+        \item The performance accuracy is around 81/82\%, which is better than the performance of a human-generated feature set but not as high as reported on other non-opinion machine learning tasks due to the difficulty of sentiment classification.
+    \end{itemize}
+    \item Unsupervised learning
+    \begin{itemize}
+        \item Unsupervised learning does not need tagged or labelled data to learn from in a supervised fashion, so probabilities of word and phrase co-occurences calculated using search engine results. Classification is predicted using semantic orientation calculated as mutual information.
+        \item This was quite good for some things, but bad for movies, since some words could sound bad but be good.
+    \end{itemize}
+\end{itemize}
+\item \textbf{Sentence (or phrase) level}: For a given sentence, identify if it expresses a positive, negative or neutral opinion
+\item \textbf{Aspect level}: For a given document, identify all opinions expressed regarding any aspect of any object.
+\begin{itemize}
+    \item A document may contain multiple expressions of sentiment regarding different aspects. A bag of words approach that treats words as independent features will not perform well in some sentences, since the context is lost.
+    \item Aspect level analysis corrects these failings.
+    \item For a given document, every quintuple of sentiment is identified:
+    \begin{itemize}
+        \item The object
+        \item The aspect
+        \item The sentiment
+        \item Who holds the sentiment
+        \item When it was expressed
+    \end{itemize}
+\end{itemize}
+\end{enumerate}
+
+\subsection{Unsupervised learning}
+An example of unsupervised learning is using phrases containing adjectives or adverbs followed by a noun. From this, the \textbf{pointwise mutual information} of a pair of words calculates how strongly those words are semantically associated. Then, the \textbf{semantic orientation} of each phrase is calculated using the PMI of the \textit{phrase} with reference words `excellent' (often used in 5-star reviews) and `poor' (often used in 1-star reviews). SO is estimated by issuing queries to a search engine, noting the number of hits (matching documents) where the phrase is near to the reference words. Finally, the average SO of phrases is calculated and assigned a final + or - value based on this.
+
+\subsection{Aspect Level Sentiment Classification}
+A simple algorithm might look something like this:
+\begin{enumerate}
+\item Mark sentiment words and phrases using a lexicon
+\begin{itemize}
+    \item Positive words or phrases assigned +1 and negatives -1
+\end{itemize}
+\item Identify sentiment shifters: (e.g. not, never, cannot)
+\begin{itemize}
+    \item Swap sentiment values for shifted words
+\end{itemize}
+\item Identify `but' phrases
+\begin{itemize}
+    \item Heuristic states that if the sentiment on one side cannot be identified, it is considered opposite to the other side
+\end{itemize}
+\item Sum sentiment scores, weighted by word distance from aspect word
+\end{enumerate}
+
+\section{Crowd Economics}
+\subsection{Prediction Markets}
+We can harness the intelligence of crowds to help us make \textit{predictions}. It is important that people are honest, and to enforce honesty, we can use \textit{pay-to-play} to avoid any bias, and discourage those with little knowledge or those who want to sabotage. This is what a prediction market is.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Prediction Market},
+nobeforeafter,
+halign lower=flush right, ]
+Trading a future event with two mutually exclusive uncertain outcomes Y and R.
+\end{tcolorbox}
+
+We create two contracts, Y and R and these are traded for even outcomes Y and R. Contracts trade until some deadline when outcomes become known. At the deadline, contracts pay out based on the outcome of a real-world event.
+\begin{itemize}
+    \item In \textbf{winner-takes-all} markets, N contracts corresponding to N mutually exclusive outcomes for a future event. Contracts have a fixed value payout if the event occurs and 0 otherwise
+\end{itemize}
+
+The market is run as a CDA and a LOB, just like a financial market. \textit{Current trade price} of a contract is considered a measure of the (\textit{believed}) probability of a given event by traders.
+
+Since traders want to make a profit, traders should buy a contract when they believe it is underpriced and sell when they believe it is overpriced. Basic trading strategy is that if your own private belief that outcome Y will occur with probability $p$ then:
+\begin{itemize}
+    \item Buy Y when $Y < p$, Buy R when $R < 1-p$
+    \item Sell Y when price $Y > p$, Sell R when price $C_b > 1-p$
+\end{itemize}
+
+These markets shift often to accommodate for news and real world events.
+
+\subsubsection{Iowa Electronic Markets IEM - Winner Takes All}
+This market offers real-money futures market where \textit{contract payoffs} depend on future events:
+\begin{itemize}
+    \item Not-for-profit: research and teaching
+    \item Stakes are small
+    \item Relatively low number of traders
+\end{itemize}
+
+IEM offers two kinds of markets:
+\begin{itemize}
+    \item Winner-takes all
+    \item \textbf{Vote share}: \% payout based on a quantitative outcome (such as share of seats in election)
+\end{itemize}
+
+Prediction markets work equally well with multiple outcomes. WTA issues a contract for each separate (mutually exclusive) outcome.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Arbitrage Opportunity},
+nobeforeafter,
+halign lower=flush right, ]
+Arbitrage is the act of simultaneously buying/selling across markets for risk free profit. For example, if a 2 contract WTA has a trade price of \$0.60/\$0.30, the cost of both is \$0.90. But, you know that one of them is guaranteed to pay \$1.00 at the end of the contract. So, we should buy as many as possible
+
+Buying these will raise the price. Once the market equilibrates at \$1, we say the signal is \textit{arbed} away.
+
+Arbitrage also works when contracts are over-priced, too.
+\end{tcolorbox}
+
+\subsubsection{Vote Share Market}
+A VS market runs in a similar fashion to a WTA market. The only difference is the description of the payouts of the futures contracts. A VS contract pays out in proportion to the percentage of the final result. For example, IEM's VS market for the 2020 US presidential election has two contracts, defined as follows:
+\begin{itemize}
+    \item UDEM20\_VS: pays \$1 times the democratic Nominee's share of the two party vote
+    \item UREP20\_VS: pays \$1 times the republican Nominee's share of the two party vote
+    \item If, for example, the final result of the election is 55\% democrat, then UDEM20\_VS pays \$0.55, and UREP20\_VS pays \$0.45.
+\end{itemize}
+
+Predictions can be really quite accurate, because money talks. There is less psychological bias and game playing, which is what we see in opinion polls. However, they are \textit{not} always correct. For example, in the Clinton/Trump election campaign, the market predicted that Clinton would win.
+
+IEM is the only prediction market in the US since it is essentially gambling. But, since IEM is not for profit, it is allowed to operate exempt from gambling restrictions.
+
+\subsection{The Crowd Economy}
+The crowd economy is an economy that requires interaction from the users of the service, such as Wikipedia.
+
+There are two key economic roles of a crowd:
+\begin{itemize}
+    \item \textbf{Crowdsourcing}: an alternative to traditional companies. Used for doing work/solving a problem
+    \item \textbf{Crowdfunding}: An alternative to traditional financial intermediaries (like banks). Used for raising money
+\end{itemize}
+\subsubsection{Crowdsourcing}
+Crowdsourcing has several forms:
+\begin{enumerate}
+\item Citizen Engagement
+\item Mass Collaboration
+\item Crowd Tasks
+\end{enumerate}
+
+Crowdsourcing is really useful for tasks that are currently too difficult for a computer to perform. For example, labelling images for supervised learning. These tasks are often tedious and repetitive.
+
+The simplest method for recruiting people to do these tasks is to either pay them. The other two methods are to trick them into doing the work (reCAPTCHA), or even ask them to do it for free (either make it worthwhile or make it fun).
+
+\subsubsection{Crowdfunding}
+Crowdfunding also has several forms:
+\begin{enumerate}
+\item Donation-based
+\item Reward-based
+\item Equity-based
+\item Debt-based (P2P lending)
+\end{enumerate}
+
+Equity and P2P based crowdfunding are regulated.
+
+Crowdfunding is really useful to use instead of banks because banks will say `no' if your idea is too risky (poor credit history, a wacky start-up, etc).
+
+Multiple ways to encourage investment:
+\begin{itemize}
+    \item Make it for a good cause
+    \item Give them an exciting reward
+    \item Give them a share of your new company
+    \item Give them a high fixed interest rate
+\end{itemize}
+
+\section{Blockchain and Bitcoin}
+Transactions using bitcoin are of a similar structure to that of real money:
+\begin{enumerate}
+\item Agree the transaction
+\begin{itemize}
+    \item A and B agree on some price
+    \item Adding a small `fee' to her payment makes it more likely to be processed quickly because the fee will be `earned' by the miner that mines the block that A's transaction is included in
+    \item A will spend a fraction of a bitcoin on this fee
+    \item Fee is not necessary, but incentivises the miners
+\end{itemize}
+\item Create the transaction message
+\begin{itemize}
+    \item A creates a message that includes three components
+    \begin{enumerate}
+    \item A reference to the earlier transaction that paid A the set price
+    \item A list of addresses of recipients of the payment, since the transaction pays the change back
+    \item A list of amounts ot pay the addresses
+    \end{enumerate}
+    \item A will split the input between two addresses, B, who is paid for the product, and A who gets her change back.
+    \item If amounts are greater than the agreed price, the remainder is the fee for a miner (but we don't know who's getting that yet.)
+\end{itemize}
+\item Sign the transaction message
+\begin{itemize}
+    \item A signs the message using her private key.
+    \item Easy to confirm that the message was made by A because public key can be used to decrypt it
+    \item No-one can encrypt it the same way without private key.
+    \item Similar to a royal seal
+\end{itemize}
+\item Broadcast the transaction message
+\begin{itemize}
+    \item A then broadcasts the encrypted message along with her public key (for decryption)
+    \item A initiates the broadcast by spreading hte message to A's immediate peers in p2p network
+    \item Before broadcasting it to their peers, they verify the message
+    \item A's transaction is one of a number on the network that have not yet ben included in the Blockchain
+\end{itemize}
+\item Verify the transaction message
+\begin{itemize}
+    \item Miners now compete to be the first to mine a block containing transactions that haven't yet been added to the blockchain
+    \item Winner is the one who keeps the fee and gets to include a payment to themselves in the block
+    \item Mining is hard work, taking many compute cycles to win the competition. Proof of work is what keeps the blockchain consistent and reliable
+\end{itemize}
+\item Transaction success
+\end{enumerate}
+
+\subsection{Anatomy of a block}
+Each block in the Blockchain has a \textit{header} formed of:
+\begin{itemize}
+    \item Timestamp and version number
+    \item A hash of the previous block header (linking new blocks in the chain)
+    \item A \textit{merkle root} summarising the new transactions that the block contains (meaning each block has a history of all bitcoin transactions)
+    \item A \textit{nonce value} chosen by the miner such that when the header is hashed (using SHA256) the resulting 256-bit hash has at least \textit{x} leading 0s
+\end{itemize}
+
+\subsection{Nonce Values and Difficulty}
+SHA256 hashes any data into an arbitrary 256-bit string. SHA256\^2 just applies SHA256 twice.
+
+If you wanted to SHA256\^2 to has D into $S=000\dots011$ you could add an arbitrary nonce value to the end of D and keep changing this value until SHA256\^2 gave you a bit string that evaluated to 3.
+
+If you are only happy with one specific 256-bit string, you will be waiting a long time before you find the right nonce, but if you justwant ot get a hash S such that $S < 2^{200}$, then things are easier. Even easier if you're happy with $S<2^{250}$.
+
+Checking whether a nonce `works' is really quick:
+\begin{itemize}
+    \item It requires one execution of SHA256\^2 on D and a comparison operation: is S satisfactory
+    \item It's just like checking whether a sudoku solution is really easy, even if the sudoku is huge or difficult
+\end{itemize}
+
+\textit{Finding} the nonce is really slow
+\begin{itemize}
+    \item Many executions of SHA256\^2 depending on how small the subset of allowable hash strings is
+    \item It's like solving a sudoku. Very difficult, especially when large.
+\end{itemize}
+
+The similarity between sudoku and finding nonce values is limited; you can't get better at finding nonce values. The only way to improve the chance of finding the right nonce value is to just \textit{check more possibilities}. There's no trick. A correct nonce is the proof of work.
+
+\subsection{Successfully Verifying the transaction}
+After some time, a miner $M$ will find the \textbf{golden nonce}. $M$ gets the transaction fees and the standard fee for finding this. $M$ broadcasts the new block to the p2p network. The nodes all add the new block to their copies of the blockchain, and miners start to mine the next new block. B can check that the transaction is verified in the blockchain and complete the transaction with A.
+
+These steps are really important to avoid \textit{double spending}. Nothing really stops someone from spending their digital bitcoin twice, so Blockchain avoids this:
+\begin{itemize}
+    \item The blockchain stores this single agreed history of every transaction
+    \item Nodes check to see if a bitcoin has already been spent.
+    \item If so, the transaction isn't included in the block being mined.
+    \item If a coin is spent twice simultaneously on different parts of the p2p network, a `fork' in the Blockchain can occur temporarily
+    \item But, the blockchain will identify and correct this fork quickly and without and need for centralised control or co-ordination.
+\end{itemize}
+
+\subsection{Bitcoin Concerns}
+Some of the critiques of Bitcoin are not unique to cryptocurrencies, such as theft or loss etc. However, there are some unique problems, and the main one is that mining bitcoin is incredibly demanding from an energy standpoint, due to the computational difficulty of finding the correct nonce value.
+
+The Blockchain is an example of a log that is \textit{intentionally slow/costly} because of the assumption of zero trust. There are far more approaches that exist and are much faster or less wasteful. Therefore, Blockchain is literally only useful for cryptocurrencies, and not much else.
+
+\subsection{Blockchain Evolution}
+Bitcoin did not appear in a vacuum. Many attempts at cryptographic payment systems and electronic cash were made during the 1990s, but many were not very functional.
+
 \end{document}
