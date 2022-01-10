@@ -115,7 +115,7 @@ Failures in these systems are to be expected. Say the servers you are buying are
 
 In the current climate, the modular centres are considered a whole working unit, and this way of thinking was mobilised by a group of Google engineers.
 
-\subsection{Blank as a service}
+\subsection{Blank as a service (XaaS)}
 \begin{itemize}
     \item \textbf{SaaS: Software as a service}
     \begin{itemize}
@@ -153,8 +153,8 @@ Cloud services have revolutionised business in many ways. It is now possible to 
 \textit{Interoperability} is a big issue. \textbf{Vendor lock-in} is a concern for a lot of clients, and this simply means that once a client is locked into a vendor, it becomes financially or practically unviable to switch to another supplier. This led to an attempt to develop a sense of unity between cloud companies, where companies created the \textit{Open Cloud Manifesto}. A lot of big companies signed up to this, but a lot of the top dogs didn't sign up for this (unsurprisingly, Google and Amazon). This manifesto seemingly no longer exists as an original. As a consumer, this is bad and worrying because vendor lock in is very possible.
 
 \section{IaaS and AWS}
-\subsection{Amazon Simple Storage Service}
-Amazon S3 is a cloud-based persistent storage. It operates independently from other Amazon services. The simple refers to the features, not that it's simple to use. You can store data in the cloud. You also don't store files, you store \textit{objects}, and these are kept in buckets. Objects have a size limit (5Tb) and a max size on a single upload is 5Gb. All buckets share the same namespace, so no sub-buckets.
+\subsection{Amazon Simple Storage Service (S3)}
+Amazon S3 is a cloud-based persistent storage. It operates independently from other Amazon services. The `simple' refers to the features, not that it's simple to use. You can store data in the cloud. You also don't store files, you store \textit{objects}, and these are kept in buckets. Objects have a size limit (5Tb) and a max size on a single upload is 5Gb. All buckets share the same namespace, so no sub-buckets.
 
 It's very easy to use; just use a web GUI that is similar to AWS. It also has a command line interface and has scripting. Default storage can be selected (geographically).
 
@@ -199,14 +199,14 @@ There are three types of storage:
 
 S3 is slow, medium-reliable, but super-durable. Never loses data, so is good for DR backups. Instance storage is simple and cheap, but speed can be really poor. EBS is high on everything, but is complex and costly.
 
-There is some autoscaling based on matrics:
+There is some autoscaling based on metrics:
 \begin{itemize}
    \item \textbf{Cloudwatch}: automated monitoring of EC2 instances. Reveals many statistics such as CPU utilisation, disk reads/writes and network traffic. Aggregates and stores monitoring data that can be accessed
    \item \textbf{Auto Scaling}: dynamically adds or removes EC2 instances based on CloudWatch metrics. You define conditions upon which you want to scale up or down your EC2 instances. Auto scaling automatically adds or removes the specified amount of Amazon EC2 instances when it detects that the conditions have been met.
    \item \textbf{Elastic Load Balancing}: automatically distributes incoming application traffic across multiple EC2 instances. Better fault tolerance. Elastic Load Balancing detects unhealthy instances within a pool and automatically reroutes traffic to healthy instances until the unhealthy instances have been restored. Customers can enable ELB within a single AZ or across multiple for consistent application performance.
 \end{itemize}
 
-\subsection{AWS Simple Queue Service SQS and Architecting for Scale-out}
+\subsection{AWS Simple Queue Service (SQS) and Architecting for Scale-out}
 SQS is reliable, loosely-coupled fault-tolerant storage and delivery of messages. It can be between any clients or computers connected to the internet, and senders and recipients do not have to communicate directly. No requirement that either side be always-available or connected to the internet.
 
 A \textbf{message} is up to 256Kb of text-data, sent to SQS and stored until it is delivered. A \textbf{queue} serves to group related messages together.
@@ -774,7 +774,11 @@ Here is how the algorithm unfolds:
 \end{itemize}
 
 \subsection{Apache Zookeeper}
+Zookeeper provides multiple features for distributed applications, and is used in loads of different systems.
+
 Zookeeper is part of a family of linearisable, durable data stores, with a rich client that prioritises consistency over availability. There are typically five nodes in a cluster and are optimised for read, rather than write.
+
+Zookeeper's internal data structure is like a tree. Each node is called a zNode, and each zNode has a path. These nodes can be either \textit{persistent} or \textit{ephemeral}. Each zNode can store data, and cannot be renamed. The best feature of zookeeper is that clients can \textbf{watch} a zNode for changes. It is very lightweight and minimal, but does things really well.
 
 \section{DevOps}
 Software development lifecycle:
@@ -977,7 +981,7 @@ GFS consists of three main component types:
     \item GFS Client (multiple)
 \end{itemize}
 
-\section{BigTable}
+\subsection{BigTable}
 BigTable manages large-scale structured data; designed to reliably scale to petabytes of data spread across thousands of machines. BigTable is widely applicable within Google. Workload types vary from batch processing jobs where data-throughput rates are key. It is also the seminal ``NoSQL'' database: ultra large scale, but not fully relational. The locality of the data is under the control of the client.
 
 A BigTable \textit{cluster} is a set of processes running BigTable. Each cluster serves a set of \textit{tables}. Each table is a sparse, distributed, persistent, sorted \textit{map}. The map is from three dimensions (row, column, time) onto a string value (a \textit{cell}). The rows contain data sorted in alpha-order by row key. Rows with consecutive keys are grouped into \textit{tablets}. A table can have any number of columns; the keys of which are grouped into sets called \textit{column families}. Different cells can contain multiple versions of the same data differentiated by a \textit{timestamp}. Garbage collection can keep the most recent $n$ versions of data and/or only keep data that is within $n$ seconds of `now'.
@@ -1038,6 +1042,18 @@ F1 has several design goals:
     \item \textbf{Usability}: full SQL support, without using SQL
 \end{itemize}
 
+\subsubsection{Architecture}
+\begin{center}
+\includegraphics{pics/f1architecture.png}
+\end{center}
+
+Here, each the two different containers represent different data centres. Note how the spanner can be accessed by other data centres. Additionally, it uses CFS (colossal file system) rather than GFS, which is not available for use globally yet, so spanner will stay using the local form of it.
+
+F1 master, F1 server and the slave pool work like \texttt{mapreduce}. The servers themselves own no data so easy to change
+
+\subsubsection{Data layout}
+Instead of as in a typical RDB, the primary \textit{contains} the foreign keys, so it is easy to know where to go to look for things and save going to and from multiple machines.
+
 \section{The Hadoop Ecosystem}
 Originally, there was Hadoop, which is Apache's answer to MapReduce. Of course, Hadoop needed something like GFS, which Apache dubbed HDFS.
 BigTable was needed, and this was called HBase. These three projects were known as `The Hadoop Core'.
@@ -1047,6 +1063,18 @@ Writing MR jobs is pretty tricky, so some programmatic abstraction was required.
 \textbf{Mahout} is Apache's scalable machine learning platform, and runs on Hadoop/Spark. It provides tools for using Hadoop to create systems that perform clustering, classification, and collaborative filtering at high sped on large data sets.
 
 \textbf{Giraph} is a graph database system used by Hadoop.
+
+\textbf{YARN} (yet another resource navigator): performs cluster resource management and acts as middleware between HDFS and other applications. Hands out RAM and other resources.
+
+\textbf{HBase/Hoya}: \textit{Hoya} is a tool for running HBase clusters on YARN. HBasse is Hadoops non-relational (noSQL) distributed database (discussed above, v close to BigTable).
+
+\textbf{Kafka}: Distributed streaming platform to store and process streams of records that is written in scala. Uses messaging system for transferring data. Uses zookeeper to share and save states between brokers. In short, you use Apache Kafka as a \textit{distributed} and \textit{robust queue} that can handle \textit{high volume data} and enables you to pass messages from one point to another
+
+\textbf{Storm}: A distributed real time stream processing system, originally by twitter, now an apache project. Much faster than Kafka (I think) Storm allows for creation of even driven processing networks which operate continuously in real-time in comparison to MRs batch-mode style of working and can run on YARN. In short, it is a system that has \textit{distributed real time processing abilities}, meaning you can execute a number of manipulations on \textit{real time data in parallel}
+
+\textbf{Spark}: High performance analytics engine/framework for large scale data-processing that runs on YARN (and other platforms including EC2 and K8s). Uses \textit{in-memory} rather than MRs constant read/writes to hard drive making it very much faster.
+
+\textbf{Flume/Sqoop}: Sqoop transfers data between Hadoop and external datastores. Flume is focused on collecting, aggregating, and moving large log files to external places..
 
 \subsection{Hive}
 Hive is best suited to \textit{data warehousing}. It operates on relatively static data where the response time is not critical. It has its own SQL-like query language called HiveQL/HQL, which is much more concise than lower level MR code.
@@ -1086,6 +1114,44 @@ Some KV systems have built-in indexing of values:
 \end{itemize}
 
 Some KV systems auto-compress.
+
+Schemaless has advantages such as being trivially easy to add things like two key-value pairs on one item, but it doesn't do things like semantic checks, so if you mistype a key, it becomes very difficult to retrieve the value.
+
+\subsubsection{SimpleDB}
+Amazon's key-value database.
+\begin{itemize}
+    \item Items not stored in a table, but in a hierarchical structure
+    \begin{itemize}
+        \item Domain
+        \item Items
+        \item Attributes (actual k-v pairs)
+    \end{itemize}
+    \item Data is all stored as \textbf{text}
+    \item Query language is \textit{very basic}
+    \item Suffers from eventual consistency.
+\end{itemize}
+
+\textbf{DynamoDB} is the updated version of simple DB, although simple DB is still offered. DynamoDB combines document and kv datastores.
+
+\subsubsection{Google App Enging (GAE) Datastore}
+Google's key-value database.
+\begin{itemize}
+    \item Cloud style is scale out, not up, and this is automated
+    \item GQL --- Query language
+    \item Similar to SimpleDB in structure, but different names:
+    \begin{itemize}
+        \item Kind
+        \item Entities
+        \item Properties (with names and values)
+    \end{itemize}
+    \item Queries into datastore can return entire entities, or just the keys 
+    \item Interestingly offers \textit{query pre-indexing}
+    \begin{itemize}
+        \item During development and testing, queries are recorded, meaning those queries are lightning fast
+        \item List of these queries can be edited
+        \item Adding and removing entities is a pain, but tradeoff is worthwhile
+    \end{itemize}
+\end{itemize}
 
 \subsection{Document Databases}
 Document DBs manage more complex data structures than KV datastores. They are NOT stores of electronic documents.
@@ -1147,14 +1213,22 @@ Kafka has a log-based queue, and this is the basic persistence method used. Logs
 
 Kafka is critically dependent on Zookeeper. ZK is a distributed configuration adn synchronisation service, where Kafka stores basic metadata about clusters, consumers, etc.
 
-Kafka consumer groups can function as a queue. It also allows you to broadcast messages like pub-sub, but the Topic structure has both queue and pub/sub properties and can handle scale processing.
+There are a number of advantages that Kafka has over things like message queues. Kafka consumer groups can function as a queue. It also allows you to broadcast messages like pub-sub, but has the advantage that the Topic structure has both queue and pub/sub properties and can handle scale processing.
 
 \subsection{Real-time stream processing}
-Stream processing is the method by which data is processed from a continual stream of raw data, and can be used in things such as the Large Hadron Collider.
+Stream processing is the method by which data is processed from a continual stream of raw data, and can be used in things such as the Large Hadron Collider. It is necessary where there is an insane amount of data that needs to be processed \textit{in real time}
 
-We want both high throughput and low latency, along with fault tolerance. RTSP is also `straggler tolerant', where a straggler is an individual task who's execution time is taking much longer than expected.
+We require both high throughput and low latency, along with fault tolerance, since the data needs to be processed as and when it arrives, it doesn't work if there is high latency. RTSP is also `straggler tolerant', where a straggler is an individual task who's execution time is taking much longer than expected.
 
 A stream processor has a framework providing queueing or message passing (push/pull pipelines or pub/sub).
+
+The architecture of RTSP is as follows:
+\begin{itemize}
+    \item \textbf{Source operator} --- Takes data from a source and turns it into standard message format. This would be where Kafka is.
+    \item \textbf{Continuous operator} --- Real time processing and \textit{extract, transform, load} (ETL), into some data analytics. This is where the likes of Apache Spark comes in.
+    \item \textbf{Sink operator} --- Data storage
+\end{itemize}
+
 
 When considering RTSP, data needs to be considered:
 \begin{itemize}
@@ -1208,12 +1282,12 @@ An Rdd is:
 
 RDDs are created and manipulated through applying bulk transformations on disk or in memory (map, filter, join). Outputs to the driver node are generated by applying actions in parallel to RDDs (reduce, collect, count). RDDs are \textit{lazy}; they don't materialize data until absolutely necessary.
 
-Using an example of Log mining, we can load error messages from a log into memory and then interactively search for various patterns:
+Using an example of Log mining, we can load error messages from a log into memory and then interactively search for various patterns (in scala):
 \begin{lstlisting}
-lines = spark.textFile("...")
-errors = lines.filter(_.startsWith("ERROR"))
-messages = errors.map(_.split('\t')(2))
-messages.cache() // expected to use it again
+lines = spark.textFile("hdfs://...") 'base RDD
+errors = lines.filter(_.startsWith("ERROR")) 'transformed RDD
+messages = errors.map(_.split("\t")(2)) 'also transformed RDD
+messages.cache() 'expected to use it again, so cached RDD
 
 messages.filter(_.contains("foo")).count
 messages.filter(_.contains("bar)).count
@@ -1230,4 +1304,357 @@ we have to care about fault tolerance in RDDs quite a lot, so here's how it is d
 \end{itemize}
 % ===================================================================
 
+%======================work on 19-09===================================
+\subsection{Example: Logistic Regression}
+If we have a number of data points (some negative, some positive), can we use a point $x$ to predict its $y$? And can we find the best way to linearly separate two sets of D-dimensional points? We can use $w$, a vector of $D$ weights:
+
+If $(1+e*{-w\cdot x})^{-1}>0.5$, we guess positive, else negative. We can iteratively improve an initially random $w$ using gradient descent:
+\begin{align*}
+w_{new} \rightarrow w - a\bigg( \frac{1}{1+e^{y\cdot wx}} -1\bigg)
+\end{align*}
+
+Where $a$ is the learning rate. Each iteration, we consider a new point.
+
+Here's a piece of code we can feed into Spark:
+\begin{lstlisting}[language=Python]
+def parsePoint(line):
+    values = [float(x) for x in line.split(' ')]
+    return (values[0], values[1:D])
+
+points = spark.textFile(...).map(parsePoint).cache()
+
+w = numpy.random.ranf(size = D)
+
+for i in range(N):
+    gradient = points.map(
+            lambda.p: (1/(1+exp(-p.y*(w.dot(p.x))))-1)*p.y*p.x
+    ).reduce(lambda a, b:a + b)
+    w -= alpha*gradient #learning rate
+\end{lstlisting}
+
+When this is implemented with Hadoop, the number of iterations raises quite dramatically, while with Spark, it is much slower (running-time wise). This is because we are able to utilise the in-memory storage effectively. Spark has a slightly higher overhead at the beginning as it is building the RDDs and setting up images, so the first iteration will be marginally slower than Hadoop for the first few iterations, but once this is set up the incremental running time is dramatically lower.
+
+\subsection{Spillover}
+If memory objects are too large, they are written to disk and handled in a standard manner. No slower than MapReduce. Logistic regression performance varies depending on how much of the memory of the data is cached in memory vs. spilling onto disk. Performance degrades \textit{gracefully} (meaning gradual decline, not like a cliff).
+%+=====================================================================
+
+%============= WORK DONE 24/12 =================
+\section{Sustainability and Cloud Computing}
+\subsection{Theoretical Frameworks}
+A simple tool to help reasoning between economic and environmental impact is the $I = P \times A \times T$ and decoupling. Simply, this is Impact = Population $\times$ Affluence $\times$ Technology.
+\begin{itemize}
+    \item The \textit{population} refers to the population of an area, such as the world.
+    \item \textit{Affluence} represents the average consumption of each person in the population. A common measure for this is GDP per capita.
+    \item \textit{Technology} is how resource intensive the production of affluence is; how much environmental impact is involved in creating, transporting and disposing of the goods, services, adn amenities used.
+\end{itemize}
+
+The \textbf{rebound effect} is the reduction in expected gains from new technologies that increase the \textit{efficiency} of resource use because of behavioural or other systemic responses. These responses diminish the beneficial effects of the new technology or other measures taken.
+
+The \textbf{3-level Framework} of environmental impact of ICT was introduced as a measure of the impact of computer systems on the environment. ICT can be either part of the problem, or part of the solution, depending on the actual problem.
+\begin{enumerate}
+    \item \textbf{Direct effects}
+    \begin{itemize}
+        \item Life cycle phases
+        \begin{itemize}
+            \item Raw material extraction, manufacturing and assembly, etc.
+            \item Use: Electricity, Diesel, water
+            \item Disposal: Land Fill, Incineration, Recovery of material (recycle)
+        \end{itemize}
+        \item Assessed with the LCA (Life Cycle Assessment) to quantify the impact (these are all negative).
+    \end{itemize}
+    \item \textbf{Enabling effects}
+    \begin{itemize}
+        \item Application of ICT
+        \item Negative
+        \begin{itemize}
+            \item Induction --- Stimulation of consumption of another resource (printer causing increased paper consumption)
+            \item Obsolescence --- Putting something out of date (iPhones for example)
+        \end{itemize}
+        \item Part of the solution
+        \begin{itemize}
+            \item Substitution --- Use of ICT for replacement of another resource (Kindle replacing physical books)
+            \item Optimisation --- Use of ICT to reduce the amount of resources required for a process through greater efficiency.
+        \end{itemize}
+    \end{itemize}
+    \item \textbf{Systemic effects}
+    \begin{itemize}
+        \item Negative
+        \begin{itemize}
+            \item Rebound effects
+            \item Emerging risks
+        \end{itemize}
+        \item Positive
+        \begin{itemize}
+            \item Transition towards sustainable patterns of production and consumption
+        \end{itemize}
+    \end{itemize}
+\end{enumerate}
+
+The effects on the third level are complicated and often shied away from. It is important to take heed of them, however. They can be more significant than the micro-economic level effects observed in levels 1 and 2.
+
+\subsection{Direct Footprint}
+Here are some ideas to keep ICT green:
+\begin{itemize}
+    \item Design for environmental sustainability
+    \item Energy-efficient computing
+    \item Power management
+    \item Data center design, layout and location
+    \item Server virtualisation
+    \item Responsible disposal and recycling
+    \item Regulatory compliance
+    \item Environment-related risk mitigation
+    \item Use of renewable energy sources
+    \item Eco-labeling of IT products
+\end{itemize}
+
+\subsection{Datacentre Sustainability}
+Datacentres themselves have an impact on the environment and it is important to reduce the footprint of them. The impact they have includes:
+\begin{itemize}
+    \item Electricity consumption
+    \item Devices: servers and networking
+    \item Water for cooling
+    \item Resources included in construction of datacentres
+    \item Diesel for generators (backup power)
+\end{itemize}
+
+Globally, it is estimated that data centres use around 200TWh globally. This has stabilised somewhat since 2014 due to the move to cloud, as there were some fears surrounding data centres at this time, however, they did not materialise.
+
+\subsection{Reporting Tools}
+Carbon reporting is a method for reporting the amount of carbon used. This reporting has experienced a lot of innovation recently, with Microsoft Azure, and Google's dashboard for their carbon usage for example. It is now mandatory for organisations to be transparent with the amount of carbon they produce. Google's tools are very advanced, such as using location-based and rack-level monitoring.
+
+For efficient cloud computing, it is important to:
+\begin{itemize}
+    \item Reduce the PUE (power usage efficiency)
+    \begin{itemize}
+        \item For example, relocate to colder areas to save on cooling
+    \end{itemize}
+    \item Inter-datacentre or temporal load balancing
+    \item Recycling and reusing their kit.
+    \begin{itemize}
+        \item Servers have a lifespan of 5 years, but their components might still be useful
+    \end{itemize}
+    \item Energy efficient devices
+    \begin{itemize}
+        \item More costly, but could save overall
+    \end{itemize}
+\end{itemize}
+
+For us, the user, here are some things we can do:
+\begin{itemize}
+    \item Use a green hoster
+    \item Efficient caching is \textbf{the most consistent} way to reduce emissions
+    \item Use CDNs
+    \item Favour serverless (FaaS)
+    \item Auto-scaling
+    \item Avoid top-of-the-hour for scheduled jobs and add jitter
+    \item Remove unneeded data
+    \item Use spot instances for workloads that require both batch processing, reduces unused capacity
+\end{itemize}
+
+\subsection{Cloud Application Assessments}
+Streaming uses creates quite a lot of carbon, and there is carbon reporting for digital services available.
+
+\section{Legal Aspects}
+\subsection{Open Source}
+Open source means that code is publicly accessible. Anyone can read it or contribute to it. Not open source software has a legal relationship and is protected as a work of literature.
+
+When we normally think of open source, we are thinking of `free' open source software.
+
+How does it work?
+\begin{enumerate}
+\item Quality
+\begin{itemize}
+    \item Because the code is available for everyone to view, it is likely that all bugs will be captured; even the really obscure one. If you find a bug, you can just pinpoint it and fix it yourself.
+    \item Linus' Law: Given enough eyeballs, all bugs are shallow
+\end{itemize}
+\item Network effects
+\begin{itemize}
+    \item Tensorflow
+\end{itemize}
+\item Brand building
+\begin{itemize}
+    \item VCS
+    \item Distributed
+    \item Pull requests
+\end{itemize}
+\end{enumerate}
+
+\subsection{Licenses}
+A license is:
+\begin{itemize}
+    \item A legal instrument governing the use or redistribution of software
+    \item They are not patents (protecting an invention)
+    \item A license protects a specific piece of software
+\end{itemize}
+
+You need a license because without a license, no one is able to reproduce, distribute, or create derivative works. Everybody who contributes to your project also becomes an exclusive copyright holder and it becomes very messy. To use the code, you must contact the author directly and ask permission.
+
+You need to choose a license (two types):
+\begin{itemize}
+    \item Permissive: allow users to do what they want
+    \begin{itemize}
+        \item MIT --- Do anything, but don't sue me lol
+        \item Apache --- like MIT, but with more boilerplate (explicit patent license, good for business use)
+    \end{itemize}
+    \item  Copyleft (`viral'): 
+    \begin{itemize}
+        \item GPL v2/3 (gnu public license) --- if you link to a GPL library/piece of software, you need to redistribute your own software under GPL also (your software needs to be open source)
+    \end{itemize}
+\end{itemize}
+
+\subsection{Data Protection}
+UK privacy and electronic communications (PECR) has a `cookie law'. This is designed for users to consent when someone stores a piece of information on your local machine. It's the whole allow decline shit we have to deal with these days. Information should enable users to understand the use of cookies and must be accessible after consent. Revoking consent also needs to be accessible.
+
+\subsection{GDPR}
+GDPR is the law to govern privacy of all EU citizens around the world and give them control over their personal data. Fines for not following this is €20 million or 2\% up to 4\% of the total worldwide annual turnover, whichever is greater.
+
+\textit{Personal data} means any information relating to an identified or identifiable natural person ('data subject'). An identifiable natural person is one who can be identified, directly or indirectly, in particular by reference to an identifier such as a name, identification number, location data, an online identifier or to get one or more factors specific to the physical, physiological genetic, mental, economic, cultural, or social identity of that natural person.
+
+Common categories include:
+\begin{itemize}
+    \item Biographical information
+    \begin{itemize}
+        \item Dates of birth
+        \item Social security numbers
+        \item Phone numbers
+        \item Email addresses
+    \end{itemize}
+    \item Appearance and behaviour
+    \begin{itemize}
+        \item Eye colour, weight
+    \end{itemize}
+    \item Workplace data and information about education
+    \begin{itemize}
+        \item Salary
+        \item Tax information
+        \item Student numbers
+    \end{itemize}
+    \item Private and subjective data
+    \begin{itemize}
+        \item Religion
+        \item Political opinions
+        \item Geo-tracking data
+    \end{itemize}
+    \item Health, sickness and genetics
+    \begin{itemize}
+        \item Medical history
+        \item Genetic data
+        \item Information about sick leave
+    \end{itemize}
+\end{itemize}
+
+The rules surrounding this data are that:
+\begin{itemize}
+    \item No personal data may be processed without unambiguous and individualised consent from the data subject.
+    \item The processing of personal data should be limited to what is necessary for the purposes for which they are processed
+    \item Controllers of personal data need appropriate technical and organisational measures (such as encryption, pseudo or full anonymisation)
+    \item Right to revoke this consent
+    \item Declare any data collection and purpose for data processing, and state how long the data is retained
+\end{itemize}
+
+This mainly applies to EU countries, but also restricts the transfer of data outside the EU. Some countries are covered by the adequacy decision in 2019 (Andorra, Argentina, Guernsey, Isle of Man, Israel, Jersey, NZ, Switzerland and Uruguay).
+
+In the USA, it works slightly different (and this is only for companies under the EU-US privacy shield framework):
+\begin{itemize}
+    \item Government audited
+    \item Checklist of companies
+    \item Certain type of data
+\end{itemize}
+
+SCCs (standard contractual clauses):
+\begin{itemize}
+    \item Legal instrument between sender and receiver to guarantee data protection
+    \item ICO tool
+\end{itemize}
+%===============================================
+
+\section{Cloud Security}
+Cloud security has been a major concern and research issue from the earliest days of serious use of cloud computing. The \textbf{cloud security alliance} (CSA) is a non-profit collaboration between an impressive number of major players.
+
+The CSA in 2013 identified nine notorious threats:
+\begin{enumerate}
+\item Data breaches
+\item Data loss
+\item Account hijacking
+\item Insecure APIs
+\item Denial of Service
+\item Malicious Insiders
+\item Abuse of Cloud Services
+\item Insufficient Due Dilligence
+\item Shared Technology Issues
+\end{enumerate}
+
+And then updated this in 2016 to the `treacherous twelve':
+\begin{enumerate}
+\item Data breaches (\#1)
+\item {\color{red} Identity/credential/access management}
+\item Insecure APIs (\#4)
+\item {\color{red}System Vulnerabilities}
+\item Account hijacking (\#3)
+\item Malicious Insiders (\#6)
+\item {\color{red}Advanced Persistent Threats}
+\item Data loss (\#2)
+\item Insufficient Due Dilligence (\#8)
+\item Abuse (and nefarious use) of Cloud Services (\#7)
+\item Denial of Service (\#5)
+\item Shared Technology Issues (\#9)
+\end{enumerate}
+
+And most recently, the `egregious eleven' in 2019, which is missing numbers 4,7,8,9,11, and 12 from the treacherous twelve:
+
+\begin{enumerate}
+\item Data breaches
+\begin{itemize}
+    \item When an organisations sensitive data falls into the hands of a competitor
+    \item For example, corporate IT rules being circumvented
+\end{itemize}
+\item {\color{red}Misconfiguration and inadequate change control}
+\begin{itemize}
+    \item Misconfiguration occurs when assets are setup incorrectly leaving them vulnerable to malicious activity
+    \item Common examples include unsecured data storage elements, lax permissions, etc.
+    \item Misconfiguration of cloud resources is a leading cause of data breaches.
+\end{itemize}
+\item {\color{red}Lack of cloud security architecture and strategy}
+\begin{itemize}
+    \item Main example given is Accenture's massive release of internal passwords and access keys of its enterprise cloud offering, via four unsecured AWS S3 buckets. Basically released the master key by accident.
+\end{itemize}
+\item Insufficient identity/credential/access management
+\begin{itemize}
+    \item Data breaches and enabling of attacks can occur because of a lack of scalable identity access management systems, failure to use multi-factor authentication, weak password use, and a lack of ongoing automated rotation of keys, passwords and certificates.
+\end{itemize}
+\item Account hijacking
+\begin{itemize}
+    \item Phishing, fraud, software exploits, etc.
+\end{itemize}
+\item Insider threat
+\begin{itemize}
+    \item A malicious insider, such as sysadmin, in an improperly designed cloud scenario can have access to potentially sensitive information.
+\end{itemize}
+\item Insecure interfaces
+\begin{itemize}
+    \item Composing services from large numbers of orchestrated component services raises the risk that one or more of the component APIs could be weak and/or compromised. Spreading out keys or tokens over the components magnifies this risk.
+\end{itemize}
+\item {\color{red}Weak control plane}
+\begin{itemize}
+    \item The management plane of a cloud service is critical and needs to be adequately protected by identity and access controls. 2FA should be part of the standard suite of controls provided to a cloud customer by the cloud service provider, but many only make this available to their customers as a premium service.
+\end{itemize}
+\item {\color{red}Metastructure and applistructure failures}
+\begin{itemize}
+    \item \textbf{Metastructure} is metadata that describes the cloud architecture
+    \item \textbf{Applistructure} is technology infrastructure and business applications
+    \item Both of these are critical components of a cloud service that, if they fail at CSP level, can severely impact all consumers.
+\end{itemize}
+\item {\color{red}Limited cloud usage visibility}
+\begin{itemize}
+    \item This occurs when an organisation does not possess the ability to visualise and analyse whether the cloud service use within the org is safe or malicious.
+    \item There are two key challenges: unsanctioned app use (unknown apps being used) and sanctioned app misuse (using known apps in bad ways).
+\end{itemize}
+\item Abuse (and nefarious use) of cloud services
+\begin{itemize}
+    \item It might take an attacker years to crack an encryption key using their own hardware, but using an array of cloud servers, it can be done in minutes. Also, DDoS becomes quite easy using these servers.
+\end{itemize}
+
+\end{enumerate}
+
+It was noted after analysis that there was a drop in ranking of traditional cloud security issues under the responsibility of the service providers such as DoS, etc. They were rated so low they were not included in the rankings. Newer, more highly rated items imply a higher maturation of the consumer's understanding of the cloud, where the issues are really specific to the cloud and indicate a landscape where consumers are actively considering cloud migration.
 \end{document}

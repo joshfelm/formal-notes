@@ -64,6 +64,8 @@ commentstyle=\color{Gray}\itshape
 \usepackage{soul}
 \usepackage{babel,dejavu,helvet}
 \usepackage{amsmath}
+\usepackage{amssymb}
+
 \usepackage{booktabs}
 \usepackage{tcolorbox}
 \usepackage[symbol]{footmisc}
@@ -651,4 +653,752 @@ allowing the maximum of $h(Y_1,Y_2)$ to hopefully be found. This should unmix th
 \section{The Bayesian Brain}
 Here, we will look at the idea that the brain performs Bayesian inference on data. 
 
+Remember Bayes' rule:
+\begin{align*}
+P(X|Y) = \frac{P(Y|X)P(X)}{P(Y)}
+\end{align*}
+
+Imagine there is a machine that detects if the sun has exploded, but before it tells you the answer, it rolls two dice and then if it gets two sixes it lies. If the machine says the sun has exploded, the probability that the sun has actually exploded is obviously not very high, but if you look at it a certain way, (probability that the machine is lying given sun has exploded is low) then you could convince yourself that the sun HAS exploded.
+
+\subsection{Bayesian Fusion}
+The brain is constantly making decisions based on fusion of different inputs. For example, we can make estimates of an objects height based on feel and sight. This estimate is based on a combination of both of these sources of input. If we define the deviation from haptic feedback as $\sigma_h$ and from visual feedback as $\sigma_v$ and the variation of the estimate of the TRUE value $\sigma$, we get the following:
+\begin{align*}
+\frac{1}{\sigma^2} = \frac{1}{\sigma_v^2} \frac{1}{\sigma_h^2}
+\end{align*}
+
+Now, let
+\begin{align*}
+\lambda = \frac{\sigma^2}{\sigma_h^2}
+\end{align*}
+
+then
+\begin{align*}
+1-\lambda = \frac{\sigma^2}{\sigma_v^2}
+\end{align*}
+
+so
+\begin{align*}
+\bar x = (1-\lambda)v + \lambda h
+\end{align*}
+
+This shows how the standard deviation affects bayesian fusion, as those with a smaller variance will be weighted highly.
+
+\subsection{Kalman Filter}
+The Kalman filter works like the following example. At time $t$ we have a belief about position and speed of an object. We believe that they are $\bar x$ but our estimate is uncertain, since $\bar x$ is the mean of a two-dimensional Gaussian distribution with covariance $P$ representing our belief.
+
+We want to update this to new values for time $t + \delta t$ using two noisy pieces of information: dead reckoning and direct measurement. The new belief will have mean $\bar x_n$ and covariance $P_n$
+
+The position changes according to the standard law of motion:
+\begin{align*}
+s \rightarrow s_a = s + v \delta t
+\end{align*}
+
+We are assuming speed is constant, but we can not assume this by including a control vector detailing the changes of speed.
+
+\textbf{Dead reckoning} is defined as:
+\begin{align*}
+X_d = FX + W
+\end{align*}
+
+where $F$ is the motion matrix
+\begin{align*}
+F = \begin{pmatrix}
+    1 & \delta t \\
+    0 & 1
+\end{pmatrix}
+\end{align*}
+
+and $W$ is the zero mean Gaussian noise with covariance matrix $Q$.
+
+If we take the average:
+\begin{align*}
+\bar x_d = F \bar x
+\end{align*}
+
+This tells us how we update the mean we use to describe the distribution.
+
+To look at the \textbf{covariance}, we will look at a one-dimensional example. Let's say we have a variable $Y$:
+\begin{align*}
+Y \sim \mathcal{N}(\bar y, p)
+\end{align*}
+
+And say the true update has the form:
+\begin{align*}
+y_a = fy
+\end{align*}
+
+where $f$ is a constant, so:
+\begin{align*}
+    Y_d = fY + U
+\end{align*}
+
+where
+\begin{align*}
+U \sim \mathcal{N}(0,q)
+\end{align*}
+
+Since $y_d$ is drawn from the sum of two gaussians, it is also gaussian with mean and variance that can be calculated directly:
+\begin{align*}
+\bar y_d = \langle Y_d \rangle = \langle fY + U \rangle = f \langle Y \rangle = f \bar y
+\end{align*}
+
+and variance:
+\begin{align*}
+\langle (Y_d - \bar y_d) ^2 \rangle &= \langle(fY+U)^2\rangle - \bar Y_d^2 = f^2 \langle Y^2 \rangle + \langle U^2 \rangle + \langle U^2 \rangle - f^2 \bar y ^2 \\
+&= f^2(p+\bar y^2) + q - f^2 \bar y = f^2p + q
+\end{align*}
+
+For two-dimensional case, we have:
+\begin{align*}
+P_d = FPF^T + Q
+\end{align*}
+
+In our one dimensional example, with $y$s where the $x$s are, little letters for variances, the equivalent of the covariances before:
+\begin{align*}
+p(y_a|y_d,y_s) \varpropto p(y_d | y_a) p(y_s|y_a)
+\end{align*}
+
+where $p(y_d|y_a) \sim \mathcal{N}(y_a,p_d)$ and $p(y_s|y_a) \sim \mathcal{N}(y_a,r)$
+
+This is just Bayesian fusion (from before):
+\begin{align*}
+\frac{1}{p_n} = \frac{1}{p_d} + \frac{1}{r}
+\end{align*}
+
+and gives new mean:
+\begin{align*}
+\bar y_n = \frac{p_n}{p_d}y_d + \frac{p_n}{r}y_s
+\end{align*}
+
+with this new mean we can rewrite
+\begin{align*}
+\frac{p_n}{p_d} = 1 - \frac{p_n}{r}
+\end{align*}
+
+so
+\begin{align*}
+\bar y_n = y_d + k(y_s - y_d)
+\end{align*}
+
+where
+\begin{align*}
+k = \frac{p_n}{r}
+\end{align*}
+
+This gives us Kalman gain:
+\begin{align*}
+\bar y_n = y_d + k(y_s - y_d)
+\end{align*}
+
+where
+\begin{align*}
+k = \frac{p_n}{r} = \frac{p_d}{p_d+r}
+\end{align*}
+
+and
+\begin{align*}
+\frac{1}{p_n} = \frac{1}{p_d} + \frac{1}{r}
+\end{align*}
+
+and finally, after some rejigging:
+\begin{align*}
+p_n = \frac{rp_d}{p_d + r} = \frac{p_d (r+p_d)}{p_d + r} - \frac{p^2_d}{p_d + r} = (1-k)p_d
+\end{align*}
+
+Back to two-d:
+\begin{align*}
+S = P_d = R
+\end{align*}
+
+and
+\begin{align*}
+K = P_d S^{-1}
+\end{align*}
+
+This factor, called the \textbf{Kalman gain} is the analogue of $k$ above:
+\begin{align*}
+\bar x_n = x_d + K(x_s - x_d)
+\end{align*}
+
+and
+\begin{align*}
+P_n = (1-K)P_d
+\end{align*}
+
+\section{Neural Circuits}
+The brain learns by taking visual input, preparing movement, and assigning an appropriate kinetic output. We use synapses to assign credit to \textit{parameters} in the brain. The image is the input, and is processed by the \textbf{primary visual cortex} (V1). The \textbf{secondary visual cortex} (V2) is then used to process this further, and this is finally passed to the \textbf{frontal cortex} which is the decision making centre.
+
+There are three forms of \textit{credit assignment}:
+\begin{itemize}
+    \item Supervised learning
+    \begin{itemize}
+        \item Relies of a teaching signal
+    \end{itemize}
+    \item Unsupervised learning
+    \begin{itemize}
+        \item Extracts useful representations of input
+    \end{itemize}
+    \item Reinforced learning
+    \begin{itemize}
+        \item Learn to navigate/survive an environment
+        \item Usually using some kind of reward fed back into the system to change the parameters
+    \end{itemize}
+\end{itemize}
+
+\subsection{A feed-forward neural network}
+The brain is like a tropical forest with lots of different neuron types and architectures. In theoretical neuroscience, we need to abstract out some of this complexity to get at the principles of information processing in the brain. We therefore need to classify input into different categories.
+
+For \textit{supervised learning}, we have some output $v = f(wu)$, where:
+\begin{itemize}
+    \item $v$: output
+    \item $w$: weights
+    \item $u$: input
+\end{itemize}
+
+In nature, this might be working out whether something is a predator, with an target $y = \{1,0\}$.
+
+Supervised learning is just minimising some \textit{cost} function $(v-y)^2$. The learning rules for the weights are derived from this cost function.
+
+For \textit{unsupervised learning}, there is no such assumption. We have:
+\begin{itemize}
+    \item $v$: output
+    \item $h$: hidden layer
+    \item $u$: input
+\end{itemize}
+
+The hidden layer is of lower \textit{dimensionality} than the other layers. This means that our network is forced to learn a lower dimension representation of the input, thereby capturing the key information of the input.
+
+Again, we are minimising the cost function $(v-u)^2$. The learning rules for the weights are again derived from the cost function.
+
+For \textit{reinforcement learning}, we need to find the best policy to maximise the rewards. For the parameters at time $t$, we have:
+\begin{itemize}
+    \item $a_t$: action
+    \item $r_t$: reward
+    \item $s_t$: state
+\end{itemize}
+
+Using an example of gridworld, where the world is a grid with recharge points and bombs, we might have a table with different reward values for each square in the grid. We update the table with temporal difference learning:
+\begin{align*}
+V(S_t) = V(S_t) + (R_{t+1} + \lambda V(S_{t+1}) - V_t)
+\end{align*}
+
+Where:
+\begin{itemize}
+    \item $V(S_t)$ is the value
+    \item $R_{t+1}$ is the reward
+    \item $V(S_{t+1})$ is the future value
+    \item $\lambda$ is the discount factor
+\end{itemize}
+
+\subsection{Supervised learning: in depth}
+Supervised learning can be difficult to train. The solution ot this is the \textit{backprop algorithm}, although this is not explicitly bound to supervised learning.
+
+\textbf{Backpropagation} is an algorithm used to train artificial neural networks that calculates a gradient from the error function with respect to a given parameter (i.e. weight). With htis gradient, errors are effectively back propagated during training throughout the network.
+
+\begin{align*}
+\Delta w = \eta (v-\text{target})u
+\end{align*}
+
+It is a generalisation of the \textbf{delta rule} (above) to deep feedforward networks, which relies on the use of the chain rule to compute gradients for each layer.
+
+\begin{center}
+\includegraphics[scale=.5]{pics/backprop.png}
+\end{center}
+
+\textbf{Backpropagation} is typically used to perform gradient descent optimisation, adjusting the weights of neurons while optimising a desired loss function (error).
+
+The backpropagation algorithm first calculates forward activity. The output is $v = W_vh$ (linear activation for $v$), and hidden layer is $h=f(W_uu)$ where $f$ denotes the activation function which is typically modelled as sigmoid or Rectifying linear unit function (ReLU).
+
+Next, it calculates \textbf{error}. The error signal is typically modelled as:
+\begin{align*}
+\frac{1}{2} (v- \text{target})^2
+\end{align*}
+
+Finally, we \textbf{backpropagate} this error (how to calculate this gradient with respect to $w_{11}$):
+\begin{align*}
+\frac{\delta \text{Error}}{\delta w_{11}} = - \eta \frac{\delta \text{Error}}{\delta w_{11}} \frac{\delta v}{\delta h_1} \frac{\delta h_1}{\delta w_{11}}
+\end{align*}
+
+Resulting in:
+\begin{align*}
+\Delta w_{11} = -\eta \frac{\delta \text{Error}}{\delta w_{11}} = (v- \text{target}) w_{v1} f'_{h_1}u_1
+\end{align*}
+
+Unfortunately, at first glance, backpropagation in the brain does not seem to be biologically plausible. The key issues are:
+\begin{enumerate}
+\item Weight transport problem: Suggests that feedback weights = feedforward weights
+\begin{itemize}
+    \item The chain rule predicts feedback weights that are equal to feedforward weights, but there is no evidence that feedback connections exactly mirror feedforward ones
+    \item The solution to this remains unclear, but it has been found that exact feedback weights can be replaced by random weights, without a major impact on performance. This method is known as feedback alignment and suggests that the brain may not need an exact feedback signal to implement `backprop'.
+\end{itemize}
+\item Derivative of activation functions: relies on calculating derivatives of activation functions
+\begin{itemize}
+    \item Backprop relies on the derivative of the activation function, but it is not clear how neurons could calculate their own derivative.
+    \item The solution to this is also unclear, but as long as the gradient direction is not impacted, the derivative is not critical for performance.
+\end{itemize}
+\item Two phase learning: feedforward propagation of activity and error backpropagation
+\begin{itemize}
+    \item Backprop relies on two phases, a feedfoward pass of activity and then a backpass of errors. In the brain, there is no clear separation between perception and learning.
+\end{itemize}
+\item Separate error network: Suggest the need for a separate biological network computing the learning rules
+\begin{itemize}
+    \item The chain rule in backprop can be seen as a separate network, but there is minimal evidence for the existence of such gradient or error networks.
+\end{itemize}
+\item Non-local learning rules: The weight update depends on non-local information
+\begin{itemize}
+    \item Backprop relies on non-local learning rules, but learning is believed to occur through local changes at synapses, which is a process known as synaptic plasticity which can only access locally available information.
+\end{itemize}
+\item Target: the target label guides supervised learning.
+\end{enumerate}
+
+\subsubsection{Pyramidal cells}
+We will now take inspiration from real neurons (pyramidal cells). These are one of the most common neurons in the brain.
+
+\begin{center}
+\includegraphics[scale=.3]{pics/pyramidal-cell.png}
+\end{center}
+
+The the brain, we have multiple areas, each made up of multiple pyramidal cells. This is the inspiration from which we get our new models of computer representations of learning in the brain. There are two cell types in the cortex, \textbf{Pyramidal} cells (excitatory cells) and \textbf{Martinotti} cells (inhibitory cells). These two work together. 
+
+Dendritic microcircuits are those that approximate backpropagation, and look like this (NOTE!: $u$ and $v$ have a different meaning from before!):
+
+\begin{center}
+\includegraphics[scale=.4]{pics/dendritic.png}
+\end{center}
+
+The general idea of this is the difference between the topdown activity from $u_{k+1}^P$ and lateral inhibition $u_k^I$ generates an \textbf{error} signal: $v_{A,k}^P \sim u_{k+1}^P - u_k^I$
+
+The \textbf{error} signal triggers changes in bottom weights $w_{k,k-1}^{PP}$.
+
+The model learns recursively across areas/layers (just like in backprop) to correctly predict an output. During this process, lateral inhibition learns to predict the top-down input, leading to a zero error after learning, i.e.: $u_k^I \sim u_{k+1}^P$
+
+The general form of the local learning rule is
+\begin{align*}
+\frac{d}{dt}w \sim \eta (u-v)r
+\end{align*}
+
+Where:
+\begin{itemize}
+    \item $u$: somatic activity
+    \item $v$: input
+    \item $\eta$: learning rate
+    \item $r$: presynaptic activity
+\end{itemize}
+
+The learning rule for the bottom-up synapses is:
+\begin{align*}
+\frac{d}{dt}w_{k,k-1}^{PP} \sim \eta (u_{k+1}^P - u_k^P)r_{k-1}^P
+\end{align*}
+
+Note that this is really similar to the backprop learning rule:
+\begin{align*}
+\Delta w^{PP} \sim \eta \text{ error}_k \ r_{k-1}^p
+\end{align*}
+
+By being closer to biology, we were able to solve three of the key problems we discussed above:
+\begin{itemize}
+    \item Two phase learning: No need to two separate phases
+    \item Separate error network: Neuron encodes both activity and errors
+    \item Non-local learning rules: learning is local
+\end{itemize}
+
+Finally, if we look at the problem of the \textit{target} we know that backprop needs a specific target (or \textit{teaching signal}). It is really hard to imagine how the brain would be able to do this. One solution is that backprop works in unsupervised learning, so we can use that. Another solution is that specific brain areas may be calculating teaching signals that are used for internal supervised learning at other brain areas.
+
+\subsubsection{Supervised learning in the Cerebellum}
+The \textbf{cerebellum} has a stereotypical structure and contains more neurons than the rest of the brain. It is typically involved in motor error correction, but growing evidence suggests that it is also involved in regulating many other aspects of behaviour.
+
+It seems to use a form of supervised learning but may also provide teaching signals to the cerebral cortex. So, the cerebellum can be used as an adaptive filter or controller. 
+
+The cerebellum's circuit looks really similar to reinforcement learning, because the forward model has a prediction that it compares with the outcome.
+
+The fact that the cerebellum has so many neurons leads us to believe that it could be used in much more than simple motor control. A 2D cognitive map of the cerebellum shows that there is activation to many different tasks.
+
+\subsubsection{Summary}
+In summary:
+\begin{itemize}
+    \item Deep learning successes rely on the backprop algorithm.
+    \item Backprop is slowly becoming a possible model for learning in the brain, but several key issues remain unsolved.
+    \item Dendritic microcircuits provide a powerful model of learning in the brain that approximates backprop.
+\end{itemize}
+
+\section{Visual System and Learning}
+Our visual system works by projecting the image of the world onto the back of the eye (the retina) which is then relayed by the optic tract and sent to the visual cortex at the back of the brain. We can then record individual neurons and hope they respond to the visual stimulus presented to the brain.
+
+The visual cortex has a few sub-areas. The primary visual cortex, the secondary visual cortex, and the inferior temporal cortex. The visual cortex also has receptive field which is a region of sensory space in which as stimulus modifies the firing rate of the neuron. The simple model of a receptive field is just a grid (visual input, $u$). This is then relayed via weights ($w$) to the visual cortex neuron ($v$), giving us this familiar equation $v = f(wu)$.
+
+\subsection{Simple cells}
+A \textit{simple cell} is a representation of a cell in the primary visual cortex. We can give a test subject a certain orientation of a white bar on a black background and see which neurons react to the particular stimulus on a particular location. If the bar is moved, the neuron might not respond as much, or might be a bit delayed. If the bar orientation is moved, the neuron may not fire at all.
+
+The classic model for a simple receptive field (as seen in simple cells) is a \textbf{gabor filter}:
+\begin{align*}
+w \sim g(x,y;\lambda, \theta, \phi, \gamma) = \exp \bigg ( - \frac{x'^2 + \gamma ^2 y'^2}{2\sigma^2}\bigg) \cos \bigg ( 2\pi \frac{x'}{\lambda} + \phi \bigg)
+\end{align*}
+
+where:
+\begin{itemize}
+    \item $x,y$ are coordinates
+    \item $\sigma$ is the standard deviation
+    \item $\gamma$ defines the aspect ratio. If $\gamma = 1$, then the kernel is very circular. If $\gamma \sim 0$, then the kernel is elliptical in one direction, and almost 0.
+    \item $\theta$ is wavelength
+    \item $\phi$ is the phase offset
+\end{itemize}
+
+A Gabor filter is a product of a \textit{Gaussian} and \textit{sinusoid} that can model a periodic pattern similar to simple cells. 
+
+\subsection{Complex cells}
+Complex cells are able to fire neurons even if the stimulus is moved. However, if the orientation changes, it stops responding. Complex cells can be modelled as a set of simple cells with the same orientation but different locations, and simple cells can be modelled with Gabor Filters.
+
+Generally speaking, simple cells are encoded in lower levels, such as V1, while complex cells are encoded higher up in places like V2. As you go higher and higher, you can have more complex components, such as edge cells (that encode edges) or even face cells (that encode faces).
+
+\subsection{Grandmother cell}
+This leads us to the concept of a grandmother cell. The idea here is that there are neurons responding specifically when you see people you are familiar with.
+
+\subsection{Convolution Neural Networks}
+CNNs can be used as a model of the visual system. This is a type of supervised learning, but the visual system is \textit{unsupervised}. CNNs along with backprop have revolutionalised computer vision nonetheless. The performance is unmatched.
+
+The two key operations are:
+\begin{itemize}
+    \item Spatial convolution: Scanning the image with a filter
+    \item Pooling: Subsampling input 
+\end{itemize}
+
+CNNs learn hierarchical features similar to the ones found in the brain.
+
+\subsection{Summary}
+\begin{itemize}
+    \item The visual cortex is spread across multiple areas
+    \item Receptive fields of increasing complexity
+    \item Mathematical models of simple and complex cells
+    \item CNNs as a representation of the visual system.
+\end{itemize}
+
+\section{Reinforcement Learning}
+Reinforcement learning is the most common form of learning in the animal kingdom. The goal of this type of learning is to learn what actions to take maximise the rewards.
+
+Some rewards are really sparse (such as winning or losing a game of something), and this poses a challenge because it's hard to realise what moves made should be rewarded since the final reward is the result of countless moves.
+
+The general framework is the \textbf{Markov Decision Process}. In a basic form, this means that `the future is independent of the past, given the present'. Mathematically, t his can be defined as the following transition probability of the future given the immediate past:
+\begin{align*}
+P(S_{t+1}|S_t = P(S_{t+1}|S_1, \dots, S_t))
+\end{align*}
+
+It assumes that the current state $S_t$ has all the information needed to make a decision about the next state $S_{t+1}$.
+
+In a Markov decision process, we define this by the following tuple:
+\begin{align*}
+(S,A,P,R,\gamma)
+\end{align*}
+
+Where:
+\begin{itemize}
+    \item $S$: Set of states
+    \item $A$: Set of actions
+    \item $P$: Transition probability $P^a_{ss'} = \mathbb{P}(S_{t+1} = s' | S_t = s, A_t = a)$
+    \item $R$: Reward function $R^a_s = \mathbb{E}(T_{t+1} = s' | S_t = s, A_t = a)$
+    \item $\gamma$: Discount factor $[0,1]$. This is usually set to $0.9$ so the system slowly forgets the previous rewards
+\end{itemize}
+
+The goal is the find the \textbf{policy} that finds the maximises \textbf{discounted reward}.
+
+A policy is the distribution over actions given states. It defines the behaviour of an agent:
+\begin{align*}
+\pi(a|s) = P(A_t = a | S_t = s)
+\end{align*}
+
+A discounted reward is the total discounted reward received by the agent:
+\begin{align*}
+R_t = r_t + \gamma r_{t+1} + \gamma^2 r_{t+2} + \dots = \sum_{t=0}^{\infty} \gamma^t r_t
+\end{align*}
+
+It is useful to define the \textbf{value} of a state as the expected cumulative reward:
+\begin{align*}
+V^\pi (s) = \mathbb{E} \Bigg [ \sum_{t=0}^{\infty} \gamma ^t r_t | s_0 = s, \pi \Bigg]
+\end{align*}
+
+For that we have the \textit{Bellman equation} which gives the expectatino over the policy for $t$ and $t+1$:
+\begin{align*}
+V^\pi (s) = \mathbb{E}_\pi [r_t + \gamma V^\pi (S_{t+1}) | S_t = S]
+\end{align*}
+
+\subsection{Temporal Difference (TD) Learning}
+\textbf{TD Learning}: is model-free reinforcement learning method that learns by bootstrapping based on current value function estimates. From the \textit{Bellman equation}, we get an iterative method for updating hte value function:
+\begin{align*}
+V(S_t) = V(S_t) + (R_{t+1} + \gamma V(S_{t+1}) - V(S_t))
+\end{align*}
+
+This gives us an estimate for the future rewards.
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Tabular TD(0) for estimating $v_\pi$},
+nobeforeafter,
+halign lower=flush right, ]
+Input: the policy $\pi$ to be evaluated.
+
+Algorithm parameter: step size $\alpha \in (0,1]$
+
+Initialise $V(s)$ for all $s \in S^+$, arbitrarily except that $V(terminal) = 0$
+
+Loop for each episode:
+\begin{itemize}
+    \item Initialize $S$
+    \item Loop for each step of episode:
+    \begin{itemize}
+        \item $A \leftarrow$ action given by $\pi$ for $S$
+        \item Take action $A$, observe $R,S'$
+        \item $V(S) \leftarrow V(S) + \alpha[R + \gamma V(S') - V(S)]$
+        \item $S \leftarrow S'$
+    \end{itemize}
+    \item Until $S$ is terminal
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Q-Learning}
+Another example of reinforcement learning is Q-Learning. Here, we learn an action-value function:
+\begin{align*}
+Q(S_t,A_t) = Q(S_t,A_t) + R_{t+1} + \gamma \max_a Q(S_{t+1}, a) - Q(S_t,A_t)
+\end{align*}
+
+\begin{tcolorbox} [space to upper,
+collower=white,
+title={Q-Learning for estimating $\pi \simeq \pi$},
+nobeforeafter,
+halign lower=flush right, ]
+Algorithm parameters: step size $\alpha \in (0,1]$, small $\epsilon > 0$
+
+Initialise $Q(s,a)$ for all $s \in S^+, a \in \mathcal{A}(s)$, arbitrarily except that $Q(terminal,\cdot) = 0$.
+
+Loop for each episode:
+\begin{itemize}
+    \item Initialise $S$
+    \item Loop for each step of episode:
+    \begin{itemize}
+        \item Choose $A$ from $S$ using policy derived from $Q$ (such as $\epsilon$-greedy)
+        \item Take action $A$, observe $R,S'$
+        \item $Q(S,A) \leftarrow Q(S,A) + \alpha[R + \gamma \max_aQ(S', a) - Q(S,A)]$
+        \item $S \leftarrow S'$
+    \end{itemize}
+    \item Until $S$ is terminal
+\end{itemize}
+\end{tcolorbox}
+
+The main difference is that we use the \textbf{best action} in the next state ($\max_aQ(S',a)$). Other than this, the two algorithms are very similar. TD-Learning uses the value of the \textbf{state given} by the policy, while Q-learning uses the \textbf{best possible action}, not necessarily the one given by the policy.
+
+\subsection{Bigger spaces}
+What if we have something with hundreds or millions of states? Possible solutions include:
+\begin{itemize}
+    \item Using exploration-exploitation strategies
+    \item Use function approximates (e.g. neural rewards)
+\end{itemize}
+
+There is an \textbf{exploration-exploitation} tradeoff where \textbf{exploitation} makes the best decision given current information and \textbf{exploration} gathers more information. The classic policy that relies on this tradeoff is the $\epsilon$-greedy policy, which is a policy for when to choose the best available action $a*$ or a random action:
+
+\begin{align*}
+a_t = \bigg \{
+\begin{matrix} 
+    a_t^*                  & \text{with probability } 1 - \epsilon \\
+    \text{random action } & \text{with probability } \epsilon
+\end{matrix}
+\end{align*}
+
+\begin{itemize}
+    \item $\epsilon=1$ gives a purely exploratory policy
+    \item $\epsilon=0$ gives a purely exploitative policy
+    \item $\epsilon=]0,1[$ gives somewhere in-between these two ideas. It is generally a good idea to explore more in the beginning and then exploit more towards the end of the optimisation.
+\end{itemize}
+
+\subsection{Deep Q-learning}
+Recent success in reinforcement learning relies on two tricks:
+\begin{enumerate}
+\item Use neural network as $Q(S,A;\theta)$ function approximator with parameters $\theta$
+\item Use separate memory system to avoid getting stuck at local optima
+\end{enumerate}
+
+\section{Unsupervised Learning}
+Most sensory data we receive is of the unsupervised variety. There is no teaching signal and no feasible reward for every bit of data.
+
+\subsection{Sparse Coding}
+Sparse coding is a form of encoding in networks. It's where you only have a small set of units responding for a given input. It provides a framework for learning sparse representations of the input.
+
+The actual \textit{definition} is that sparse coding is the representation of items by the strong activation of a relatively small set of neurons. For each stimulus, this is a subset of all available neurons
+
+Sparse coding has these key properties:
+\begin{itemize}
+    \item \textbf{Overcomplete dictionary W}: $d>m$ (i.e. more dictionary elements than input elements)
+    \item \textbf{Sparseness}: Number of zero elements in $v$ is much larger than then number of non-zero elements
+    \item Overcomplete and sparse representation leads to \textbf{richer features}.
+\end{itemize}
+
+These properties are represented in the cost function, where we have the convention of two important terms: \textit{preserve information} and \textit{sparseness}. The cost function looks like this:
+\begin{align*}
+\text{cost } = [\text{preserve information}] + \lambda [\text{sparseness}]
+\end{align*}
+
+Sparse coding with L1 norm is:
+\begin{align*}
+\arg \text{min}_{W,V} = ||U-WV||^2_2 + \lambda ||V||+1
+\end{align*}
+
+\begin{itemize}
+    \item To find a good sparse code, we need to optimise both the dictionary $W$ and the representation $V$.
+    \item This optimisation is convex in $V$ and $W$ separately, but not both.
+    \item Several methods exist to optimise $V$ and $W$, but we will only discuss one
+    \item $\lambda$ controls the tradeoff between sparseness and reconstruction.
+\end{itemize}
+
+Sparse coding is really good for noise reduction of an image or image restoration.
+
+In the visual system, this is an easy mapping from conceptual to real. The inputs are mapped to the \textbf{LGN}, that is a region between the retina and the back of the brain. This input goes through some set of weights (maps to our $W$). Finally, the visual cortex itself is the output.
+
+\subsection{Sparse Coding in the Brain}
+We are now going to look at one type of cost function:
+\begin{align*}
+\text{argmin}_{W,V} = ||U-WV||^2_2 + \lambda \sum_{i}S(v_i)
+\end{align*}
+
+Where $S(v_i) = \log(1+v_i^2)$.
+
+We need to derive a way to optimise these two sets of components, as discussed previously. Let's start with $V$.
+\begin{align*}
+w_iU - \sum_{j \not = i} G_{ij}v_j - f_\lambda(v_i)
+\end{align*}
+
+where $G_{ij} = w_i w_j$ and $f_\lambda(v_i) = v_i + \lambda S'(v_i)$.
+
+Secondly, we need to optimise the weights as
+\begin{align*}
+\Delta w_i &= \eta \frac{\delta \text{Cost}}{\delta w_i} \\
+&= \eta < [U- \hat U]v_i > \\
+&= \eta < [U - \sum_{i}^{m}w_iv_i]v_i >
+\end{align*}
+
+The learning rule is local and there is a Hebbian term ($UV$ meaning a function of pre and post synaptic connectivity) and a postsynaptic only term ($WV^2$ that causes decay).
+
+Sparse coding is really useful for the brain because it has good representations of information that can be used for decision making and discrimination. It's also really energy efficient, with only a few neurons active at a given time. Finally, it's also more robust to peturbations than purely localist codes.
+
+\subsection{Autoencoders}
+Autoencoders are very popular and use a similar cost function to the one discussed above. We give a network an input and then the network learns a sparse or compressed representation of the input. There is a network \textit{bottleneck}, after which the network starts to decode the network. It essentially goes from lots of nodes, to few nodes (which is the bottleneck), and finally up to many (the re-representation).
+
+The aim is to reconstruct the input, but without an explicit constraint on sparsity, and instead on other forms of regularisation.
+
+The cost function for this, therefore is:
+\begin{align*}
+\text{argmin}_W = ||V_U||^2_2
+\end{align*}
+
+\section{Temporal processing and Recurrent Neural Networks (RNNs)}
+Temporal processing is crucial for our perception of the world. For example, with speech, you obviously are unable to understand things that are backwards (like reversed). The content of two clips where one is reversed is technically the same.
+
+\subsection{Temporal Processing}
+We have a few brain areas that are key for language processing in the brain. \textbf{Broca's area} is particularly important for speech production, while the many other cortices are used for speech understanding. I don't think this will be necessary content for the exam, but if it is, check the first part of lecture 6.
+
+Receptive fields are also present for natural sounds in the auditory cortex, similar to the way that natural shapes are seen in the visual cortex. Receptive fields for audio seem to be localised in time and frequency domains, also similar to those in the visual cortex.
+
+Feedforward networks do not model time \textit{explicitly}. One option is to consider each input as being a different time point, but this is still quite hacky, because it is not how the brain work and does not seem to be a natural solution to the problem. Instead, in a \textbf{recurrent network}, each node is \textit{laterally connected} and is also able to be connected to itself (have some memory about previous input). 
+
+We would model discrete time (the next time point $v_{t+1}$) as:
+\begin{align*}
+v_{t+1} = rv_t + f(Wu_t + Mv_t)
+\end{align*}
+
+Here:
+\begin{itemize}
+    \item $r$ is the activity delay
+    \item $u$ is the feed forward input
+    \item $M$ is the recurrence input from other units
+\end{itemize}
+
+Furthermore, we can model continuous time as
+\begin{align*}
+\tau_r \frac{dv}{dt} = -v + f(Wu + Mv)
+\end{align*}
+
+Here:
+\begin{itemize}
+    \item $dv/dt$ is the modelling of change in $v$ over time
+    \item $\tau_r$ controls this and is the timeconstant of activity decay
+    \item $-v$ is the passive decay
+    \item The rest is the same as the discrete case
+\end{itemize}
+
+\subsection{Recurrent Neural Networks (RNNs)}
+An application of RNNs in neuroscience is that the brain remembering where it is looking at despite constant blinking. Is there some sort of memory for this? Remembering eye position seems to be encoded by three neurons. One encodes the direction clockwise, and the other counter clockwise. When the eye changes direction, one of these two neurons fire. There is a third neuron called an \textit{integrator} neuron, that fires the whole time, and the rate determines where the eye is. The integrator gets input from the \textbf{on} and \textbf{off-direction} neurons resulting in an eye position. This integrator is related to the discrete time model equation discussed above.
+
+\begin{itemize}
+    \item For $r=1$ we have a perfect integrator, where the neuron remembers previous inputs forever
+    \item For $r<1$ the activity decays back to baseline
+    \item For $r>1$ the activity grows exponentially over time
+\end{itemize}
+
+So you choose or optimise $r$ depending on the timescale of memory you need for a given task.
+
+Some networks use a \textbf{winner-takes-all} network, which is similar to applying a \textit{max} operator on the response of $k$ neurons. Using lateral inhibitory neurons is a way of implementing such a max operation in a network. If we don't have this winner takes all, we might have multiple neurons firing for a certain eye position, but applying this means we only have a single, strongest neuron firing.
+
+\subsubsection{Attractor Neural Networks}
+Attractor neural nets are another form of RNN modelled as dynamic systems that contain a number of attractor states with low energy to which the network dynamics converge. An example of this is the \textbf{Hopfield} network.
+
+These attractor neural nets have two key properties:
+\begin{itemize}
+    \item $m_{ii} = 0$: no unit has a connection with itself
+    \item $m_{ij} = m_{ij}$ connections are symmetric
+\end{itemize}
+
+There is also a stochastic version of the Hopfield network, called a \textbf{Boltzmann machine}. The total input is
+\begin{align*}
+z_i = b_i + \sum_{j}^{\text{external input}} u_jw_{ij} + \sum_{x}^{\text{recurrent input}} v_x m_{ix}
+\end{align*}
+
+The probability of turning on a given neuron $i$ is
+\begin{align*}
+P_{i=on} = \frac{1}{1 + \exp (-\frac{z_i}{T})}
+\end{align*}
+
+If temperature $T = 0$, we just get a Hopfield network.
+
+Boltzmann machines are good generative models, meaning they are able to recreate shapes pretty well when they have learned it.
+
+\subsection{Reservoir computing}
+Reservoir computing uses a large pool of sparsely connected neurons that generate a large repertoire of dynamics (they have \textit{fading memory}) and learn a simple read-out to combine the interesting dynamics into a useful output.
+
+There are two specific variants of reservoir computing: \textbf{echo state networks} and \textbf{Liquid state machines}
+
+Echo state networks is the most common \textit{rate-based} (meaning neurons are modelled at the level of firing rates) reservoir networks.
+
+Liquid state machines are similar to echo state machines, but neurons are modelled at the level of individual spikes, which is a more realistic estimation of neurons.
+
+\subsection{Recurrent CNNs}
+Most brain areas exhibit a high degree of recurrence. Recent developments show that if CNNs are extended with specific forms of recurrence, they are able to outperform purely feedforward CNNs.
+
+\section{Microcircuits and RNNs}
+We have two umbrella types of neurons in the brain: \textit{inhibitory} and \textit{excitatory} neurons. The activity between these two is very balanced, which is good because it means that there is no runaway activity.
+
+The inhibitory learning rule is:
+\begin{align*}
+\Delta w_{\text{inh}} &= \eta x (y - r_0) \\
+0 &= \eta x(y-r_0) \\
+y &= r_0
+\end{align*}
+
+Where $r_0$ is the target rate of the post synaptic neuron $y$. $r_0$ is typically quite a low number.
+
+What we have seen from inhibitory plasticity is that inhibition learns to follow excitation. It means that the receptive fields are balanced.
+
+Inhibitory cells come in different flavours. Pyramidal cells are one type of inhibitory cell, but together with these, there are multiple more types. We won't talk about all these, but it's important to know. We will be looking at \textbf{basket cells}, which make up around 50\% of the inhibitory neurons in the brain.
+
+\subsection{Long Short-Term Memory (LSTM)}
+LSTMs are the state of the art recurrent neural network model. They are useful because they are gated neural network that is able to capture both short and long term data. At the heart of this network is the memory cell.
+
+\begin{center}
+    \includegraphics[scale=.7]{memory_cell.png}
+\end{center}
+
+This structure very closely resembles the circuits we see in the \textit{cortical circuits}. There is an important difference, however. We do the gating with \textit{multiplicative difference} in LSTM, but in neuroscience, we often interpret this gating as being inhibitory, meaning it should be subtractive. This moves us to a new model, \textbf{sub-LSTM}, where the gating is subtractive.
+
+\subsection{Summary}
+\begin{itemize}
+    \item Multiple excitatory and inhibitory cell types in the brain
+    \item Intricate microcircuits across multiple layers
+    \item Machine learning LSTMs are a form of gated-RNN good for capturing long-term dependencies such as language modelling
+    \item Cortical microcircuits have similar features to gated-RNNs but may operate with subtractive gating (subLSTMs)
+\end{itemize}
 \end{document}
